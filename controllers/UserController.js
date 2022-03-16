@@ -15,10 +15,8 @@ const UserController = {
                 id: user.id,
                 phone: user.phone
             },
-            // Add a secret key to make it more secure
             process.env.JWT_ACCESS_KEY,
-            // After 2 hours this accessoken will disappear and the user has to login again
-            { expiresIn: "1h" }
+            { expiresIn: "10m" }
         );
     },
 
@@ -29,7 +27,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_REFRESH_KEY,
-            { expiresIn: "1h" }
+            { expiresIn: "10m" }
         );
     },
 
@@ -115,7 +113,7 @@ const UserController = {
                 const { pin, ...others } = user._doc;
                 return res.status(200).json({
                     message: "Login Successfully",
-                    accessToken: accessToken,
+                    token: accessToken,
                     data: { ...others },
                     status: true
                 });
@@ -163,12 +161,10 @@ const UserController = {
             }
             const lastOtp = otpUser[otpUser.length - 1];
             if (lastOtp.phone === req.body.phone && lastOtp.otp === req.body.otp) {
-                const accessoken = UserController.generateAccessToken(lastOtp);
                 await Otp.deleteMany({ phone: lastOtp.phone });
                 return res.status(200).json({
                     status: true,
                     message: "OTP VALID",
-                    token: accessoken
                 })
             }
             else {
