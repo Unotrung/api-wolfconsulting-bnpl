@@ -23,7 +23,7 @@ const PersonalController = {
             let user = req.body.user;
             const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user });
             const result = await personal.save();
-            return res.status(200).json({
+            return res.status(201).json({
                 data: result,
                 status: true
             });
@@ -35,7 +35,7 @@ const PersonalController = {
 
     getInfomation: async (req, res, next) => {
         try {
-            let personal = await Personal.findOne({ user: req.params.user });
+            let personal = await Personal.findOne({ user: req.params.id });
             if (personal) {
                 return res.status(200).json({
                     data: personal,
@@ -43,8 +43,8 @@ const PersonalController = {
                 });
             }
             else {
-                return res.status(400).json({
-                    message: "Can Not Find User",
+                return res.status(401).json({
+                    message: "This Personal Infomation is not exists",
                     status: false
                 });
             }

@@ -16,7 +16,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_ACCESS_KEY,
-            { expiresIn: "10m" }
+            { expiresIn: "20m" }
         );
     },
 
@@ -27,7 +27,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_REFRESH_KEY,
-            { expiresIn: "10m" }
+            { expiresIn: "20m" }
         );
     },
 
@@ -40,13 +40,13 @@ const UserController = {
                         _id: user.id,
                         phone: user.phone
                     },
-                    message: "This phone number already exists !",
+                    message: "This phone number is already exists !",
                     isExists: true
                 });
             }
             else {
                 return res.status(401).json({
-                    message: "This phone number does not exist yet !",
+                    message: "This phone number is not exists !",
                     isExists: false
                 });
             }
@@ -61,23 +61,19 @@ const UserController = {
             const auth = await User.findOne({ phone: req.body.phone });
             if (auth) {
                 return res.status(401).json({
-                    message: "This account already exists ! Please Login",
-                    isExist: true
+                    message: "This account is already exists ! Please Login",
                 });
             }
             else {
-                // Get data from User
                 let PHONE = req.body.phone;
                 let PIN = req.body.pin;
-                // Encryption pin with bcrypt
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(PIN, salt);
-                // Create New User 
                 const user = await new User({ phone: PHONE, pin: hashed });
                 const accessToken = UserController.generateAccessToken(user);
                 const result = await user.save();
                 const { pin, ...others } = result._doc;
-                return res.status(200).json({
+                return res.status(201).json({
                     message: "Register Successfully",
                     data: { ...others },
                     token: accessToken,
@@ -94,11 +90,11 @@ const UserController = {
         try {
             const user = await User.findOne({ phone: req.body.phone });
             if (!user) {
-                return res.status(401).json({ message: "Wrong phone !" });
+                return res.status(401).json({ message: "Wrong phone ! Please Try Again" });
             }
             const valiPin = await bcrypt.compare(req.body.pin, user.pin);
             if (!valiPin) {
-                return res.status(401).json({ message: "Wrong pin!" });
+                return res.status(401).json({ message: "Wrong pin ! Please Try Again" });
             }
             if (user && valiPin) {
                 const accessToken = UserController.generateAccessToken(user);
@@ -113,8 +109,8 @@ const UserController = {
                 const { pin, ...others } = user._doc;
                 return res.status(200).json({
                     message: "Login Successfully",
-                    token: accessToken,
                     data: { ...others },
+                    token: accessToken,
                     status: true
                 });
             }
@@ -144,7 +140,7 @@ const UserController = {
             }
             else {
                 return res.status(401).json({
-                    message: "This Phone Is Invalid !",
+                    message: "Wrong phone ! Please Try Again",
                 });
             }
         }
@@ -163,14 +159,14 @@ const UserController = {
             if (lastOtp.phone === req.body.phone && lastOtp.otp === req.body.otp) {
                 await Otp.deleteMany({ phone: lastOtp.phone });
                 return res.status(200).json({
-                    status: true,
                     message: "OTP VALID",
+                    status: true,
                 })
             }
             else {
                 return res.status(401).json({
-                    status: false,
                     message: "OTP INVALID",
+                    status: false,
                 })
             }
         }
@@ -186,7 +182,7 @@ const UserController = {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(req.body.pin, salt);
                 await user.updateOne({ $set: { pin: hashed } });
-                return res.status(200).json({
+                return res.status(201).json({
                     message: "Update Password Successfully",
                     status: true
                 });

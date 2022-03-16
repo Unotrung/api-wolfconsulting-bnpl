@@ -8,6 +8,6 @@ router.post("/sendOtp", UserController.sendOtp);
 router.post("/verifyOtp", UserController.verifyOtp);
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
-router.put("/updatepin", MiddlewareController.verifyToken, UserController.updatePin);
+router.put("/updatepin", MiddlewareController.VerifyTokenByMySelf, UserController.updatePin);
 
 module.exports = router;

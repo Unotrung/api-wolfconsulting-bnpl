@@ -27,6 +27,22 @@ const middlewareController = {
         }
     },
 
+    VerifyTokenByMySelf: (req, res, next) => {
+        try {
+            middlewareController.verifyToken(req, res, () => {
+                if (req.user.id === req.params.id || req.user.phone === req.body.phone) {
+                    next();
+                }
+                else {
+                    return res.status(403).json('You are not allowed to do this action');
+                }
+            })
+        }
+        catch (err) {
+            next(err);
+        }
+    }
+
 }
 
 module.exports = middlewareController;
