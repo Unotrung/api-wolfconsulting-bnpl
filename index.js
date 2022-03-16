@@ -10,6 +10,7 @@ const logEvents = require('./helpers/logEvents');
 const { v4: uuid } = require('uuid');
 const compression = require('compression');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
@@ -43,6 +44,13 @@ mongoose.connect(process.env.MONGODB_URL, function (err) {
     }
 }
 )
+
+const limiter = rateLimit({
+    windowMs: 1000,
+    max: 1,
+})
+
+app.use(limiter);
 
 app.use('/v1/user', userRoute);
 app.use('/v1/personal', personalRoute);
