@@ -39,8 +39,7 @@ const PersonalController = {
 
     getInfomation: async (req, res, next) => {
         try {
-            let id = req.params.user;
-            let personal = await Personal.findById(id);
+            let personal = await Personal.findOne({ user: req.params.user });
             if (personal) {
                 return res.status(200).json({
                     data: personal,
