@@ -5,25 +5,52 @@ const PersonalController = {
 
     register: async (req, res, next) => {
         try {
-            let fullname = req.body.fullname;
-            let gender = req.body.gender;
-            let dob = req.body.dob;
+            let name = req.body.name;
+            let sex = req.body.sex;
+            let birthday = req.body.birthday;
             let phone = req.body.phone;
-            let nid = req.body.nid;
-            let dateCreated = req.body.dateCreated;
-            let address = req.body.address;
-            let nickname = req.body.nickname;
-            let relatedName = req.body.relatedName;
-            let relatedPhone = req.body.relatedPhone;
+            let citizenId = req.body.citizenId;
+            let issueDate = req.body.issueDate;
+
+            let city = req.body.city;
+            let district = req.body.district;
+            let ward = req.body.ward;
+            let street = req.body.street;
+
+            let personal_title_ref = req.body.personal_title_ref;
+            let name_ref = req.body.name_ref;
+            let phone_ref = req.body.phone_ref;
+
             let user = req.body.id;
-            if (fullname !== null && gender !== null && dob !== null && phone !== null
-                && nid !== null && dateCreated !== null && address !== null && nickname !== null
-                && relatedName !== null && relatedPhone !== null && user !== null) {
-                const personal = await new Personal({ fullname: fullname, gender: gender, dob: dob, phone: phone, nid: nid, dateCreated: dateCreated, address: address, nickname: nickname, relatedName: relatedName, relatedPhone: relatedPhone, user: user });
-                const result = await personal.save();
+            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user });
+            const result = await personal.save();
+            return res.status(200).json({
+                data: result,
+                status: true
+            });
+        }
+        catch (err) {
+            return res.status(500).json({
+                err: err,
+                status: false
+            });
+        }
+    },
+
+    getInfomation: async (req, res, next) => {
+        try {
+            let id = req.body.id;
+            let personal = await Personal.findById(id);
+            if (personal) {
                 return res.status(200).json({
-                    data: result,
+                    data: personal,
                     status: true
+                });
+            }
+            else {
+                return res.status(400).json({
+                    message: "Can Not Find User",
+                    status: false
                 });
             }
         }
@@ -33,7 +60,7 @@ const PersonalController = {
                 status: false
             });
         }
-    },
+    }
 
 };
 

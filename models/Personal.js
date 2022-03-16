@@ -1,41 +1,55 @@
 const mongoose = require('mongoose');
 
 const personalSchema = new mongoose.Schema({
-    fullname: {
+    name: {
         type: String,
-        required: [true, 'Fullname is required'],
+        required: [true, 'Name is required'],
     },
-    gender: {
-        type: Boolean,
-        required: [true, 'Gender is required'],
+    sex: {
+        type: String,
+        required: [true, 'Sex is required'],
     },
-    dob: {
+    birthday: {
         type: Date,
-        required: [true, 'Date of birth is required'],
+        required: [true, 'Birthday is required'],
     },
     phone: {
         type: String,
         required: [true, 'Phone is required'],
     },
-    nid: {
+    citizenId: {
         type: String,
-        required: [true, 'Nid is required'],
+        required: [true, 'CitizenId is required'],
     },
-    dateCreated: {
+    issueDate: {
         type: Date,
-        required: [true, 'Date Created is required'],
+        required: [true, 'Issue Date is required'],
     },
-    address: {
+
+    city: {
         type: String,
-        required: [true, 'Address is required'],
+        required: [true, 'City is required'],
     },
-    nickname: {
+    district: {
+        type: String,
+        required: [true, 'District is required'],
+    },
+    ward: {
+        type: String,
+        required: [true, 'Ward is required'],
+    },
+    street: {
+        type: String,
+        required: [true, 'Street is required'],
+    },
+
+    personal_title_ref: {
         type: String,
     },
-    relatedName: {
+    name_ref: {
         type: String,
     },
-    relatedPhone: {
+    phone_ref: {
         type: String,
     },
     user: {

@@ -11,7 +11,6 @@ const otpSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Otp is required'],
     },
-    // Trường này tự khởi tạo
     createdAt: {
         type: Date,
         default: Date.now,
