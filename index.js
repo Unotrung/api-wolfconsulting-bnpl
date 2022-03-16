@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 
 const userRoute = require('./routers/UserRouter');
+const personalRoute = require('./routers/PersonalRouter');
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ mongoose.connect(process.env.MONGODB_URL, function (err) {
 
 // ROUTES
 app.use('/v1/user', userRoute);
+app.use('/v1/personal', personalRoute);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
