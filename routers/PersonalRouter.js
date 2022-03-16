@@ -3,6 +3,6 @@ const MiddlewareController = require('../controllers/MiddlewareController');
 const router = require("express").Router();
 
 router.post("/register", MiddlewareController.verifyToken, PersonalController.register);
-router.post("/:id", MiddlewareController.verifyToken, PersonalController.getInfomation);
+router.post("/:user", MiddlewareController.verifyToken, PersonalController.getInfomation);
 
 module.exports = router;
