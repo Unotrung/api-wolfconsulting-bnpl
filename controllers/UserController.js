@@ -75,12 +75,14 @@ const UserController = {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(PIN, salt);
                 // Create New User 
-                const user = await new User({ phone: PHONE, pin: hashed })
+                const user = await new User({ phone: PHONE, pin: hashed });
+                const accessToken = UserController.generateAccessToken();
                 const result = await user.save();
                 const { pin, ...others } = result._doc;
                 return res.status(200).json({
                     message: "Register Successfully",
                     data: { ...others },
+                    token: accessToken,
                     status: true
                 });
             }
