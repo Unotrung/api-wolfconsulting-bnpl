@@ -1,5 +1,4 @@
 const Personal = require('../models/Personal');
-const jwt = require('jsonwebtoken');
 
 const PersonalController = {
 
@@ -30,10 +29,7 @@ const PersonalController = {
             });
         }
         catch (err) {
-            return res.status(500).json({
-                err: err,
-                status: false
-            });
+            next(err);
         }
     },
 
@@ -54,10 +50,7 @@ const PersonalController = {
             }
         }
         catch (err) {
-            return res.status(500).json({
-                err: err,
-                status: false
-            });
+            next(err);
         }
     }
 
