@@ -21,7 +21,7 @@ const PersonalController = {
             let name_ref = req.body.name_ref;
             let phone_ref = req.body.phone_ref;
 
-            let user = req.body.id;
+            let user = req.body.user;
             const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user });
             const result = await personal.save();
             return res.status(200).json({
