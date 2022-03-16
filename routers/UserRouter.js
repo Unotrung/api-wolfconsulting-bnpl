@@ -6,7 +6,7 @@ const router = require("express").Router();
 router.post("/checkPhoneExists", UserController.checkPhoneExists);
 router.post("/sendOtp", UserController.sendOtp);
 router.post("/verifyOtp", UserController.verifyOtp);
-router.post("/register", MiddlewareController.verifyToken, UserController.register);
+router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.put("/updatepin", MiddlewareController.verifyToken, UserController.updatePin);
 
