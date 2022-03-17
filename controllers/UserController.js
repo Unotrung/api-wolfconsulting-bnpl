@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Personal = require('../models/Personal');
 const Otp = require('../models/Otp');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -160,6 +161,75 @@ const UserController = {
                 await Otp.deleteMany({ phone: lastOtp.phone });
                 return res.status(200).json({
                     message: "OTP VALID",
+                    status: true,
+                })
+            }
+            else {
+                return res.status(401).json({
+                    message: "OTP INVALID",
+                    status: false,
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    sendOtpPin: async (req, res, next) => {
+        try {
+            const validPhone = await User.findOne({ phone: req.body.phone });
+            if (validPhone) {
+                const validNid = await Personal.findOne({ citizenId: req.body.nid });
+                if (validNid && validPhone.id === validNid.user) {
+                    const OTP = otpGenerator.generate(6, {
+                        digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
+                    });
+                    const PHONE = req.body.phone;
+                    const NID = req.body.nid;
+                    if (OTP !== null && PHONE !== null && NID !== null) {
+                        const dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID });
+                        const result = await dataTemp.save();
+                        return res.status(200).json({
+                            message: "Send OTP Successfully",
+                            otp: OTP,
+                            status: true
+                        });
+                    }
+                }
+                else {
+                    return res.status(401).json({
+                        message: "Wrong Nid ! Please Try Again",
+                    });
+                }
+            }
+            else {
+                return res.status(401).json({
+                    message: "Wrong phone ! Please Try Again",
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    verifyOtpPin: async (req, res, next) => {
+        try {
+            const validUser = await Otp.find({ phone: req.body.phone, nid: req.body.nid });
+            if (validUser.length === 0) {
+                return res.status(401).json({ message: "Expired OTP ! Please Resend OTP" });
+            }
+            const lastOtp = validUser[validUser.length - 1];
+            console.log("PHONE:", lastOtp.phone === req.body.phone);
+            console.log("NID:", lastOtp.nid === req.body.nid);
+            console.log("OTP:", lastOtp.otp === req.body.otp);
+            if (lastOtp.phone === req.body.phone && lastOtp.nid === req.body.nid && lastOtp.otp === req.body.otp) {
+                const accessToken = UserController.generateAccessToken(lastOtp);
+                await Otp.deleteMany({ phone: lastOtp.phone, nid: req.body.nid });
+                return res.status(200).json({
+                    message: "OTP VALID",
+                    token: accessToken,
                     status: true,
                 })
             }

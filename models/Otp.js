@@ -11,6 +11,9 @@ const otpSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Otp is required'],
     },
+    nid: {
+        type: String,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

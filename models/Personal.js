@@ -53,7 +53,7 @@ const personalSchema = new mongoose.Schema({
         type: String,
     },
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.String,
         required: true
     }
 }, { timestamps: true });
