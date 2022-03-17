@@ -4,7 +4,6 @@ const middlewareController = {
 
     verifyToken: (req, res, next) => {
         try {
-            // Lấy token từ người dùng thông qua authorization
             const token = req.header('authorization');
             if (token) {
                 // 'Beaer [token]'
