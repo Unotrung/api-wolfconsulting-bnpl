@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const otpGenerator = require('otp-generator');
+const { v4: uuid } = require('uuid');
+const logEvents = require('../helpers/logEvents');
 
 let refreshTokens = [];
 
@@ -74,6 +76,7 @@ const UserController = {
                 const accessToken = UserController.generateAccessToken(user);
                 const result = await user.save();
                 const { pin, ...others } = result._doc;
+                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
                 return res.status(201).json({
                     message: "Register Successfully",
                     data: { ...others },
@@ -91,16 +94,19 @@ const UserController = {
         try {
             const user = await User.findOne({ phone: req.body.phone });
             if (!user) {
+                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong phone`, 'error_login.log');
                 return res.status(401).json({ message: "Wrong phone ! Please Try Again" });
             }
             const valiPin = await bcrypt.compare(req.body.pin, user.pin);
             if (!valiPin) {
+                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong pin`, 'error_login.log');
                 return res.status(401).json({ message: "Wrong pin ! Please Try Again" });
             }
             if (user && valiPin) {
                 const accessToken = UserController.generateAccessToken(user);
                 const refreshToken = UserController.generateRefreshToken(user);
                 refreshTokens.push(refreshToken);
+                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is login successfully`, 'login_success.log');
                 res.cookie("refreshToken", refreshToken, {
                     httpOnly: true,
                     secure: false,

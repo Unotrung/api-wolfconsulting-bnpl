@@ -1,3 +1,0 @@
-17-03-2022	09::12::03-----Id_Log: a3bc1d27-e856-4815-abb5-4f7f7c9276c0 --- Router: /v1/user/login --- Method: POST --- Message: User.findOne is not a function
-17-03-2022	09::12::27-----Id_Log: e8f12f28-36c8-4fd4-8644-7c15aa078b37 --- Router: /v1/user/login --- Method: POST --- Message: User.findOne is not a function
-17-03-2022	09::13::04-----Id_Log: bbbd1134-0437-494c-a595-f8207f80df63 --- Router: /v1/user/login --- Method: POST --- Message: User.findOne is not a function

@@ -1,4 +1,5 @@
 const Personal = require('../models/Personal');
+const logEvents = require('../helpers/logEvents');
 
 const PersonalController = {
 
