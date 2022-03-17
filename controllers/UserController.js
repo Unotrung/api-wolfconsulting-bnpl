@@ -191,7 +191,7 @@ const UserController = {
         catch (err) {
             next(err);
         }
-    }
+    },
 
 };
 
