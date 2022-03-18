@@ -258,7 +258,7 @@ const UserController = {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(req.body.pin, salt);
                 await user.updateOne({ $set: { pin: hashed } });
-                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated successfully`, 'update_success.log');
+                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated successfully`, 'update_pin_success.log');
                 return res.status(201).json({
                     message: "Update Password Successfully",
                     status: true
@@ -280,12 +280,13 @@ const UserController = {
             const user = await User.findOne({ phone: req.body.phone });
             if (user) {
                 const validPin = await bcrypt.compare(req.body.pin, user.pin);
+                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin failure`, 'update_password_fail.log');
                 if (validPin) {
                     if (req.body.new_pin) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(req.body.new_pin, salt);
                         await user.updateOne({ $set: { pin: hashed } });
-                        logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_pin.log');
+                        logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_password_success.log');
                         return res.status(201).json({
                             message: "Update Pin Successfully",
                             status: true
