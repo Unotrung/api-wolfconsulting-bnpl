@@ -264,11 +264,56 @@ const UserController = {
                     status: true
                 });
             }
+            else {
+                return res.status(400).json({
+                    message: "This account is not exists !"
+                })
+            }
         }
         catch (err) {
             next(err);
         }
     },
+
+    updatePassword: async (req, res, next) => {
+        try {
+            const user = await User.findOne({ phone: req.body.phone });
+            console.log(req.body.phone);
+            if (user) {
+                const validPin = await bcrypt.compare(req.body.pin, user.pin);
+                if (validPin) {
+                    if (req.body.new_pin) {
+                        const salt = await bcrypt.genSalt(10);
+                        const hashed = await bcrypt.hash(req.body.new_pin, salt);
+                        await user.updateOne({ $set: { pin: hashed } });
+                        logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_pin.log');
+                        return res.status(201).json({
+                            message: "Update Pin Successfully",
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(400).json({
+                            message: "Please Enter Your New Pin"
+                        })
+                    }
+                }
+                else {
+                    return res.status(400).json({
+                        message: "Your old pin is not correct !"
+                    })
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: "This account is not exists !"
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    }
 
 };
 

@@ -11,5 +11,6 @@ router.post("/login", UserController.login);
 router.post("/sendOtpPin", UserController.sendOtpPin);
 router.post("/verifyOtpPin", UserController.verifyOtpPin);
 router.put("/updatepin", MiddlewareController.VerifyTokenByMySelf, UserController.updatePin);
+router.put("/updatepassword", UserController.updatePassword);
 
 module.exports = router;
