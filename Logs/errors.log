@@ -1,0 +1,2 @@
+18-03-2022	09::30::15-----Id_Log: 0ecdea19-1e13-4284-83c0-20709517c95b --- Router: /v1/personal/register --- Method: POST --- Message: uuid is not defined
+18-03-2022	09::39::30-----Id_Log: df131c9f-494a-4319-8cff-813eef0feab4 --- Router: /v1/personal/register --- Method: POST --- Message: E11000 duplicate key error collection: BNPL.users index: phone_1 dup key: { phone: "0111222333" }

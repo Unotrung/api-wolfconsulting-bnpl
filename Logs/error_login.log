@@ -1,5 +1,0 @@
-17-03-2022	18::28::49-----Id_Log: 8c14db9a-a8e4-4e2e-b3ae-ae5a2d814c2b --- Router: /login --- Method: POST --- Message: 0123456788 login fail because wrong phone
-17-03-2022	18::29::40-----Id_Log: 6f495368-ba4f-4acb-8016-f1d41439853e --- Router: /login --- Method: POST --- Message: 0123456787 login fail because wrong phone
-17-03-2022	18::31::05-----Id_Log: aa1dfea4-50ac-49df-a401-c3ac042478c1 --- Router: /login --- Method: POST --- Message: 0123456788 login fail because wrong phone
-17-03-2022	18::33::32-----Id_Log: 966e34d7-dfc7-4a01-a18e-16c00ca0b7a9 --- Router: /login --- Method: POST --- Message: 0111222333 login fail because wrong pin
-17-03-2022	18::34::03-----Id_Log: 3dc26dce-8896-4b54-9cb7-1c20bedd5afe --- Router: /login --- Method: POST --- Message: 0111222333 login fail because wrong pin
