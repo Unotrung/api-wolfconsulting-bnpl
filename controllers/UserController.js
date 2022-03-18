@@ -278,7 +278,6 @@ const UserController = {
     updatePassword: async (req, res, next) => {
         try {
             const user = await User.findOne({ phone: req.body.phone });
-            console.log(req.body.phone);
             if (user) {
                 const validPin = await bcrypt.compare(req.body.pin, user.pin);
                 if (validPin) {
@@ -313,8 +312,27 @@ const UserController = {
         catch (err) {
             next(err);
         }
-    }
+    },
 
+    getAllUser: async (req, res, next) => {
+        try {
+            const users = await User.find();
+            if (users.length > 0) {
+                return res.status(200).json({
+                    data: users,
+                    message: "Get List User Success"
+                })
+            }
+            else {
+                return res.status(400).json({
+                    message: "List User Is Empty"
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    }
 };
 
 module.exports = UserController;
