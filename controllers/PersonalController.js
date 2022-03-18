@@ -27,7 +27,9 @@ const PersonalController = {
 
             if (req.body.pin) {
                 let pin = req.body.pin;
-                const user = await new User({ phone: phone, pin: pin });
+                const salt = await bcrypt.genSalt(10);
+                const hashed = await bcrypt.hash(pin, salt);
+                const user = await new User({ phone: phone, pin: hashed });
                 await user.save();
             }
 
