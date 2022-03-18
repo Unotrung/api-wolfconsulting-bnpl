@@ -54,7 +54,6 @@ const personalSchema = new mongoose.Schema({
     },
     user: {
         type: mongoose.Schema.Types.String,
-        required: true
     }
 }, { timestamps: true });
 
