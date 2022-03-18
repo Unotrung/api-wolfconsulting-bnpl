@@ -14,6 +14,7 @@ const rateLimit = require('express-rate-limit');
 
 const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
+const commonRoute = require('./routers/CommonRouter');
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use(limiter);
 
 app.use('/v1/user', userRoute);
 app.use('/v1/personal', personalRoute);
+app.use('/v1/common', commonRoute);
 
 // Handle Error Not Found
 app.use((req, res, next) => {
