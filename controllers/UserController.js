@@ -187,7 +187,7 @@ const UserController = {
             const validPhone = await User.findOne({ phone: req.body.phone });
             if (validPhone) {
                 const validNid = await Personal.findOne({ citizenId: req.body.nid });
-                if (validNid && validPhone.id === validNid.user) {
+                if (validNid && validPhone.phone === validNid.phone) {
                     const OTP = otpGenerator.generate(6, {
                         digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
                     });
