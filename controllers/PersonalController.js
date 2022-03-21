@@ -72,8 +72,46 @@ const PersonalController = {
         try {
             let personals = await Personal.find();
             if (personals.length > 0) {
+                const totalItem = await Personal.countDocuments({});
+                console.log("Total Item: ", totalItem);
+
+                const PAGE_SIZE = req.query.pageSize;
+                console.log("Page Size: ", PAGE_SIZE);
+
+                const totalPage = Math.ceil(totalItem / PAGE_SIZE);
+                console.log("Total Page: ", totalPage);
+
+                let page = req.query.page || 1;
+                if (page < 1) {
+                    page = 1
+                };
+                if (page > totalPage) {
+                    page = totalPage
+                }
+
+                page = parseInt(page);
+                console.log("Current Page: ", page);
+
+                let sortByField = req.query.sortByField;
+                console.log("Sort By Field: ", sortByField);
+
+                let sortValue = req.query.sortValue;
+                sortValue = parseInt(sortValue);
+                console.log("Sort Value: ", sortValue);
+
+                var skipItem = (page - 1) * PAGE_SIZE;
+
+                const sort = sortValue === 1 ? `${sortByField}` : `-${(sortByField)}`;
+
+                const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
+
                 return res.status(200).json({
-                    data: personals,
+                    data: result,
+                    totalItem: totalItem,
+                    totalPage: totalPage,
+                    currentPage: page,
+                    sortByField: sortByField,
+                    sortValue: sortValue,
                     status: true
                 });
             }
