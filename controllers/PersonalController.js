@@ -70,16 +70,16 @@ const PersonalController = {
 
     getAllBNPLInformation: async (req, res, next) => {
         try {
-            let personal = await Personal.find();
-            if (personal) {
+            let personals = await Personal.find();
+            if (personals.length > 0) {
                 return res.status(200).json({
-                    data: personal,
+                    data: personals,
                     status: true
                 });
             }
             else {
                 return res.status(401).json({
-                    message: "Data Personal is not exists",
+                    message: "List Personal Is Empty",
                     status: false
                 });
             }
