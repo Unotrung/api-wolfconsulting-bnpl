@@ -17,7 +17,7 @@ const logEvents = async (message, name) => {
         // log.end();
     }
     catch (error) {
-        console.log(error);
+        next(err);
     }
 }
 
