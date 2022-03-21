@@ -8,7 +8,13 @@ const logEvents = async (message, name) => {
     const contentLog = `${dateTime}-----${message}\n`;
     try {
         // Store the file where and what content to store
+        // Cách 1
         fs.appendFile(fileName, contentLog);
+
+        // Cách 2
+        // const log = fs.createWriteStream(fileName, { flags: 'a' });
+        // log.write(contentLog);
+        // log.end();
     }
     catch (error) {
         console.log(error);

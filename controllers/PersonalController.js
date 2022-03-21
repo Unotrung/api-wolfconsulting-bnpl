@@ -35,7 +35,7 @@ const PersonalController = {
             }
 
             const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user });
-            logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} had uploaded information customer successfully`, 'information_customer.log');
+            // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} had uploaded information customer successfully`, 'information_customer.log');
             const result = await personal.save();
             return res.status(201).json({
                 data: result,
@@ -67,6 +67,27 @@ const PersonalController = {
             next(err);
         }
     },
+
+    getAllBNPLInformation: async (req, res, next) => {
+        try {
+            let personal = await Personal.find({});
+            if (personal) {
+                return res.status(200).json({
+                    data: personal,
+                    status: true
+                });
+            }
+            else {
+                return res.status(401).json({
+                    message: "Data Personal is not exists",
+                    status: false
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    }
 
 };
 

@@ -76,7 +76,7 @@ const UserController = {
                 const accessToken = UserController.generateAccessToken(user);
                 const result = await user.save();
                 const { pin, ...others } = result._doc;
-                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
+                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
                 return res.status(201).json({
                     message: "Register Successfully",
                     data: { ...others },
@@ -94,19 +94,19 @@ const UserController = {
         try {
             const user = await User.findOne({ phone: req.body.phone });
             if (!user) {
-                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong phone`, 'error_login.log');
+                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong phone`, 'error_login.log');
                 return res.status(401).json({ message: "Wrong phone ! Please Try Again" });
             }
             const valiPin = await bcrypt.compare(req.body.pin, user.pin);
             if (!valiPin) {
-                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong pin`, 'error_login.log');
+                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong pin`, 'error_login.log');
                 return res.status(401).json({ message: "Wrong pin ! Please Try Again" });
             }
             if (user && valiPin) {
                 const accessToken = UserController.generateAccessToken(user);
                 const refreshToken = UserController.generateRefreshToken(user);
                 refreshTokens.push(refreshToken);
-                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is login successfully`, 'login_success.log');
+                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is login successfully`, 'login_success.log');
                 res.cookie("refreshToken", refreshToken, {
                     httpOnly: true,
                     secure: false,
@@ -258,7 +258,7 @@ const UserController = {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(req.body.pin, salt);
                 await user.updateOne({ $set: { pin: hashed } });
-                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated successfully`, 'update_pin_success.log');
+                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated successfully`, 'update_pin_success.log');
                 return res.status(201).json({
                     message: "Update Password Successfully",
                     status: true
@@ -280,7 +280,7 @@ const UserController = {
             const user = await User.findOne({ phone: req.body.phone });
             if (user) {
                 const validPin = await bcrypt.compare(req.body.pin, user.pin);
-                logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin failure`, 'update_password_fail.log');
+                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin failure`, 'update_password_fail.log');
                 if (validPin) {
                     if (req.body.new_pin) {
                         const salt = await bcrypt.genSalt(10);
