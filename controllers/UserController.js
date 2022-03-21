@@ -286,7 +286,7 @@ const UserController = {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(req.body.new_pin, salt);
                         await user.updateOne({ $set: { pin: hashed } });
-                        logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_password_success.log');
+                        // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_password_success.log');
                         return res.status(201).json({
                             message: "Update Pin Successfully",
                             status: true
