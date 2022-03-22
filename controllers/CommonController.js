@@ -42,7 +42,7 @@ const CommonController = {
             const data = await response.json();
             if (data !== null) {
                 return res.json({
-                    token: data.result.token.split(" ")[1],
+                    token: data.result.token,
                     status: true
                 })
             }
