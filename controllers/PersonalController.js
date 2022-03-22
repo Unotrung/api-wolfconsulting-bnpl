@@ -1,8 +1,6 @@
 const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
 const bcrypt = require('bcrypt');
-const { v4: uuid } = require('uuid');
-const logEvents = require('../helpers/logEvents');
 
 const PersonalController = {
 

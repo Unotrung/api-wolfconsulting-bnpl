@@ -4,8 +4,6 @@ const Otp = require('../models/bnpl_otps');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
-const { v4: uuid } = require('uuid');
-const logEvents = require('../helpers/logEvents');
 
 let refreshTokens = [];
 

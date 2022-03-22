@@ -6,11 +6,10 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const createError = require('http-errors');
-const logEvents = require('./helpers/logEvents');
-const { v4: uuid } = require('uuid');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const logger = require('./helpers/index');
 
 const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
@@ -48,7 +47,7 @@ mongoose.connect(process.env.MONGODB_URL, function (err) {
 
 const limiter = rateLimit({
     windowMs: 1000,
-    max: 1,
+    max: 100,
 })
 
 app.use(limiter);
@@ -67,6 +66,7 @@ app.use((err, req, res, next) => {
     // Any middleware that fails will run down to this middleware for processing
     // Log errors in logs.log . file
     // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`, 'errors.log');
+    logger.error(`${err.message}`);
     return res.json({
         status: err.status || 500,
         message: err.message

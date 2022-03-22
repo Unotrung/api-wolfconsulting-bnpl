@@ -1,7 +1,7 @@
-const fs = require('fs').promises;
-const path = require('path');
-const { format } = require('date-fns');
-const winston = require('winston');
+// const fs = require('fs').promises;
+// const path = require('path');
+// const { format } = require('date-fns');
+// const winston = require('winston');
 
 // const logEvents = async (message, name) => {
 //     const fileName = path.join(__dirname, '../Logs', `${name}`);
@@ -22,34 +22,34 @@ const winston = require('winston');
 //     }
 // }
 
-const logger = winston.createLogger({
-    // format của log được kết hợp thông qua format.combine
-    format: winston.format.combine(
-        winston.format.splat(),
-        // Định dạng time cho log
-        winston.format.timestamp({
-            format: 'DD-MM-YYYY HH:mm:ss'
-        }),
-        // thêm màu sắc
-        winston.format.colorize(),
-        // thiết lập định dạng của log
-        winston.format.printf(
-            log => {
-                // nếu log là error hiển thị stack trace còn không hiển thị message của log 
-                if (log.stack) return `[${log.timestamp}] [${log.level}] ${log.stack}`;
-                return `[${log.timestamp}] [${log.level}] ${log.message}`;
-            },
-        ),
-    ),
-    transports: [
-        // hiển thị log thông qua console
-        new winston.transports.Console(),
-        // Thiết lập ghi các errors vào file 
-        new winston.transports.File({
-            level: 'error',
-            filename: path.join(__dirname, 'errors.log')
-        })
-    ],
-});
+// const logger = winston.createLogger({
+//     // format của log được kết hợp thông qua format.combine
+//     format: winston.format.combine(
+//         winston.format.splat(),
+//         // Định dạng time cho log
+//         winston.format.timestamp({
+//             format: 'DD-MM-YYYY HH:mm:ss'
+//         }),
+//         // thêm màu sắc
+//         winston.format.colorize(),
+//         // thiết lập định dạng của log
+//         winston.format.printf(
+//             log => {
+//                 // nếu log là error hiển thị stack trace còn không hiển thị message của log
+//                 if (log.stack) return `[${log.timestamp}] [${log.level}] ${log.stack}`;
+//                 return `[${log.timestamp}] [${log.level}] ${log.message}`;
+//             },
+//         ),
+//     ),
+//     transports: [
+//         // hiển thị log thông qua console
+//         new winston.transports.Console(),
+//         // Thiết lập ghi các errors vào file
+//         new winston.transports.File({
+//             level: 'error',
+//             filename: path.join(__dirname, 'errors.log')
+//         })
+//     ],
+// });
 
-module.exports = { logger };
+// module.exports = { logEvents, logger };
