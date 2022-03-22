@@ -9,7 +9,8 @@ const createError = require('http-errors');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const logger = require('./helpers/index');
+const { buildProdLogger } = require('./helpers/logger');
+const { v4: uuid } = require('uuid');
 
 const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
@@ -66,7 +67,7 @@ app.use((err, req, res, next) => {
     // Any middleware that fails will run down to this middleware for processing
     // Log errors in logs.log . file
     // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`, 'errors.log');
-    logger.error(`${err.message}`);
+    buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
     return res.json({
         status: err.status || 500,
         message: err.message
