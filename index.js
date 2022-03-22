@@ -53,9 +53,9 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.use('/v1/user', userRoute);
-app.use('/v1/personal', personalRoute);
-app.use('/v1/common', commonRoute);
+app.use('/v1/bnpl/user', userRoute);
+app.use('/v1/bnpl/personal', personalRoute);
+app.use('/v1/bnpl/common', commonRoute);
 
 // Handle Error Not Found
 app.use((req, res, next) => {

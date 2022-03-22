@@ -1,8 +1,8 @@
-const Personal = require('../models/Personal');
-const User = require('../models/User');
+const Personal = require('../models/bnpl_personals');
+const Customer = require('../models/bnpl_customers');
+const bcrypt = require('bcrypt');
 const { v4: uuid } = require('uuid');
 const logEvents = require('../helpers/logEvents');
-const bcrypt = require('bcrypt');
 
 const PersonalController = {
 
@@ -30,7 +30,7 @@ const PersonalController = {
                 let pin = req.body.pin;
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(pin, salt);
-                const user = await new User({ phone: phone, pin: hashed });
+                const user = await new Customer({ phone: phone, pin: hashed });
                 await user.save();
             }
 

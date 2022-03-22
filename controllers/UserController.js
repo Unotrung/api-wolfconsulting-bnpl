@@ -1,9 +1,8 @@
-const User = require('../models/User');
-const Personal = require('../models/Personal');
-const Otp = require('../models/Otp');
+const Customer = require('../models/bnpl_customers');
+const Personal = require('../models/bnpl_personals');
+const Otp = require('../models/bnpl_otps');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const _ = require('lodash');
 const otpGenerator = require('otp-generator');
 const { v4: uuid } = require('uuid');
 const logEvents = require('../helpers/logEvents');
@@ -36,7 +35,7 @@ const UserController = {
 
     checkPhoneExists: async (req, res, next) => {
         try {
-            const user = await User.findOne({ phone: req.body.phone });
+            const user = await Customer.findOne({ phone: req.body.phone });
             if (user) {
                 return res.status(200).json({
                     data: {
@@ -61,7 +60,7 @@ const UserController = {
 
     register: async (req, res, next) => {
         try {
-            const auth = await User.findOne({ phone: req.body.phone });
+            const auth = await Customer.findOne({ phone: req.body.phone });
             if (auth) {
                 return res.status(401).json({
                     message: "This account is already exists ! Please Login",
@@ -72,9 +71,9 @@ const UserController = {
                 let PIN = req.body.pin;
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(PIN, salt);
-                const user = await new User({ phone: PHONE, pin: hashed });
+                const user = await new Customer({ phone: PHONE, pin: hashed });
                 const accessToken = UserController.generateAccessToken(user);
-                const result = await user.save();
+                const result = await Customer.save();
                 const { pin, ...others } = result._doc;
                 // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
                 return res.status(201).json({
@@ -92,7 +91,7 @@ const UserController = {
 
     login: async (req, res, next) => {
         try {
-            const user = await User.findOne({ phone: req.body.phone });
+            const user = await Customer.findOne({ phone: req.body.phone });
             if (!user) {
                 // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong phone`, 'error_login.log');
                 return res.status(401).json({ message: "Wrong phone ! Please Try Again" });
@@ -129,7 +128,7 @@ const UserController = {
 
     sendOtp: async (req, res, next) => {
         try {
-            const user = await User.findOne({ phone: req.body.phone });
+            const user = await Customer.findOne({ phone: req.body.phone });
             if (user) {
                 const OTP = otpGenerator.generate(6, {
                     digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
@@ -184,7 +183,7 @@ const UserController = {
 
     sendOtpPin: async (req, res, next) => {
         try {
-            const validPhone = await User.findOne({ phone: req.body.phone });
+            const validPhone = await Customer.findOne({ phone: req.body.phone });
             if (validPhone) {
                 const validNid = await Personal.findOne({ citizenId: req.body.nid });
                 if (validNid && validPhone.phone === validNid.phone) {
@@ -253,11 +252,11 @@ const UserController = {
 
     updatePin: async (req, res, next) => {
         try {
-            const user = await User.findOne({ phone: req.body.phone });
+            const user = await Customer.findOne({ phone: req.body.phone });
             if (user) {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(req.body.pin, salt);
-                await user.updateOne({ $set: { pin: hashed } });
+                await Customer.updateOne({ $set: { pin: hashed } });
                 // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated successfully`, 'update_pin_success.log');
                 return res.status(201).json({
                     message: "Update Password Successfully",
@@ -277,7 +276,7 @@ const UserController = {
 
     updatePassword: async (req, res, next) => {
         try {
-            const user = await User.findOne({ phone: req.body.phone });
+            const user = await Customer.findOne({ phone: req.body.phone });
             if (user) {
                 const validPin = await bcrypt.compare(req.body.pin, user.pin);
                 // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin failure`, 'update_password_fail.log');
@@ -285,7 +284,7 @@ const UserController = {
                     if (req.body.new_pin) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(req.body.new_pin, salt);
-                        await user.updateOne({ $set: { pin: hashed } });
+                        await Customer.updateOne({ $set: { pin: hashed } });
                         // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_password_success.log');
                         return res.status(201).json({
                             message: "Update Pin Successfully",
@@ -317,7 +316,7 @@ const UserController = {
 
     getAllUser: async (req, res, next) => {
         try {
-            const users = await User.find();
+            const users = await Customer.find();
             if (users.length > 0) {
                 return res.status(200).json({
                     data: users,

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const otpSchema = new mongoose.Schema({
+const bnpl_otpsSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: [true, 'Phone is required'],
@@ -22,4 +22,4 @@ const otpSchema = new mongoose.Schema({
     // After 5 minutes it deleted automatically from the database
 }, { timestamps: true });
 
-module.exports = mongoose.model('Otp', otpSchema);
+module.exports = mongoose.model('bnpl_otps', bnpl_otpsSchema);
