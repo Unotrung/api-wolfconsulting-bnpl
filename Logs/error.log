@@ -1,0 +1,4 @@
+Time: 23-03-2022 09:51:30 --- Status: error --- Id_Log: 62a55ca4-f706-4afb-866b-ba3b40b2d1eb --- Router: /v1/user/bnpl/register --- Method: POST --- Message: This route dose not exists !
+Time: 23-03-2022 09:52:26 --- Status: error --- Id_Log: f0747595-f626-4dbd-a7a2-0bb8a2b6f9dc --- Router: /v1/bnpl/user/register --- Method: POST --- Message: Cannot destructure property 'pin' of 'result._doc' as it is undefined.
+Time: 23-03-2022 09:54:04 --- Status: error --- Id_Log: 767dab71-831a-4d12-aa31-b52416efc5ad --- Router: /v1/bnpl/user/bnpl/login --- Method: POST --- Message: This route dose not exists !
+Time: 23-03-2022 09:54:36 --- Status: error --- Id_Log: df7bc2c0-f3de-4fcf-a559-9ed6fb75558c --- Router: /v1/bnpl/user/bnpl/login --- Method: POST --- Message: This route dose not exists !

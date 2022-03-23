@@ -1,10 +1,12 @@
 const { createLogger, format, transports } = require('winston');
 const { combine, errors, timestamp, colorize, printf } = format;
+const winstonMongodb = require('winston-mongodb');
 const path = require('path');
 
 function buildProdLogger(level, name) {
+
     const logFormat = printf(({ level, message, timestamp, stack }) => {
-        return `${timestamp} ${level}: ${stack || message}`;
+        return `Time: ${timestamp} --- Status: ${level} --- ${stack || message}`;
     });
 
     return createLogger({
@@ -21,6 +23,14 @@ function buildProdLogger(level, name) {
             new transports.File({
                 level: `${level}`,
                 filename: path.join(__dirname, '../Logs', `${name}`)
+            }),
+            new transports.MongoDB({
+                level: `${level}`,
+                db: process.env.MONGODB_URL,
+                options: {
+                    useUnifiedTopology: true
+                },
+                collection: 'log'
             })
         ],
     });
