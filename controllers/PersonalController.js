@@ -1,6 +1,7 @@
 const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
 const bcrypt = require('bcrypt');
+// const { errorFormatter } = require('../helpers/errors');
 
 const PersonalController = {
 
