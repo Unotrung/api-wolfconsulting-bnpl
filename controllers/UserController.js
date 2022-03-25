@@ -254,7 +254,7 @@ const UserController = {
             if (user) {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(req.body.new_pin, salt);
-                await Customer.updateOne({ $set: { pin: hashed } });
+                await user.updateOne({ $set: { pin: hashed } });
                 // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated successfully`, 'update_pin_success.log');
                 return res.status(201).json({
                     message: "Update Password Successfully",
