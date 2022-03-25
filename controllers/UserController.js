@@ -27,7 +27,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_REFRESH_KEY,
-            { expiresIn: "20m" }
+            { expiresIn: "5h" }
         );
     },
 

@@ -12,6 +12,7 @@ const bnpl_customerSchema = new mongoose.Schema({
     pin: {
         type: String,
     },
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('bnpl_customer', bnpl_customerSchema);

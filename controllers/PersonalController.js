@@ -123,7 +123,7 @@ const PersonalController = {
         catch (err) {
             next(err);
         }
-    }
+    },
 
 };
 

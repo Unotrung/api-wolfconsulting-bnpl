@@ -64,9 +64,6 @@ app.use((req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-    // Any middleware that fails will run down to this middleware for processing
-    // Log errors in logs.log . file
-    // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`, 'errors.log');
     buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
     return res.json({
         status: err.status || 500,
