@@ -34,11 +34,8 @@ const UserController = {
     checkPhoneExists: async (req, res, next) => {
         try {
             let phone = req.body.phone;
-            console.log(phone);
-            console.log(typeof phone);
             const user = await Customer.findOne({ phone: phone });
             if (user) {
-                console.log(123);
                 return res.status(200).json({
                     data: {
                         _id: user.id,
@@ -49,17 +46,18 @@ const UserController = {
                 });
             }
             else if (phone.startsWith('033')) {
-                console.log(456);
                 return res.status(200).json({
                     message: "This phone number is not exists in EAP!",
-                    isExists: false
+                    isExists: false,
+                    errCode: 1001,
                 });
             }
             else if (phone.startsWith('044')) {
                 console.log(789);
                 return res.status(200).json({
                     message: "This phone number is not exists in BNPL!",
-                    isExists: false
+                    isExists: false,
+                    errCode: 1002,
                 });
             }
         }
