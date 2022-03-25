@@ -48,7 +48,7 @@ const PersonalController = {
                 });
             }
 
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user || customer._id, providers: [] });
+            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user, providers: [] });
             const result = await personal.save((err) => {
                 if (!err) {
                     return res.status(201).json({
@@ -81,7 +81,7 @@ const PersonalController = {
             }
             else {
                 return res.status(401).json({
-                    message: "This Personal Infomation is not exists",
+                    message: "This Personal Infomation is not exists !",
                     status: false
                 });
             }
@@ -156,14 +156,23 @@ const PersonalController = {
         let validNid = await Personal.findOne({ citizenId: nid });
         if (nid !== null && provider !== null) {
             if (validNid) {
-                await validNid.updateOne({ $push: { providers: provider } });
-                return res.status(200).json({
-                    message: "Add Provider Success",
-                    status: true
-                })
+                await validNid.updateOne({ $push: { providers: provider } }, (err) => {
+                    if (!err) {
+                        return res.status(200).json({
+                            message: "Add Provider Success",
+                            status: true
+                        })
+                    }
+                    else {
+                        return res.status(400).json({
+                            message: "Add Provider Failure",
+                            status: false
+                        })
+                    }
+                });
             }
             else {
-                return res.status(404).json({
+                return res.status(400).json({
                     message: "Nid is not exists",
                     status: false
                 })

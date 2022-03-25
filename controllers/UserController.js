@@ -223,14 +223,16 @@ const UserController = {
                     }
                 }
                 else {
-                    return res.status(401).json({
+                    return res.status(200).json({
                         message: "Wrong Nid ! Please Try Again",
+                        status: false
                     });
                 }
             }
             else {
-                return res.status(401).json({
+                return res.status(200).json({
                     message: "Wrong phone ! Please Try Again",
+                    status: false
                 });
             }
         }
@@ -243,12 +245,12 @@ const UserController = {
         try {
             const validUser = await Otp.find({ phone: req.body.phone, nid: req.body.nid });
             if (validUser.length === 0) {
-                return res.status(401).json({ message: "Expired OTP ! Please Resend OTP" });
+                return res.status(401).json({
+                    message: "Expired OTP ! Please Resend OTP",
+                    status: false
+                });
             }
             const lastOtp = validUser[validUser.length - 1];
-            console.log("PHONE:", lastOtp.phone === req.body.phone);
-            console.log("NID:", lastOtp.nid === req.body.nid);
-            console.log("OTP:", lastOtp.otp === req.body.otp);
             if (lastOtp.phone === req.body.phone && lastOtp.nid === req.body.nid && lastOtp.otp === req.body.otp) {
                 const accessToken = UserController.generateAccessToken(lastOtp);
                 await Otp.deleteMany({ phone: lastOtp.phone, nid: req.body.nid });
@@ -304,7 +306,7 @@ const UserController = {
                     if (req.body.new_pin) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(req.body.new_pin, salt);
-                        await Customer.updateOne({ $set: { pin: hashed } });
+                        await user.updateOne({ $set: { pin: hashed } });
                         // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_password_success.log');
                         return res.status(201).json({
                             message: "Update Pin Successfully",
