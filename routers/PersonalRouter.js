@@ -3,6 +3,7 @@ const MiddlewareController = require('../controllers/MiddlewareController');
 const router = require("express").Router();
 
 router.post("/register", PersonalController.register);
+router.post("/addProvider", PersonalController.addProvider);
 router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
 router.get("/:id", MiddlewareController.VerifyTokenByMySelf, PersonalController.getInfomation);
 

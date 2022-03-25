@@ -1,5 +1,6 @@
 const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
+const Provider = require('../models/bnpl_providers');
 const bcrypt = require('bcrypt');
 // const { errorFormatter } = require('../helpers/errors');
 
@@ -30,15 +31,38 @@ const PersonalController = {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(pin, salt);
                 const customer = await new Customer({ phone: phone, pin: hashed });
-                await customer.save();
+                await customer.save((err) => {
+                    if (!err) {
+                        return res.status(201).json({
+                            message: "Add Customer BNPL Successfully",
+                            data: customer,
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(400).json({
+                            message: "Add Customer BNPL Failure",
+                            status: false
+                        });
+                    }
+                });
             }
 
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user, providers: [] });
-            // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} had uploaded information customer successfully`, 'information_customer.log');
-            const result = await personal.save();
-            return res.status(201).json({
-                data: result,
-                status: true
+            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user || customer._id, providers: [] });
+            const result = await personal.save((err) => {
+                if (!err) {
+                    return res.status(201).json({
+                        message: "Add Personal BNPL Successfully",
+                        data: result,
+                        status: true
+                    });
+                }
+                else {
+                    return res.status(400).json({
+                        message: "Add Personal BNPL Failure",
+                        status: false
+                    });
+                }
             });
         }
         catch (err) {
@@ -129,8 +153,21 @@ const PersonalController = {
     addProvider: async (req, res, next) => {
         let provider = req.body.provider;
         let nid = req.body.nid;
+        let validNid = await Personal.findOne({ citizenId: nid });
         if (nid !== null && provider !== null) {
-
+            if (validNid) {
+                await validNid.updateOne({ $push: { providers: provider } });
+                return res.status(200).json({
+                    message: "Add Provider Success",
+                    status: true
+                })
+            }
+            else {
+                return res.status(404).json({
+                    message: "Nid is not exists",
+                    status: false
+                })
+            }
         }
     }
 
