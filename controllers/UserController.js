@@ -53,7 +53,6 @@ const UserController = {
                 });
             }
             else if (phone.startsWith('044')) {
-                console.log(789);
                 return res.status(200).json({
                     message: "This phone number is not exists in BNPL!",
                     isExists: false,
@@ -81,14 +80,23 @@ const UserController = {
                 const hashed = await bcrypt.hash(PIN, salt);
                 const user = await new Customer({ phone: PHONE, pin: hashed });
                 const accessToken = UserController.generateAccessToken(user);
-                const result = await user.save();
-                const { pin, ...others } = result._doc;
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
-                return res.status(201).json({
-                    message: "Register Successfully",
-                    data: { ...others },
-                    token: accessToken,
-                    status: true
+                const result = await user.save((err) => {
+                    if (!err) {
+                        const { pin, ...others } = result._doc;
+                        // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
+                        return res.status(201).json({
+                            message: "Register Successfully",
+                            data: { ...others },
+                            token: accessToken,
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(400).json({
+                            message: "Register Failure",
+                            status: false
+                        });
+                    }
                 });
             }
         }
