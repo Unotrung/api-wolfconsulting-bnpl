@@ -153,7 +153,7 @@ const PersonalController = {
     addProvider: async (req, res, next) => {
         let provider = await Provider.findOne({ provider: req.body.provider });
         let validNid = await Personal.findOne({ citizenId: req.body.nid });
-        if (nid !== null && provider !== null) {
+        if (req.body.provider !== null && req.body.nid !== null) {
             if (validNid) {
                 await validNid.updateOne({ $push: { providers: provider._id } }, (err) => {
                     if (!err) {
