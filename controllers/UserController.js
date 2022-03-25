@@ -45,7 +45,7 @@ const UserController = {
                 });
             }
             else {
-                return res.status(401).json({
+                return res.status(200).json({
                     message: "This phone number is not exists !",
                     isExists: false
                 });
@@ -60,7 +60,7 @@ const UserController = {
         try {
             const auth = await Customer.findOne({ phone: req.body.phone });
             if (auth) {
-                return res.status(401).json({
+                return res.status(200).json({
                     message: "This account is already exists ! Please Login",
                 });
             }
@@ -92,12 +92,12 @@ const UserController = {
             const user = await Customer.findOne({ phone: req.body.phone });
             if (!user) {
                 // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong phone`, 'error_login.log');
-                return res.status(401).json({ message: "Wrong phone ! Please Try Again" });
+                return res.status(200).json({ message: "Wrong phone ! Please Try Again", status: false });
             }
             const valiPin = await bcrypt.compare(req.body.pin, user.pin);
             if (!valiPin) {
                 // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong pin`, 'error_login.log');
-                return res.status(401).json({ message: "Wrong pin ! Please Try Again" });
+                return res.status(200).json({ message: "Wrong pin ! Please Try Again", status: false });
             }
             if (user && valiPin) {
                 const accessToken = UserController.generateAccessToken(user);
@@ -143,8 +143,9 @@ const UserController = {
                 }
             }
             else {
-                return res.status(401).json({
+                return res.status(200).json({
                     message: "Wrong phone ! Please Try Again",
+                    status: fail
                 });
             }
         }
@@ -157,7 +158,10 @@ const UserController = {
         try {
             const otpUser = await Otp.find({ phone: req.body.phone });
             if (otpUser.length === 0) {
-                return res.status(401).json({ message: "Expired OTP ! Please Resend OTP" });
+                return res.status(401).json({
+                    message: "Expired OTP ! Please Resend OTP",
+                    status: false
+                });
             }
             const lastOtp = otpUser[otpUser.length - 1];
             if (lastOtp.phone === req.body.phone && lastOtp.otp === req.body.otp) {

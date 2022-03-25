@@ -56,7 +56,8 @@ const bnpl_personalSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.String,
         ref: "bnpl_customer"
-    }
+    },
+    providers: [{ type: mongoose.Schema.Types.ObjectId }]
 
 }, { timestamps: true });
 

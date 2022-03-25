@@ -58,8 +58,8 @@ app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
 
 // Handle Error Not Found
+
 app.use((req, res, next) => {
-    // All Not Found errors will be handled centrally here
     next(createError.NotFound('This route dose not exists !'));
 })
 

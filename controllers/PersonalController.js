@@ -32,7 +32,7 @@ const PersonalController = {
                 await customer.save();
             }
 
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user });
+            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user, providers: [] });
             // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} had uploaded information customer successfully`, 'information_customer.log');
             const result = await personal.save();
             return res.status(201).json({
@@ -124,6 +124,14 @@ const PersonalController = {
             next(err);
         }
     },
+
+    addProvider: async (req, res, next) => {
+        let provider = req.body.provider;
+        let nid = req.body.nid;
+        if (nid !== null && provider !== null) {
+
+        }
+    }
 
 };
 
