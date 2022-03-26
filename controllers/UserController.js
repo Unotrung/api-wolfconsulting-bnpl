@@ -172,33 +172,22 @@ const UserController = {
             });
             const PHONE = req.body.phone;
             if (PHONE !== null && PHONE !== '') {
-                const user = await Customer.findOne({ phone: PHONE });
-                if (user) {
-                    if (OTP !== null && PHONE != null) {
-                        const dataTemp = new Otp({ phone: PHONE, otp: OTP });
-                        const result = await dataTemp.save((err) => {
-                            if (!err) {
-                                return res.status(200).json({
-                                    message: "Send OTP Successfully",
-                                    otp: OTP,
-                                    status: true
-                                });
-                            }
-                            else {
-                                return res.status(200).json({
-                                    message: "Send OTP Failure",
-                                    status: false
-                                });
-                            }
+                const dataTemp = new Otp({ phone: PHONE, otp: OTP });
+                const result = await dataTemp.save((err) => {
+                    if (!err) {
+                        return res.status(200).json({
+                            message: "Send OTP Successfully",
+                            otp: OTP,
+                            status: true
                         });
                     }
-                }
-                else {
-                    return res.status(200).json({
-                        message: "This phone number is not exists !",
-                        status: false
-                    });
-                }
+                    else {
+                        return res.status(200).json({
+                            message: "Send OTP Failure",
+                            status: false
+                        });
+                    }
+                });
             }
             else {
                 return res.status(200).json({
