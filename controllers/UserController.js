@@ -217,7 +217,7 @@ const UserController = {
                     const lastOtp = otpUser[otpUser.length - 1];
                     if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
                         await Otp.deleteMany({ phone: lastOtp.phone });
-                        return res.status(204).json({
+                        return res.status(200).json({
                             message: "Successfully. OTP VALID",
                             status: true,
                         })
