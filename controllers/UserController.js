@@ -379,9 +379,10 @@ const UserController = {
 
     getAllUser: async (req, res, next) => {
         try {
-            const users = await Customer.find().select(_id, phone);
+            const users = await Customer.find().select('_id phone');
             if (users.length > 0) {
                 return res.status(200).json({
+                    count: users.length,
                     data: users,
                     message: "Get List User Success",
                     status: true
