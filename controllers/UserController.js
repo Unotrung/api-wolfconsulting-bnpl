@@ -75,36 +75,43 @@ const UserController = {
 
     register: async (req, res, next) => {
         try {
-            const auth = await Customer.findOne({ phone: req.body.phone });
-            if (auth) {
-                return res.status(200).json({
-                    message: "This account is already exists ! Please Login",
-                });
+            let PHONE = req.body.phone;
+            let PIN = req.body.pin;
+            if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
+                const auth = await Customer.findOne({ phone: req.body.phone });
+                if (auth) {
+                    return res.status(200).json({
+                        message: "This account is already exists ! Please Login",
+                    });
+                }
+                else {
+                    const salt = await bcrypt.genSalt(10);
+                    const hashed = await bcrypt.hash(PIN, salt);
+                    const user = await new Customer({ phone: PHONE, pin: hashed });
+                    const accessToken = UserController.generateAccessToken(user);
+                    const result = await user.save((err) => {
+                        if (!err) {
+                            const { pin, ...others } = result._doc;
+                            return res.status(201).json({
+                                message: "Register Successfully",
+                                data: { ...others },
+                                token: accessToken,
+                                status: true
+                            });
+                        }
+                        else {
+                            return res.status(400).json({
+                                message: "Register Failure",
+                                status: false
+                            });
+                        }
+                    });
+                }
             }
             else {
-                let PHONE = req.body.phone;
-                let PIN = req.body.pin;
-                const salt = await bcrypt.genSalt(10);
-                const hashed = await bcrypt.hash(PIN, salt);
-                const user = await new Customer({ phone: PHONE, pin: hashed });
-                const accessToken = UserController.generateAccessToken(user);
-                const result = await user.save((err) => {
-                    if (!err) {
-                        const { pin, ...others } = result._doc;
-                        // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
-                        return res.status(201).json({
-                            message: "Register Successfully",
-                            data: { ...others },
-                            token: accessToken,
-                            status: true
-                        });
-                    }
-                    else {
-                        return res.status(400).json({
-                            message: "Register Failure",
-                            status: false
-                        });
-                    }
+                return res.status(200).json({
+                    message: "Please enter your phone number and pin code. Do not leave any fields blank !",
+                    status: false
                 });
             }
         }
