@@ -89,9 +89,9 @@ const UserController = {
                     const hashed = await bcrypt.hash(PIN, salt);
                     const user = await new Customer({ phone: PHONE, pin: hashed });
                     const accessToken = UserController.generateAccessToken(user);
-                    const result = await user.save((err) => {
+                    const result = await user.save((err, data) => {
                         if (!err) {
-                            const { pin, ...others } = result._doc;
+                            const { pin, ...others } = data._doc;
                             return res.status(201).json({
                                 message: "Register Successfully",
                                 data: { ...others },
