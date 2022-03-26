@@ -155,20 +155,11 @@ const PersonalController = {
         let validNid = await Personal.findOne({ citizenId: req.body.nid });
         if (req.body.provider !== null && req.body.nid !== null) {
             if (validNid) {
-                await validNid.updateOne({ $push: { providers: provider._id } }, (err) => {
-                    if (!err) {
-                        return res.status(200).json({
-                            message: "Add Provider Success",
-                            status: true
-                        })
-                    }
-                    else {
-                        return res.status(400).json({
-                            message: "Add Provider Failure",
-                            status: false
-                        })
-                    }
-                });
+                await validNid.updateOne({ $push: { providers: provider.id } });
+                return res.status(200).json({
+                    message: "Add Provider Success",
+                    status: true
+                })
             }
             else {
                 return res.status(400).json({

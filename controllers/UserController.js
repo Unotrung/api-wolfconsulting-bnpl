@@ -34,29 +34,37 @@ const UserController = {
     checkPhoneExists: async (req, res, next) => {
         try {
             let phone = req.body.phone;
-            const user = await Customer.findOne({ phone: phone });
-            if (user) {
-                return res.status(200).json({
-                    data: {
-                        _id: user.id,
-                        phone: user.phone
-                    },
-                    message: "This phone number is already exists !",
-                    isExists: true
-                });
+            if (phone !== null && phone !== '') {
+                const user = await Customer.findOne({ phone: phone });
+                if (user) {
+                    return res.status(200).json({
+                        data: {
+                            _id: user.id,
+                            phone: user.phone
+                        },
+                        message: "This phone number is already exists !",
+                        isExists: true
+                    });
+                }
+                else if (phone.startsWith('033')) {
+                    return res.status(200).json({
+                        message: "This phone number is not exists in EAP !",
+                        isExists: false,
+                        errCode: 1001,
+                    });
+                }
+                else if (phone.startsWith('044')) {
+                    return res.status(200).json({
+                        message: "This phone number is not exists in BNPL !",
+                        isExists: false,
+                        errCode: 1002,
+                    });
+                }
             }
-            else if (phone.startsWith('033')) {
+            else {
                 return res.status(200).json({
-                    message: "This phone number is not exists in EAP!",
-                    isExists: false,
-                    errCode: 1001,
-                });
-            }
-            else if (phone.startsWith('044')) {
-                return res.status(200).json({
-                    message: "This phone number is not exists in BNPL!",
-                    isExists: false,
-                    errCode: 1002,
+                    message: "Please enter the phone number !",
+                    status: false
                 });
             }
         }
