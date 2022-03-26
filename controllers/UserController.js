@@ -122,33 +122,41 @@ const UserController = {
 
     login: async (req, res, next) => {
         try {
-            const user = await Customer.findOne({ phone: req.body.phone });
-            if (!user) {
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong phone`, 'error_login.log');
-                return res.status(200).json({ message: "Wrong phone ! Please Try Again", status: false });
+            const PHONE = req.body.phone;
+            const PIN = req.body.pin;
+            if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
+                const user = await Customer.findOne({ phone: PHONE });
+                if (!user) {
+                    return res.status(200).json({ message: "Wrong phone. Please Try Again !", status: false });
+                }
+                const valiPin = await bcrypt.compare(PIN, user.pin);
+                if (!valiPin) {
+                    return res.status(200).json({ message: "Wrong pin. Please Try Again !", status: false });
+                }
+                if (user && valiPin) {
+                    const accessToken = UserController.generateAccessToken(user);
+                    const refreshToken = UserController.generateRefreshToken(user);
+                    refreshTokens.push(refreshToken);
+                    // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is login successfully`, 'login_success.log');
+                    res.cookie("refreshToken", refreshToken, {
+                        httpOnly: true,
+                        secure: false,
+                        path: '/',
+                        sameSite: 'strict',
+                    });
+                    const { pin, ...others } = user._doc;
+                    return res.status(200).json({
+                        message: "Login Successfully",
+                        data: { ...others },
+                        token: accessToken,
+                        status: true
+                    });
+                }
             }
-            const valiPin = await bcrypt.compare(req.body.pin, user.pin);
-            if (!valiPin) {
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong pin`, 'error_login.log');
-                return res.status(200).json({ message: "Wrong pin ! Please Try Again", status: false });
-            }
-            if (user && valiPin) {
-                const accessToken = UserController.generateAccessToken(user);
-                const refreshToken = UserController.generateRefreshToken(user);
-                refreshTokens.push(refreshToken);
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is login successfully`, 'login_success.log');
-                res.cookie("refreshToken", refreshToken, {
-                    httpOnly: true,
-                    secure: false,
-                    path: '/',
-                    sameSite: 'strict',
-                });
-                const { pin, ...others } = user._doc;
+            else {
                 return res.status(200).json({
-                    message: "Login Successfully",
-                    data: { ...others },
-                    token: accessToken,
-                    status: true
+                    message: "Please enter your phone number and pin code. Do not leave any fields blank !",
+                    status: false
                 });
             }
         }
