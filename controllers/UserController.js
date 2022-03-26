@@ -167,26 +167,43 @@ const UserController = {
 
     sendOtp: async (req, res, next) => {
         try {
-            const user = await Customer.findOne({ phone: req.body.phone });
-            if (user) {
-                const OTP = otpGenerator.generate(6, {
-                    digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
-                });
-                const PHONE = req.body.phone;
-                if (OTP !== null && PHONE != null) {
-                    const dataTemp = new Otp({ phone: PHONE, otp: OTP });
-                    const result = await dataTemp.save();
+            const OTP = otpGenerator.generate(6, {
+                digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
+            });
+            const PHONE = req.body.phone;
+            if (PHONE !== null && PHONE !== '') {
+                const user = await Customer.findOne({ phone: PHONE });
+                if (user) {
+                    if (OTP !== null && PHONE != null) {
+                        const dataTemp = new Otp({ phone: PHONE, otp: OTP });
+                        const result = await dataTemp.save((err) => {
+                            if (!err) {
+                                return res.status(200).json({
+                                    message: "Send OTP Successfully",
+                                    otp: OTP,
+                                    status: true
+                                });
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: "Send OTP Failure",
+                                    status: false
+                                });
+                            }
+                        });
+                    }
+                }
+                else {
                     return res.status(200).json({
-                        message: "Send OTP Successfully",
-                        otp: OTP,
-                        status: true
+                        message: "This phone number is not exists !",
+                        status: false
                     });
                 }
             }
             else {
                 return res.status(200).json({
-                    message: "Wrong phone ! Please Try Again",
-                    status: fail
+                    message: "Please enter the phone number !",
+                    status: false
                 });
             }
         }
