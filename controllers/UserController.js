@@ -203,26 +203,38 @@ const UserController = {
 
     verifyOtp: async (req, res, next) => {
         try {
-            const otpUser = await Otp.find({ phone: req.body.phone });
-            if (otpUser.length === 0) {
-                return res.status(401).json({
-                    message: "Expired OTP ! Please Resend OTP",
-                    status: false
-                });
-            }
-            const lastOtp = otpUser[otpUser.length - 1];
-            if (lastOtp.phone === req.body.phone && lastOtp.otp === req.body.otp) {
-                await Otp.deleteMany({ phone: lastOtp.phone });
-                return res.status(200).json({
-                    message: "OTP VALID",
-                    status: true,
-                })
+            const PHONE = req.body.phone;
+            const OTP = req.body.otp;
+            if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
+                const otpUser = await Otp.find({ phone: PHONE });
+                if (otpUser.length === 0) {
+                    return res.status(401).json({
+                        message: "Expired OTP. Please Resend OTP !",
+                        status: false
+                    });
+                }
+                else {
+                    const lastOtp = otpUser[otpUser.length - 1];
+                    if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
+                        await Otp.deleteMany({ phone: lastOtp.phone });
+                        return res.status(204).json({
+                            message: "Successfully. OTP VALID",
+                            status: true,
+                        })
+                    }
+                    else {
+                        return res.status(401).json({
+                            message: "Failure. OTP INVALID",
+                            status: false,
+                        })
+                    }
+                }
             }
             else {
-                return res.status(401).json({
-                    message: "OTP INVALID",
-                    status: false,
-                })
+                return res.status(200).json({
+                    message: "Please enter your phone number and otp code. Do not leave any fields blank !",
+                    status: false
+                });
             }
         }
         catch (err) {
