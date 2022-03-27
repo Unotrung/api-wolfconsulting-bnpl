@@ -4,7 +4,7 @@ const router = require("express").Router();
 
 router.post("/addInfoPersonal", PersonalController.addInfoPersonal);
 router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
-router.get("/:id", PersonalController.getInfomation);
+router.get("/:id", MiddlewareController.VerifyTokenByMySelf, PersonalController.getInfomation);
 router.post("/addProvider", PersonalController.addProvider);
 
 module.exports = router;
