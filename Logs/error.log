@@ -10,3 +10,12 @@ Time: 25-03-2022 15:49:45 --- Status: error --- Id_Log: b7c45b34-241e-4f16-a710-
 Time: 25-03-2022 16:10:07 --- Status: error --- Id_Log: ed523360-e4bc-4130-887e-84c379756a66 --- Router: /v1/user/checkPhoneExists --- Method: POST --- Message: This route dose not exists !
 Time: 26-03-2022 13:47:06 --- Status: error --- Id_Log: 0bf98a8f-b1de-4473-9a49-a40842fc95d9 --- Router: /v1/bnpl/user/getAllUser --- Method: GET --- Message: _id is not defined
 Time: 26-03-2022 13:47:20 --- Status: error --- Id_Log: d750ad4f-3995-48f2-9a71-7a04a738298e --- Router: /v1/bnpl/user/getAllUser --- Method: GET --- Message: id is not defined
+Time: 27-03-2022 16:32:31 --- Status: error --- Id_Log: 82859116-d986-4648-aef9-25b56e18d8ed --- Router: /v1/bnpl/personal/register --- Method: POST --- Message: This route dose not exists !
+Time: 27-03-2022 16:32:40 --- Status: error --- Id_Log: 20b8bdfd-fb1d-4636-8b58-066a417dc4c9 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 27-03-2022 16:33:26 --- Status: error --- Id_Log: 05c3d5e7-52b7-4493-a025-41a5eed683ac --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 27-03-2022 16:35:33 --- Status: error --- Id_Log: e43b263a-3d5c-43f6-84a6-1437f6549ec6 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 27-03-2022 16:35:34 --- Status: error --- Id_Log: c4f7977d-5c87-43b5-97c1-63f3692a6961 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 27-03-2022 16:35:56 --- Status: error --- Id_Log: 5300a27b-8a1d-4e35-9cef-08ce139fbf97 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 27-03-2022 16:35:56 --- Status: error --- Id_Log: 9317a07f-bcfe-4ad1-947e-b2ec2e654d9b --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 27-03-2022 16:36:13 --- Status: error --- Id_Log: b48d37ac-5d1e-4770-8ac5-7597fefaa193 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 27-03-2022 16:36:27 --- Status: error --- Id_Log: f7ba84cb-fd6d-4e29-b6f3-efc0a296433f --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
