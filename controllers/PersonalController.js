@@ -24,7 +24,6 @@ const PersonalController = {
             let phone_ref = req.body.phone_ref;
 
             let user = req.body.user;
-            let userRef = "";
 
             let pin = req.body.pin;
 
@@ -83,7 +82,7 @@ const PersonalController = {
                 });
             }
             else {
-                return res.status(401).json({
+                return res.status(200).json({
                     message: "This Personal Infomation is not exists !",
                     status: false
                 });
