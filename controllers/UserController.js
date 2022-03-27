@@ -393,7 +393,7 @@ const UserController = {
         try {
             let PHONE = req.body.phone;
             let PIN = req.body.pin;
-            let NEW_PIN = req.body.pin;
+            let NEW_PIN = req.body.new_pin;
             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '' && NEW_PIN !== null && NEW_PIN !== '') {
                 const user = await Customer.findOne({ phone: PHONE });
                 if (user) {
