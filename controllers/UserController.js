@@ -100,7 +100,7 @@ const UserController = {
                             });
                         }
                         else {
-                            return res.status(400).json({
+                            return res.status(200).json({
                                 message: "Register Failure",
                                 status: false
                             });
@@ -208,7 +208,7 @@ const UserController = {
             if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
                 const otpUser = await Otp.find({ phone: PHONE });
                 if (otpUser.length === 0) {
-                    return res.status(401).json({
+                    return res.status(200).json({
                         message: "Expired OTP. Please Resend OTP !",
                         status: false
                     });
@@ -223,7 +223,7 @@ const UserController = {
                         })
                     }
                     else {
-                        return res.status(401).json({
+                        return res.status(200).json({
                             message: "Failure. OTP INVALID",
                             status: false,
                         })
@@ -314,7 +314,7 @@ const UserController = {
                     const lastOtp = validUser[validUser.length - 1];
                     if (lastOtp.phone === PHONE && lastOtp.nid === NID && lastOtp.otp === OTP) {
                         const accessToken = UserController.generateAccessToken(lastOtp);
-                        await Otp.deleteMany({ phone: lastOtp.phone, nid: req.body.nid });
+                        await Otp.deleteMany({ phone: PHONE, nid: NID });
                         return res.status(200).json({
                             message: "Successfully. OTP VALID",
                             token: accessToken,
