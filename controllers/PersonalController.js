@@ -174,7 +174,7 @@ const PersonalController = {
                     else {
                         return res.status(200).json({
                             message: "Register Provider Failure",
-                            status: true
+                            status: false
                         })
                     }
                 }).clone().catch((err) => {
