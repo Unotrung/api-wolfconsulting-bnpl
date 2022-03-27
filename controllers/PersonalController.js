@@ -154,19 +154,38 @@ const PersonalController = {
     },
 
     registerProvider: async (req, res, next) => {
-        let provider = await Provider.findOne({ provider: req.body.provider });
-        let validNid = await Personal.findOne({ citizenId: req.body.nid });
-        if (req.body.provider !== null && req.body.nid !== null) {
+        let provider = req.body.provider;
+        let nid = req.body.nid;
+        if (provider !== null && provider !== '' && nid !== null && nid !== '') {
+            let validProvider = await Provider.findOne({ provider: provider });
+            let validNid = await Personal.findOne({ citizenId: nid });
             if (validNid) {
-                await validNid.updateOne({ $push: { providers: provider.id } });
-                return res.status(200).json({
-                    message: "Add Provider Success",
-                    status: true
-                })
+                await validNid.updateOne({ $push: { providers: validProvider.id } }, (err, data) => {
+                    if (!err) {
+                        return res.status(200).json({
+                            message: "Register Provider Successfully",
+                            data: data,
+                            status: true
+                        })
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "Register Provider Failure",
+                            status: true
+                        })
+                    }
+                }).clone().catch((err) => {
+                    return res.status(200).json({
+                        err: err,
+                        messsage: "Something wrong in register provider!",
+                        status: false,
+                    })
+                });;
+
             }
             else {
-                return res.status(400).json({
-                    message: "Nid is not exists",
+                return res.status(200).json({
+                    message: "This Nid is not exists !",
                     status: false
                 })
             }
