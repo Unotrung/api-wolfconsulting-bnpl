@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 
 const PersonalController = {
 
-    register: async (req, res, next) => {
+    addInfoPersonal: async (req, res, next) => {
         try {
             let name = req.body.name;
             let sex = req.body.sex;
@@ -24,23 +24,22 @@ const PersonalController = {
             let name_ref = req.body.name_ref;
             let phone_ref = req.body.phone_ref;
 
-            let user = req.body.user;
-
             if (req.body.pin) {
                 let pin = req.body.pin;
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(pin, salt);
                 const customer = await new Customer({ phone: phone, pin: hashed });
-                await customer.save((err) => {
+                await customer.save((err, data) => {
                     if (!err) {
+                        const { pin, ...others } = data._doc;
                         return res.status(201).json({
                             message: "Add Customer BNPL Successfully",
-                            data: customer,
+                            data: { ...others },
                             status: true
                         });
                     }
                     else {
-                        return res.status(400).json({
+                        return res.status(200).json({
                             message: "Add Customer BNPL Failure",
                             status: false
                         });
@@ -48,17 +47,19 @@ const PersonalController = {
                 });
             }
 
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user, providers: [] });
-            const result = await personal.save((err) => {
+            let userRef = await Customer.findOne({ phone: phone });
+            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: userRef._id, providers: [] });
+            const result = await personal.save((err, data) => {
                 if (!err) {
+                    const { user, ...others } = data._doc;
                     return res.status(201).json({
                         message: "Add Personal BNPL Successfully",
-                        data: result,
+                        data: { ...others },
                         status: true
                     });
                 }
                 else {
-                    return res.status(400).json({
+                    return res.status(200).json({
                         message: "Add Personal BNPL Failure",
                         status: false
                     });
