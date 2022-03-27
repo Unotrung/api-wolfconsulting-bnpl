@@ -353,16 +353,22 @@ const UserController = {
                     await user.updateOne({ $set: { pin: hashed } }, (err) => {
                         if (!err) {
                             return res.status(201).json({
-                                message: "Update Password Successfully",
+                                message: "Reset Pin Successfully",
                                 status: true
                             });
                         }
                         else {
                             return res.status(200).json({
-                                message: "Update Password Failure",
+                                message: "Reset Pin Failure",
                                 status: false
                             });
                         }
+                    }).clone().catch((err) => {
+                        return res.status(200).json({
+                            err: err,
+                            messsage: "Something is wrong in reset pin !",
+                            status: false,
+                        })
                     });
                 }
                 else {
@@ -408,7 +414,13 @@ const UserController = {
                                     status: false
                                 });
                             }
-                        });
+                        }).clone().catch((err) => {
+                            return res.status(200).json({
+                                err: err,
+                                messsage: "Something is wrong in update pin !",
+                                status: false,
+                            })
+                        });;
                     }
                     else {
                         return res.status(200).json({
