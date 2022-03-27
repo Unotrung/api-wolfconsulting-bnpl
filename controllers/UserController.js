@@ -341,7 +341,7 @@ const UserController = {
         }
     },
 
-    updatePin: async (req, res, next) => {
+    resetPin: async (req, res, next) => {
         try {
             let PHONE = req.body.phone;
             let NEW_PIN = req.body.new_pin;
@@ -383,7 +383,7 @@ const UserController = {
         }
     },
 
-    updatePassword: async (req, res, next) => {
+    updatePin: async (req, res, next) => {
         try {
             let PHONE = req.body.phone;
             let PIN = req.body.pin;
