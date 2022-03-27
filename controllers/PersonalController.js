@@ -72,27 +72,6 @@ const PersonalController = {
         }
     },
 
-    getInfomation: async (req, res, next) => {
-        try {
-            let personal = await Personal.findOne({ user: req.params.id });
-            if (personal) {
-                return res.status(200).json({
-                    data: personal,
-                    status: true
-                });
-            }
-            else {
-                return res.status(200).json({
-                    message: "This Personal Infomation is not exists !",
-                    status: false
-                });
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
-
     getAllBNPLInformation: async (req, res, next) => {
         try {
             let personals = await Personal.find();
@@ -143,6 +122,28 @@ const PersonalController = {
             else {
                 return res.status(401).json({
                     message: "List Personal Is Empty",
+                    status: false
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    getInfomation: async (req, res, next) => {
+        try {
+            let personal = await Personal.findOne({ user: req.params.id });
+            if (personal) {
+                return res.status(200).json({
+                    message: "Get information of personal successfully",
+                    data: personal,
+                    status: true
+                });
+            }
+            else {
+                return res.status(200).json({
+                    message: "This Personal Infomation is not exists !",
                     status: false
                 });
             }
