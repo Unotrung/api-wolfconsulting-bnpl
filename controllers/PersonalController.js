@@ -193,6 +193,12 @@ const PersonalController = {
                 })
             }
         }
+        else {
+            return res.status(200).json({
+                message: "Please enter your nid and choose provider BNPL. Do not leave any fields blank !",
+                status: false
+            });
+        }
     }
 
 };
