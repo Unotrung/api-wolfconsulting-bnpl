@@ -153,7 +153,7 @@ const PersonalController = {
         }
     },
 
-    addProvider: async (req, res, next) => {
+    registerProvider: async (req, res, next) => {
         let provider = await Provider.findOne({ provider: req.body.provider });
         let validNid = await Personal.findOne({ citizenId: req.body.nid });
         if (req.body.provider !== null && req.body.nid !== null) {

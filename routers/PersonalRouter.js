@@ -5,6 +5,6 @@ const router = require("express").Router();
 router.post("/addInfoPersonal", PersonalController.addInfoPersonal);
 router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
 router.get("/:id", MiddlewareController.VerifyTokenByMySelf, PersonalController.getInfomation);
-router.post("/addProvider", PersonalController.addProvider);
+router.post("/registerProvider", PersonalController.registerProvider);
 
 module.exports = router;
