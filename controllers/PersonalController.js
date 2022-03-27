@@ -48,23 +48,31 @@ const PersonalController = {
             }
 
             let userRef = await Customer.findOne({ phone: phone });
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: userRef._id, providers: [] });
-            const result = await personal.save((err, data) => {
-                if (!err) {
-                    const { user, ...others } = data._doc;
-                    return res.status(201).json({
-                        message: "Add Personal BNPL Successfully",
-                        data: { ...others },
-                        status: true
-                    });
-                }
-                else {
-                    return res.status(200).json({
-                        message: "Add Personal BNPL Failure",
-                        status: false
-                    });
-                }
-            });
+            if (userRef) {
+                const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: userRef._id, providers: [] });
+                const result = await personal.save((err, data) => {
+                    if (!err) {
+                        const { user, ...others } = data._doc;
+                        return res.status(201).json({
+                            message: "Add Personal BNPL Successfully",
+                            data: { ...others },
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "Add Personal BNPL Failure",
+                            status: false
+                        });
+                    }
+                });
+            }
+            else {
+                return res.status(200).json({
+                    message: "This Phone Is Not Found. Please Try Again !",
+                    status: false,
+                })
+            }
         }
         catch (err) {
             next(err);
