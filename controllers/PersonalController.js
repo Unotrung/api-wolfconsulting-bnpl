@@ -164,7 +164,10 @@ const PersonalController = {
                     if (!err) {
                         return res.status(200).json({
                             message: "Register Provider Successfully",
-                            data: data,
+                            data: {
+                                nid: nid,
+                                provider: provider
+                            },
                             status: true
                         })
                     }
