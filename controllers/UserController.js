@@ -43,27 +43,27 @@ const UserController = {
                             phone: user.phone
                         },
                         message: "This phone number is already exists !",
-                        isExists: true
+                        status: true
                     });
                 }
                 else if (phone.startsWith('033')) {
                     return res.status(200).json({
                         message: "This phone number is not exists in EAP !",
-                        isExists: false,
+                        status: false,
                         errCode: 1001,
                     });
                 }
                 else if (phone.startsWith('044')) {
                     return res.status(200).json({
                         message: "This phone number is not exists in BNPL !",
-                        isExists: false,
+                        status: false,
                         errCode: 1002,
                     });
                 }
                 else {
                     return res.status(200).json({
                         message: "This phone number is not exists !",
-                        isExists: false,
+                        status: false,
                         errCode: 1003,
                     });
                 }
@@ -92,13 +92,13 @@ const UserController = {
                             nid: user.citizenId
                         },
                         message: "This nid is already exists !",
-                        isExists: true
+                        status: true
                     });
                 }
                 else {
                     return res.status(200).json({
                         message: "This nid is not exists !",
-                        isExists: false,
+                        status: false,
                     });
                 }
             }
