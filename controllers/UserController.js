@@ -80,6 +80,40 @@ const UserController = {
         }
     },
 
+    checkNidExists: async (req, res, next) => {
+        try {
+            let nid = req.body.nid;
+            if (nid !== null && nid !== '') {
+                const user = await Personal.findOne({ citizenId: nid });
+                if (user) {
+                    return res.status(200).json({
+                        data: {
+                            _id: user.id,
+                            nid: user.citizenId
+                        },
+                        message: "This nid is already exists !",
+                        isExists: true
+                    });
+                }
+                else {
+                    return res.status(200).json({
+                        message: "This nid is not exists !",
+                        isExists: false,
+                    });
+                }
+            }
+            else {
+                return res.status(200).json({
+                    message: "Please enter the nid !",
+                    status: false
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
     register: async (req, res, next) => {
         try {
             let PHONE = req.body.phone;
