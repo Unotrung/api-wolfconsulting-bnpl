@@ -27,7 +27,33 @@ const PersonalController = {
 
             let pin = req.body.pin;
 
+            // var flag = false;
+
+            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user, providers: [] });
+            await personal.save((err, data) => {
+                if (!err) {
+                    const { user, ...others } = data._doc;
+                    // flag = true;
+                    return res.status(201).json({
+                        message: "Add Personal BNPL Successfully",
+                        data: { ...others },
+                        status: true
+                    });
+                }
+                else {
+                    // flag = false;
+                    return res.status(200).json({
+                        message: "Add Personal BNPL Failure",
+                        status: false
+                    });
+                }
+            });
+
+            // console.log(123456789);
+            // console.log(flag);
+            // && flag === true
             if (pin) {
+                // console.log(123)
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(pin, salt);
                 const customer = await new Customer({ phone: phone, pin: hashed });
@@ -48,24 +74,6 @@ const PersonalController = {
                     }
                 });
             }
-
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user, providers: [] });
-            const result = await personal.save((err, data) => {
-                if (!err) {
-                    const { user, ...others } = data._doc;
-                    return res.status(201).json({
-                        message: "Add Personal BNPL Successfully",
-                        data: { ...others },
-                        status: true
-                    });
-                }
-                else {
-                    return res.status(200).json({
-                        message: "Add Personal BNPL Failure",
-                        status: false
-                    });
-                }
-            });
         }
         catch (err) {
             next(err);
@@ -199,6 +207,17 @@ const PersonalController = {
                 status: false
             });
         }
+    },
+
+    deletePersonalandAccount: async (req, res, next) => {
+        const phone = "0359349582";
+        const nid = "030094009394";
+        await Customer.findOneAndDelete({ phone: phone });
+        await Personal.findOneAndDelete({ phone: phone, nid: nid });
+        return res.status(200).json({
+            message: "Delete Successfully",
+            status: true
+        })
     }
 
 };
