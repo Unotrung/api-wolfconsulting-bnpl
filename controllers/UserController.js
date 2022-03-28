@@ -63,14 +63,15 @@ const UserController = {
                 else {
                     return res.status(200).json({
                         message: "This phone number is not exists !",
-                        isExists: false
+                        isExists: false,
+                        errCode: 1003,
                     });
                 }
             }
             else {
                 return res.status(200).json({
-                    message: "This phone number is already exists !",
-                    isExists: true
+                    message: "Please enter the phone number !",
+                    status: false
                 });
             }
         }
