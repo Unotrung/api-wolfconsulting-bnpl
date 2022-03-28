@@ -60,11 +60,17 @@ const UserController = {
                         errCode: 1002,
                     });
                 }
+                else {
+                    return res.status(200).json({
+                        message: "This phone number is not exists !",
+                        isExists: false
+                    });
+                }
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter the phone number !",
-                    status: false
+                    message: "This phone number is already exists !",
+                    isExists: true
                 });
             }
         }
