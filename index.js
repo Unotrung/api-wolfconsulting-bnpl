@@ -57,8 +57,6 @@ app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
 
-// Handle Error Not Found
-
 app.use((req, res, next) => {
     next(createError.NotFound('This route dose not exists !'));
 })
@@ -75,4 +73,3 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log(`Server is listening at PORT ${PORT}`);
 })
-

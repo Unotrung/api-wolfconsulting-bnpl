@@ -41,7 +41,26 @@ const CommonController = {
     },
 
     getAllTenor: async (req, res, next) => {
-
+        try {
+            const tenors = await Tenor.find();
+            if (tenors.length > 0) {
+                return res.status(200).json({
+                    count: tenors.length,
+                    data: tenors,
+                    message: "Get List Tenor Success",
+                    status: true
+                })
+            }
+            else {
+                return res.status(200).json({
+                    message: "List Tenor Is Empty",
+                    status: false
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
     },
 
 };
