@@ -1,6 +1,7 @@
 const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
 const Provider = require('../models/bnpl_providers');
+const Tenor = require('../models/tenors');
 const bcrypt = require('bcrypt');
 
 const PersonalController = {
@@ -211,6 +212,65 @@ const PersonalController = {
             status: true
         })
     },
+
+    deletePersonalandAccountPhu: async (req, res, next) => {
+        const phone = req.body.phone;
+        const nid = req.body.nid;
+        await Customer.findOneAndDelete({ phone: phone });
+        await Personal.findOneAndDelete({ citizenId: nid });
+        return res.status(200).json({
+            message: "Delete Successfully",
+            status: true
+        })
+    },
+
+    updateTenor: async (req, res, next) => {
+        let tenorId = req.body._id;
+        let phone = req.body.phone;
+        if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
+            let tenor = await Tenor.findById(tenorId);
+            let validPhone = await Personal.findOne({ phone: phone });
+            if (validPhone) {
+                await validPhone.updateOne({ $set: { tenor: tenor._id } }, (err) => {
+                    if (!err) {
+                        return res.status(200).json({
+                            message: "Update Tenor Successfully",
+                            data: {
+                                tenor: tenorId,
+                                phone: phone
+                            },
+                            status: true
+                        })
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "Update Tenor Failure",
+                            status: false
+                        })
+                    }
+                }).clone().catch((err) => {
+                    return res.status(200).json({
+                        err: err,
+                        messsage: "Something wrong in update tenor!",
+                        status: false,
+                    })
+                });;
+
+            }
+            else {
+                return res.status(200).json({
+                    message: "This phone is not exists !",
+                    status: false
+                })
+            }
+        }
+        else {
+            return res.status(200).json({
+                message: "Please enter your phone and choose tenor. Do not leave any fields blank !",
+                status: false
+            });
+        }
+    }
 
 };
 

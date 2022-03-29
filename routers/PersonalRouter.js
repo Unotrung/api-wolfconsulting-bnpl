@@ -7,5 +7,6 @@ router.post("/addInfoPersonal", PersonalController.addInfoPersonal);
 router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
 router.post("/registerProvider", PersonalController.registerProvider);
 router.delete("/deletePersonalandAccount", PersonalController.deletePersonalandAccount);
+router.delete("/deletePersonalandAccountPhu", PersonalController.deletePersonalandAccountPhu);
 
 module.exports = router;

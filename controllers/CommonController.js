@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const dotenv = require('dotenv');
+const Tenor = require('../models/tenors');
 
 dotenv.config();
 
@@ -37,7 +38,11 @@ const CommonController = {
         catch (err) {
             next(err);
         }
-    }
+    },
+
+    getAllTenor: async (req, res, next) => {
+
+    },
 
 };
 
