@@ -4,7 +4,7 @@ const router = require("express").Router();
 
 router.post("/addInfoPersonal", PersonalController.addInfoPersonal);
 router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
-router.get("/:id", MiddlewareController.VerifyTokenByMySelf, PersonalController.getInfomation);
+router.get("/:phone", MiddlewareController.VerifyTokenByMySelf, PersonalController.getInfomation);
 router.post("/registerProvider", PersonalController.registerProvider);
 router.delete("/deletePersonalandAccount", PersonalController.deletePersonalandAccount);
 

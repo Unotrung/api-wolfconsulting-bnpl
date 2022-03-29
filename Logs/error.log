@@ -19,3 +19,9 @@ Time: 27-03-2022 16:35:56 --- Status: error --- Id_Log: 5300a27b-8a1d-4e35-9cef-
 Time: 27-03-2022 16:35:56 --- Status: error --- Id_Log: 9317a07f-bcfe-4ad1-947e-b2ec2e654d9b --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
 Time: 27-03-2022 16:36:13 --- Status: error --- Id_Log: b48d37ac-5d1e-4770-8ac5-7597fefaa193 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
 Time: 27-03-2022 16:36:27 --- Status: error --- Id_Log: f7ba84cb-fd6d-4e29-b6f3-efc0a296433f --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: Cannot read properties of null (reading '_id')
+Time: 29-03-2022 13:35:43 --- Status: error --- Id_Log: 96c1c53b-7297-4c50-b2cd-fbbd32504b8c --- Router: /v1/bnpl/personal/0981284476 --- Method: GET --- Message: Schema hasn't been registered for model "item".
+Use mongoose.model(name, schema)
+Time: 29-03-2022 13:36:09 --- Status: error --- Id_Log: 9de0c3cc-e674-4ffd-8294-776eff3a79f5 --- Router: /v1/bnpl/personal/0981284476 --- Method: GET --- Message: Schema hasn't been registered for model "item".
+Use mongoose.model(name, schema)
+Time: 29-03-2022 13:37:34 --- Status: error --- Id_Log: 721a1703-0151-4d9d-a597-c6235aebe585 --- Router: /v1/bnpl/personal/0981284476 --- Method: GET --- Message: Schema hasn't been registered for model "item".
+Use mongoose.model(name, schema)

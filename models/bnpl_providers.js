@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const bnpl_providerSchema = new mongoose.Schema({
 
     provider: {
-        type: String,
-        required: [true, 'Provider is required']
+        type: String
     },
 
 }, { timestamps: true });
