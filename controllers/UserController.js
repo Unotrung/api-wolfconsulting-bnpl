@@ -391,12 +391,12 @@ const UserController = {
                 if (user) {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(NEW_PIN, salt);
-                    await user.updateOne({ $set: { pin: hashed } }, (err) => {
+                    await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
                                 message: "Reset Pin Successfully",
                                 status: true
-                            });
+                            })
                         }
                         else {
                             return res.status(200).json({
@@ -404,13 +404,7 @@ const UserController = {
                                 status: false
                             });
                         }
-                    }).clone().catch((err) => {
-                        return res.status(200).json({
-                            err: err,
-                            messsage: "Something is wrong in reset pin !",
-                            status: false,
-                        })
-                    });
+                    })
                 }
                 else {
                     return res.status(200).json({
@@ -442,12 +436,12 @@ const UserController = {
                     if (validPin) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(NEW_PIN, salt);
-                        await user.updateOne({ $set: { pin: hashed } }, (err) => {
+                        await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
                             if (!err) {
                                 return res.status(201).json({
                                     message: "Update Pin Successfully",
                                     status: true
-                                });
+                                })
                             }
                             else {
                                 return res.status(200).json({
@@ -455,13 +449,7 @@ const UserController = {
                                     status: false
                                 });
                             }
-                        }).clone().catch((err) => {
-                            return res.status(200).json({
-                                err: err,
-                                messsage: "Something is wrong in update pin !",
-                                status: false,
-                            })
-                        });;
+                        })
                     }
                     else {
                         return res.status(200).json({

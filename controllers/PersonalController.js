@@ -146,7 +146,7 @@ const PersonalController = {
             let validProvider = await Provider.findOne({ provider: provider });
             let validNid = await Personal.findOne({ citizenId: nid });
             if (validNid) {
-                await validNid.updateOne({ $push: { providers: validProvider.id } }, (err, data) => {
+                await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
                     if (!err) {
                         return res.status(200).json({
                             message: "Register Provider Successfully",
@@ -163,14 +163,7 @@ const PersonalController = {
                             status: false
                         })
                     }
-                }).clone().catch((err) => {
-                    return res.status(200).json({
-                        err: err,
-                        messsage: "Something wrong in register provider!",
-                        status: false,
-                    })
-                });;
-
+                })
             }
             else {
                 return res.status(200).json({
