@@ -62,7 +62,11 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
-    tenor: { type: mongoose.Schema.Types.ObjectId, ref: 'tenor' }
+    tenor: { type: mongoose.Schema.Types.ObjectId, ref: 'tenor' },
+    credit_limit: {
+        type: Number,
+        default: 10000000
+    },
 
 }, { timestamps: true });
 
