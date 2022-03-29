@@ -133,8 +133,7 @@ const PersonalController = {
 
     getInfomation: async (req, res, next) => {
         try {
-            console.log(req.params.phone);
-            let personal = await Personal.findOne({ phone: req.params.phone }).populate('items');
+            let personal = await Personal.findOne({ phone: req.params.phone }).populate('providers').populate('items').populate('tenor');
             if (personal) {
                 return res.status(200).json({
                     message: "Get information of personal successfully",

@@ -25,3 +25,5 @@ Time: 29-03-2022 13:36:09 --- Status: error --- Id_Log: 9de0c3cc-e674-4ffd-8294-
 Use mongoose.model(name, schema)
 Time: 29-03-2022 13:37:34 --- Status: error --- Id_Log: 721a1703-0151-4d9d-a597-c6235aebe585 --- Router: /v1/bnpl/personal/0981284476 --- Method: GET --- Message: Schema hasn't been registered for model "item".
 Use mongoose.model(name, schema)
+Time: 29-03-2022 14:52:48 --- Status: error --- Id_Log: 9569f70e-0991-4012-bbd6-316f3cbce7ca --- Router: /v1/bnpl/personal/0999888777 --- Method: GET --- Message: Schema hasn't been registered for model "item".
+Use mongoose.model(name, schema)

@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const item = require('./items');
+const tenor = require('./tenors');
+const bnpl_provider = require('./bnpl_providers');
 
 const bnpl_personalSchema = new mongoose.Schema({
 
