@@ -24,8 +24,6 @@ const PersonalController = {
             let name_ref = req.body.name_ref;
             let phone_ref = req.body.phone_ref;
 
-            let user = req.body.user;
-
             let pin = req.body.pin;
 
             if (pin) {
@@ -35,7 +33,7 @@ const PersonalController = {
                 await customer.save();
             }
 
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, user: user, providers: [], items: [], tenor: null });
+            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [], tenor: null });
             await personal.save((err, data) => {
                 if (!err) {
                     const { user, ...others } = data._doc;

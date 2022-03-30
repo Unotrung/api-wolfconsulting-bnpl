@@ -56,10 +56,6 @@ const bnpl_personalSchema = new mongoose.Schema({
     phone_ref: {
         type: String,
     },
-    user: {
-        type: mongoose.Schema.Types.String,
-        ref: "bnpl_customer"
-    },
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
     tenor: { type: mongoose.Schema.Types.ObjectId, ref: 'tenor' },
