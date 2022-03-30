@@ -166,9 +166,26 @@ const CommonController = {
                         }
                     });
                 }
+                else if (step === 2) {
+                    await Customer.updateOne({ phone: phone }, { $set: { step: 3 } }).then((data, err) => {
+                        if (!err) {
+                            return res.status(201).json({
+                                message: `Update Step Successfully For Phone ${phone}`,
+                                step: data.step,
+                                status: true
+                            })
+                        }
+                        else {
+                            return res.status(201).json({
+                                message: `Update Step Failure For Phone ${phone}`,
+                                status: false
+                            })
+                        }
+                    });
+                }
                 else {
                     return res.status(200).json({
-                        message: `Step is not valid`,
+                        message: 'Step is not valid',
                         status: false
                     })
                 }

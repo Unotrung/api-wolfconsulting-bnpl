@@ -26,6 +26,7 @@ const PersonalController = {
 
             let pin = req.body.pin;
 
+            // Kiểm tra điện thoại tồn tại bỏ qua
             if (pin) {
                 const salt = await bcrypt.genSalt(10);
                 const hashed = await bcrypt.hash(pin.toString(), salt);
@@ -33,6 +34,7 @@ const PersonalController = {
                 await customer.save();
             }
 
+            // Check số điện thoại register phải trùng mới cho đăng ký
             const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [], tenor: null });
             await personal.save((err, data) => {
                 if (!err) {
