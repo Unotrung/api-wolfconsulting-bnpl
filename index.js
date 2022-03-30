@@ -9,6 +9,7 @@ const createError = require('http-errors');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const rfs = require('rotating-file-stream');
 const { buildProdLogger } = require('./helpers/logger');
 const { v4: uuid } = require('uuid');
 
@@ -34,7 +35,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 
-app.use(morgan('combined'));
+const accessLogStream = rfs.createStream('access.log', {
+    interval: "1d",
+    path: path.join(__dirname, 'public')
+});
+
+app.use(morgan('combined', { stream: accessLogStream }));
 
 mongoose.connect(process.env.MONGODB_URL, function (err) {
     if (!err) {

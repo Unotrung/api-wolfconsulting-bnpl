@@ -1,9 +1,0 @@
-Time: 29-03-2022 21:05:16 --- Status: error --- Id_Log: 04d6a8a9-8cae-4393-a69b-564806a11fd9 --- Router: /v1/bnpl/user/getAllTenor --- Method: GET --- Message: This route dose not exists !
-Time: 29-03-2022 21:40:39 --- Status: error --- Id_Log: 9329fc38-21c7-49b3-9b24-4be2b7cbd79e --- Router: /v1/bnpl/common/updateTenor --- Method: PUT --- Message: This route dose not exists !
-Time: 29-03-2022 21:41:25 --- Status: error --- Id_Log: 6f418d30-54c4-467f-b9a3-53d7c7fcdc7b --- Router: /v1/bnpl/personal/updateTenor --- Method: PUT --- Message: This route dose not exists !
-Time: 29-03-2022 22:04:44 --- Status: error --- Id_Log: fba0cd34-014b-4205-9302-3768f75426a4 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: data must be a string or Buffer and salt must either be a salt string or a number of rounds
-Time: 29-03-2022 22:05:19 --- Status: error --- Id_Log: ace7ddb3-30c7-4200-8720-8dc790d58853 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: data must be a string or Buffer and salt must either be a salt string or a number of rounds
-Time: 29-03-2022 22:14:02 --- Status: error --- Id_Log: f2a09110-f84e-48d7-af68-5487fd715370 --- Router: /v1/bnpl/personal/addInfoPersonal --- Method: POST --- Message: E11000 duplicate key error collection: WolfConsulting.bnpl_customers index: phone_1 dup key: { phone: "0981284476" }
-Time: 29-03-2022 22:39:47 --- Status: error --- Id_Log: f3d06cdb-f9a9-4d9b-bbe0-40b8e739fab5 --- Router: /v1/bnpl/personal/addProvider --- Method: POST --- Message: This route dose not exists !
-Time: 29-03-2022 22:39:59 --- Status: error --- Id_Log: 50e28dfe-c3cd-46a6-a03f-f131171a5234 --- Router: /v1/bnpl/personal/registerProvider --- Method: POST --- Message: This route dose not exists !
-Time: 29-03-2022 22:40:18 --- Status: error --- Id_Log: 783661dd-2f61-4de5-9457-9e71932a0917 --- Router: /v1/bnpl/personal/registerProvider --- Method: POST --- Message: This route dose not exists !

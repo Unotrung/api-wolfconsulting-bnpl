@@ -30,6 +30,7 @@
     "nodemon": "^2.0.15",
     "otp-generator": "^4.0.0",
     "redis": "^4.0.4",
+    "rotating-file-stream": "^3.0.3",
     "uuid": "^8.3.2",
     "winston": "^3.6.0",
     "winston-mongodb": "^5.0.7"
