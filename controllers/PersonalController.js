@@ -185,9 +185,9 @@ const PersonalController = {
             let tenor = await Tenor.findById(tenorId);
             let validPhone = await Personal.findOne({ phone: phone });
             if (validPhone) {
-                await validPhone.updateOne({ $set: { tenor: tenor._id } }, (err) => {
+                await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
                     if (!err) {
-                        return res.status(200).json({
+                        return res.status(201).json({
                             message: "Update Tenor Successfully",
                             data: {
                                 tenor: tenorId,
@@ -197,25 +197,18 @@ const PersonalController = {
                         })
                     }
                     else {
-                        return res.status(200).json({
+                        return res.status(201).json({
                             message: "Update Tenor Failure",
                             status: false
                         })
                     }
-                }).clone().catch((err) => {
-                    return res.status(200).json({
-                        err: err,
-                        messsage: "Something wrong in update tenor!",
-                        status: false,
-                    })
-                });;
-
+                })
             }
             else {
                 return res.status(200).json({
-                    message: "This phone is not exists !",
+                    message: "This phone number is not exists !",
                     status: false
-                })
+                });
             }
         }
         else {
