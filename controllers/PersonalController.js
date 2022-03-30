@@ -180,14 +180,10 @@ const PersonalController = {
 
     updateTenor: async (req, res, next) => {
         let tenorId = req.body.id;
-        console.log('Tenor Id: ', tenorId);
         let phone = req.body.phone;
-        console.log('Phone: ', phone);
         if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
             let tenor = await Tenor.findById(tenorId);
-            console.log('Tenor: ', tenor);
             let validPhone = await Personal.findOne({ phone: phone });
-            console.log('Valid Phone: ', validPhone);
             if (validPhone) {
                 await validPhone.updateOne({ $set: { tenor: tenor._id } }, (err) => {
                     if (!err) {
