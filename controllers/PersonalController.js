@@ -180,28 +180,6 @@ const PersonalController = {
         }
     },
 
-    deletePersonalandAccount: async (req, res, next) => {
-        const phone = "0359349582";
-        const nid = "030094009394";
-        await Customer.findOneAndDelete({ phone: phone });
-        await Personal.findOneAndDelete({ phone: phone, nid: nid });
-        return res.status(200).json({
-            message: "Delete Successfully",
-            status: true
-        })
-    },
-
-    deletePersonalandAccountPhu: async (req, res, next) => {
-        const phone = req.body.phone;
-        const nid = req.body.nid;
-        await Customer.findOneAndDelete({ phone: phone });
-        await Personal.findOneAndDelete({ citizenId: nid });
-        return res.status(200).json({
-            message: "Delete Successfully",
-            status: true
-        })
-    },
-
     updateTenor: async (req, res, next) => {
         let tenorId = req.body.id;
         console.log('Tenor Id: ', tenorId);
@@ -252,7 +230,29 @@ const PersonalController = {
                 status: false
             });
         }
-    }
+    },
+
+    deletePersonalandAccount: async (req, res, next) => {
+        const phone = "0359349582";
+        const nid = "030094009394";
+        await Customer.findOneAndDelete({ phone: phone });
+        await Personal.findOneAndDelete({ citizenId: nid });
+        return res.status(200).json({
+            message: "Delete Successfully",
+            status: true
+        })
+    },
+
+    deletePersonalandAccountPhu: async (req, res, next) => {
+        const phone = req.body.phone;
+        const nid = req.body.nid;
+        await Customer.findOneAndDelete({ phone: phone });
+        await Personal.findOneAndDelete({ citizenId: nid });
+        return res.status(200).json({
+            message: "Delete Successfully",
+            status: true
+        })
+    },
 
 };
 
