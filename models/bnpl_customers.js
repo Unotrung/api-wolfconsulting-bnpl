@@ -12,6 +12,9 @@ const bnpl_customerSchema = new mongoose.Schema({
     pin: {
         type: String,
     },
+    step: {
+        type: Number,
+    }
 
 }, { timestamps: true });
 

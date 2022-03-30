@@ -35,13 +35,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 
-const accessLogStream = rfs.createStream('access.log', {
-    interval: "1d",
-    path: path.join(__dirname, 'public')
-});
-
-app.use(morgan('combined', { stream: accessLogStream }));
-
 mongoose.connect(process.env.MONGODB_URL, function (err) {
     if (!err) {
         console.log('Connect MongoDB Successfully');

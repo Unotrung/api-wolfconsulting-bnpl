@@ -40,7 +40,8 @@ const UserController = {
                     return res.status(200).json({
                         data: {
                             _id: user.id,
-                            phone: user.phone
+                            phone: user.phone,
+                            step: user.step
                         },
                         message: "This phone number is already exists !",
                         status: true
@@ -65,6 +66,7 @@ const UserController = {
                         message: "This phone number is not exists !",
                         status: false,
                         errCode: 1003,
+                        step: 0
                     });
                 }
             }
@@ -499,6 +501,7 @@ const UserController = {
             next(err);
         }
     }
+
 };
 
 module.exports = UserController;
