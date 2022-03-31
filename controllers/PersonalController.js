@@ -4,6 +4,8 @@ const Provider = require('../models/bnpl_providers');
 const Tenor = require('../models/tenors');
 const Item = require('../models/items');
 const bcrypt = require('bcrypt');
+const { buildProdLogger } = require('../helpers/logger');
+const { v4: uuid } = require('uuid');
 
 const PersonalController = {
 
