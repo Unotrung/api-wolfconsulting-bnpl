@@ -9,7 +9,6 @@ const createError = require('http-errors');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const rfs = require('rotating-file-stream');
 const { buildProdLogger } = require('./helpers/logger');
 const { v4: uuid } = require('uuid');
 
@@ -20,8 +19,6 @@ const commonRoute = require('./routers/CommonRouter');
 dotenv.config();
 
 const app = express();
-
-app.use(morgan('combined'));
 
 app.use(helmet());
 
@@ -63,7 +60,7 @@ app.use((req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
-    buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
+    buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
     return res.json({
         status: err.status || 500,
         message: err.message

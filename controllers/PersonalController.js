@@ -38,6 +38,7 @@ const PersonalController = {
                     const hashed = await bcrypt.hash(pin.toString(), salt);
                     const customer = await new Customer({ phone: phone, pin: hashed });
                     await customer.save();
+                    buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
                 }
             }
 
@@ -57,6 +58,7 @@ const PersonalController = {
                 await personal.save((err, data) => {
                     if (!err) {
                         const { user, ...others } = data._doc;
+                        buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(201).json({
                             message: "Add Personal BNPL Successfully",
                             data: { ...others },
@@ -64,6 +66,7 @@ const PersonalController = {
                         });
                     }
                     else {
+                        buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(200).json({
                             message: "Add Personal BNPL Failure",
                             status: false
@@ -175,6 +178,7 @@ const PersonalController = {
                 if (validNid) {
                     await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
                         if (!err) {
+                            buildProdLogger('info', 'register_provider_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                             return res.status(200).json({
                                 message: "Register Provider Successfully",
                                 data: {
@@ -185,6 +189,7 @@ const PersonalController = {
                             })
                         }
                         else {
+                            buildProdLogger('error', 'register_provider_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                             return res.status(200).json({
                                 message: "Register Provider Failure",
                                 status: false
@@ -222,6 +227,7 @@ const PersonalController = {
                     if (tenor) {
                         await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
                             if (!err) {
+                                buildProdLogger('info', 'update_tenor_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(201).json({
                                     message: "Update Tenor Successfully",
                                     data: {
@@ -232,6 +238,7 @@ const PersonalController = {
                                 })
                             }
                             else {
+                                buildProdLogger('error', 'update_tenor_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(200).json({
                                     message: "Update Tenor Failure",
                                     status: false
