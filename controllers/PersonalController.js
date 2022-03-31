@@ -2,9 +2,14 @@ const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
 const Provider = require('../models/bnpl_providers');
 const Tenor = require('../models/tenors');
+const Item = require('../models/items');
 const bcrypt = require('bcrypt');
 
 const PersonalController = {
+
+    randomIndex: (arr) => {
+        return Math.floor(Math.random() * arr.length);
+    },
 
     addInfoPersonal: async (req, res, next) => {
         try {
@@ -36,9 +41,16 @@ const PersonalController = {
                 }
             }
 
+            const items = await Item.find({});
+
+            const arrayItem = [];
+            items.map((item) => { arrayItem.push(item._id) });
+
+            const arrayCredit_limit = [10000000, 20000000, 30000000, 40000000];
+
             const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
             if (!personalValid) {
-                const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [], tenor: null });
+                const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [randomIndex(arrayItem), randomIndex(arrayItem)], tenor: null });
                 await personal.save((err, data) => {
                     if (!err) {
                         const { user, ...others } = data._doc;

@@ -61,7 +61,6 @@ const bnpl_personalSchema = new mongoose.Schema({
     tenor: { type: mongoose.Schema.Types.ObjectId, ref: 'tenor' },
     credit_limit: {
         type: Number,
-        default: 10000000
     },
 
 }, { timestamps: true });

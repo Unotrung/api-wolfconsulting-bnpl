@@ -13,7 +13,7 @@ const bnpl_customerSchema = new mongoose.Schema({
         type: String,
     },
     step: {
-        type: Number,
+        type: String,
     }
 
 }, { timestamps: true });
