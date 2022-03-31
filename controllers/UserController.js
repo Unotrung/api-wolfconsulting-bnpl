@@ -137,7 +137,7 @@ const UserController = {
                     const result = await user.save((err, data) => {
                         if (!err) {
                             const { pin, ...others } = data._doc;
-                            buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                            buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(201).json({
                                 message: "Register Successfully",
                                 data: { ...others },
@@ -146,7 +146,7 @@ const UserController = {
                             });
                         }
                         else {
-                            buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                            buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(200).json({
                                 message: "Register Failure",
                                 status: false
@@ -399,14 +399,14 @@ const UserController = {
                     const hashed = await bcrypt.hash(NEW_PIN, salt);
                     await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
                         if (!err) {
-                            buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                            buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(201).json({
                                 message: "Reset Pin Successfully",
                                 status: true
                             })
                         }
                         else {
-                            buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                            buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(200).json({
                                 message: "Reset Pin Failure",
                                 status: false
@@ -446,14 +446,14 @@ const UserController = {
                         const hashed = await bcrypt.hash(NEW_PIN, salt);
                         await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
                             if (!err) {
-                                buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                                buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(201).json({
                                     message: "Update Pin Successfully",
                                     status: true
                                 })
                             }
                             else {
-                                buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                                buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(200).json({
                                     message: "Update Pin Failure",
                                     status: false
