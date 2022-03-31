@@ -207,51 +207,56 @@ const PersonalController = {
     },
 
     updateTenor: async (req, res, next) => {
-        let tenorId = req.body.id;
-        let phone = req.body.phone;
-        if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
-            let tenor = await Tenor.findById(tenorId);
-            let validPhone = await Personal.findOne({ phone: phone });
-            if (validPhone) {
-                if (tenor) {
-                    await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
-                        if (!err) {
-                            return res.status(201).json({
-                                message: "Update Tenor Successfully",
-                                data: {
-                                    tenor: tenorId,
-                                    phone: phone
-                                },
-                                status: true
-                            })
-                        }
-                        else {
-                            return res.status(200).json({
-                                message: "Update Tenor Failure",
-                                status: false
-                            })
-                        }
-                    })
+        try {
+            let tenorId = req.body.id;
+            let phone = req.body.phone;
+            if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
+                let tenor = await Tenor.findById(tenorId);
+                let validPhone = await Personal.findOne({ phone: phone });
+                if (validPhone) {
+                    if (tenor) {
+                        await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
+                            if (!err) {
+                                return res.status(201).json({
+                                    message: "Update Tenor Successfully",
+                                    data: {
+                                        tenor: tenorId,
+                                        phone: phone
+                                    },
+                                    status: true
+                                })
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: "Update Tenor Failure",
+                                    status: false
+                                })
+                            }
+                        })
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "This tenor is not exists !",
+                            status: false
+                        });
+                    }
                 }
                 else {
                     return res.status(200).json({
-                        message: "This tenor is not exists !",
+                        message: "This phone number is not exists !",
                         status: false
                     });
                 }
             }
             else {
                 return res.status(200).json({
-                    message: "This phone number is not exists !",
+                    message: "Please enter your phone and choose tenor. Do not leave any fields blank !",
                     status: false
                 });
             }
         }
-        else {
-            return res.status(200).json({
-                message: "Please enter your phone and choose tenor. Do not leave any fields blank !",
-                status: false
-            });
+        catch (err) {
+            next(err);
         }
     },
 
