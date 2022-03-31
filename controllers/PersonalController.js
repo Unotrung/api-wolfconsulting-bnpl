@@ -48,11 +48,6 @@ const PersonalController = {
 
             const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
 
-            console.log('arrayItem: ', arrayItem);
-            console.log('arrayCreditlimit: ', arrayCreditlimit);
-            console.log([PersonalController.randomIndex(arrayItem), PersonalController.randomIndex(arrayItem)]);
-            console.log(PersonalController.randomIndex(arrayCreditlimit));
-
             const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
             if (!personalValid) {
                 const personal = await new Personal({
@@ -218,24 +213,32 @@ const PersonalController = {
             let tenor = await Tenor.findById(tenorId);
             let validPhone = await Personal.findOne({ phone: phone });
             if (validPhone) {
-                await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
-                    if (!err) {
-                        return res.status(201).json({
-                            message: "Update Tenor Successfully",
-                            data: {
-                                tenor: tenorId,
-                                phone: phone
-                            },
-                            status: true
-                        })
-                    }
-                    else {
-                        return res.status(200).json({
-                            message: "Update Tenor Failure",
-                            status: false
-                        })
-                    }
-                })
+                if (tenor) {
+                    await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
+                        if (!err) {
+                            return res.status(201).json({
+                                message: "Update Tenor Successfully",
+                                data: {
+                                    tenor: tenorId,
+                                    phone: phone
+                                },
+                                status: true
+                            })
+                        }
+                        else {
+                            return res.status(200).json({
+                                message: "Update Tenor Failure",
+                                status: false
+                            })
+                        }
+                    })
+                }
+                else {
+                    return res.status(200).json({
+                        message: "This tenor is not exists !",
+                        status: false
+                    });
+                }
             }
             else {
                 return res.status(200).json({
