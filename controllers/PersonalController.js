@@ -166,43 +166,48 @@ const PersonalController = {
     },
 
     registerProvider: async (req, res, next) => {
-        let provider = req.body.provider;
-        let nid = req.body.nid;
-        if (provider !== null && provider !== '' && nid !== null && nid !== '') {
-            let validProvider = await Provider.findOne({ provider: provider });
-            let validNid = await Personal.findOne({ citizenId: nid });
-            if (validNid) {
-                await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
-                    if (!err) {
-                        return res.status(200).json({
-                            message: "Register Provider Successfully",
-                            data: {
-                                nid: nid,
-                                provider: provider
-                            },
-                            status: true
-                        })
-                    }
-                    else {
-                        return res.status(200).json({
-                            message: "Register Provider Failure",
-                            status: false
-                        })
-                    }
-                })
+        try {
+            let provider = req.body.provider;
+            let nid = req.body.nid;
+            if (provider !== null && provider !== '' && nid !== null && nid !== '') {
+                let validProvider = await Provider.findOne({ provider: provider });
+                let validNid = await Personal.findOne({ citizenId: nid });
+                if (validNid) {
+                    await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
+                        if (!err) {
+                            return res.status(200).json({
+                                message: "Register Provider Successfully",
+                                data: {
+                                    nid: nid,
+                                    provider: provider
+                                },
+                                status: true
+                            })
+                        }
+                        else {
+                            return res.status(200).json({
+                                message: "Register Provider Failure",
+                                status: false
+                            })
+                        }
+                    })
+                }
+                else {
+                    return res.status(200).json({
+                        message: "This Nid is not exists !",
+                        status: false
+                    })
+                }
             }
             else {
                 return res.status(200).json({
-                    message: "This Nid is not exists !",
+                    message: "Please enter your nid and choose provider BNPL. Do not leave any fields blank !",
                     status: false
-                })
+                });
             }
         }
-        else {
-            return res.status(200).json({
-                message: "Please enter your nid and choose provider BNPL. Do not leave any fields blank !",
-                status: false
-            });
+        catch (err) {
+            next(err);
         }
     },
 
