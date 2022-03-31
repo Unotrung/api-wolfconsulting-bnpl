@@ -20,8 +20,6 @@ dotenv.config();
 
 const app = express();
 
-app.use(morgan('combined'));
-
 app.use(helmet());
 
 app.use(compression());
