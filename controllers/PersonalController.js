@@ -56,6 +56,12 @@ const PersonalController = {
                     }
                 });
             }
+            else {
+                return res.status(200).json({
+                    message: 'Personal Is Exists',
+                    status: false
+                })
+            }
 
         }
         catch (err) {
