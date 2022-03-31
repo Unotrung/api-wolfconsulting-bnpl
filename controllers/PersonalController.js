@@ -26,32 +26,37 @@ const PersonalController = {
 
             let pin = req.body.pin;
 
-            // Kiểm tra điện thoại tồn tại bỏ qua
+            const customerValid = await Customer.findOne({ phone: phone });
             if (pin) {
-                const salt = await bcrypt.genSalt(10);
-                const hashed = await bcrypt.hash(pin.toString(), salt);
-                const customer = await new Customer({ phone: phone, pin: hashed });
-                await customer.save();
+                if (!customerValid) {
+                    const salt = await bcrypt.genSalt(10);
+                    const hashed = await bcrypt.hash(pin.toString(), salt);
+                    const customer = await new Customer({ phone: phone, pin: hashed });
+                    await customer.save();
+                }
             }
 
-            // Check số điện thoại register phải trùng mới cho đăng ký
-            const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [], tenor: null });
-            await personal.save((err, data) => {
-                if (!err) {
-                    const { user, ...others } = data._doc;
-                    return res.status(201).json({
-                        message: "Add Personal BNPL Successfully",
-                        data: { ...others },
-                        status: true
-                    });
-                }
-                else {
-                    return res.status(200).json({
-                        message: "Add Personal BNPL Failure",
-                        status: false
-                    });
-                }
-            });
+            const personalValid = await Personal.findOne({ phone: phone, citizenId: nid });
+            if (!personalValid) {
+                const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [], tenor: null });
+                await personal.save((err, data) => {
+                    if (!err) {
+                        const { user, ...others } = data._doc;
+                        return res.status(201).json({
+                            message: "Add Personal BNPL Successfully",
+                            data: { ...others },
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "Add Personal BNPL Failure",
+                            status: false
+                        });
+                    }
+                });
+            }
+
         }
         catch (err) {
             next(err);
