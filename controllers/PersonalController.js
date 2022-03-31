@@ -46,13 +46,18 @@ const PersonalController = {
             const arrayItem = [];
             items.map((item) => { arrayItem.push(item._id) });
 
-            const arrayCredit_limit = [10000000, 20000000, 30000000, 40000000];
+            const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
+
+            console.log('arrayItem: ', arrayItem);
+            console.log('arrayCreditlimit: ', arrayCreditlimit);
+            console.log([PersonalController.randomIndex(arrayItem), PersonalController.randomIndex(arrayItem)]);
+            console.log(PersonalController.randomIndex(arrayCreditlimit));
 
             const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
             if (!personalValid) {
                 const personal = await new Personal({
-                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [PersonalController.randomIndex(arrayItem), PersonalController.randomIndex(arrayItem)],
-                    credit_limit: PersonalController.randomIndex(arrayCredit_limit), tenor: null
+                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
+                    credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
                 });
                 await personal.save((err, data) => {
                     if (!err) {
