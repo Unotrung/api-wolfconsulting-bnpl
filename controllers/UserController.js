@@ -191,7 +191,7 @@ const UserController = {
                         sameSite: 'strict',
                     });
                     const { pin, ...others } = user._doc;
-                    buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                    buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                     return res.status(200).json({
                         message: "Login Successfully",
                         data: { ...others },
