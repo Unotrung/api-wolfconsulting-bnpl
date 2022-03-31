@@ -50,7 +50,10 @@ const PersonalController = {
 
             const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
             if (!personalValid) {
-                const personal = await new Personal({ name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [randomIndex(arrayItem), randomIndex(arrayItem)], tenor: null });
+                const personal = await new Personal({
+                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [PersonalController.randomIndex(arrayItem), PersonalController.randomIndex(arrayItem)],
+                    credit_limit: PersonalController.randomIndex(arrayCredit_limit), tenor: null
+                });
                 await personal.save((err, data) => {
                     if (!err) {
                         const { user, ...others } = data._doc;
