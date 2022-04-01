@@ -53,6 +53,8 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+console.log(123);
+
 app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
