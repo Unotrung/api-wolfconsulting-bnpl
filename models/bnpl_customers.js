@@ -16,12 +16,6 @@ const bnpl_customerSchema = new mongoose.Schema({
     pin: {
         type: String,
         required: [true, 'Pin is required'],
-        validate: {
-            validator: function (value) {
-                return /^\d{4}$/g.test(value);
-            },
-            message: props => `${props.value} is not a valid pin !`
-        }
     },
     step: {
         type: String,
