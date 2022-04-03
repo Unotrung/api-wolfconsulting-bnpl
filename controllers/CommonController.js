@@ -32,7 +32,7 @@ const CommonController = {
             }
             else {
                 return res.json({
-                    message: "Fail To Get API",
+                    message: "Fail to get api",
                     status: false,
                 })
             }
@@ -49,13 +49,13 @@ const CommonController = {
                 return res.status(200).json({
                     count: tenors.length,
                     data: tenors,
-                    message: "Get List Tenor Success",
+                    message: "Get list tenor success",
                     status: true
                 })
             }
             else {
                 return res.status(200).json({
-                    message: "List Tenor Is Empty",
+                    message: "List tenor is empty",
                     status: false
                 })
             }
@@ -64,68 +64,6 @@ const CommonController = {
             next(err);
         }
     },
-
-    // eSignContract: async (req, res, next) => {
-    //     try {
-    //         let phone = req.body.phone;
-    //         if (phone !== null && phone !== '') {
-    //             await Personal.updateOne({ phone: phone }, { $set: { step: 2 } }).then((data, err) => {
-    //                 if (!err) {
-    //                     return res.status(201).json({
-    //                         message: `Update Step Successfully For Phone ${phone}`,
-    //                         status: true
-    //                     })
-    //                 }
-    //                 else {
-    //                     return res.status(201).json({
-    //                         message: `Update Step Failure For Phone ${phone}`,
-    //                         status: false
-    //                     })
-    //                 }
-    //             });
-    //         }
-    //         else {
-    //             return res.status(200).json({
-    //                 message: 'Please Enter Your Phone. Do not leave any field blank !',
-    //                 status: false
-    //             })
-    //         }
-    //     }
-    //     catch (err) {
-    //         next(err);
-    //     }
-    // },
-
-    // completeSuccess: async (req, res, next) => {
-    //     try {
-    //         let phone = req.body.phone;
-    //         if (phone !== null && phone !== '') {
-    //             await Personal.updateOne({ phone: phone }, { $set: { step: 3 } }).then((data, err) => {
-    //                 if (!err) {
-    //                     return res.status(201).json({
-    //                         message: 'Successfully. Done 100%',
-    //                         status: true
-    //                     })
-    //                 }
-    //                 else {
-    //                     return res.status(201).json({
-    //                         message: 'Failure. Try Again',
-    //                         status: false
-    //                     })
-    //                 }
-    //             });
-    //         }
-    //         else {
-    //             return res.status(200).json({
-    //                 message: 'Please Enter Your Phone. Do not leave any field blank !',
-    //                 status: false
-    //             })
-    //         }
-    //     }
-    //     catch (err) {
-    //         next(err);
-    //     }
-    // },
 
     updateStep: async (req, res, next) => {
         try {
@@ -136,14 +74,14 @@ const CommonController = {
                     await Customer.updateOne({ phone: phone }, { $set: { step: 'not_exist' } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone}`,
                                 step: data.step,
                                 status: true
                             })
                         }
                         else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
+                            return res.status(200).json({
+                                message: `Update step failure for phone ${phone}`,
                                 status: false
                             })
                         }
@@ -153,14 +91,14 @@ const CommonController = {
                     await Customer.updateOne({ phone: phone }, { $set: { step: 'register_success' } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone}`,
                                 step: data.step,
                                 status: true
                             })
                         }
                         else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
+                            return res.status(200).json({
+                                message: `Update step failure for phone ${phone}`,
                                 status: false
                             })
                         }
@@ -170,14 +108,14 @@ const CommonController = {
                     await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_process' } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone}`,
                                 step: data.step,
                                 status: true
                             })
                         }
                         else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
+                            return res.status(200).json({
+                                message: `Update step failure for phone ${phone}`,
                                 status: false
                             })
                         }
@@ -187,14 +125,14 @@ const CommonController = {
                     await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_completed' } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone}`,
                                 step: data.step,
                                 status: true
                             })
                         }
                         else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
+                            return res.status(200).json({
+                                message: `Update step failure for phone ${phone}`,
                                 status: false
                             })
                         }
@@ -204,14 +142,14 @@ const CommonController = {
                     await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_failure' } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone}`,
                                 step: data.step,
                                 status: true
                             })
                         }
                         else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
+                            return res.status(200).json({
+                                message: `Update step failure for phone ${phone}`,
                                 status: false
                             })
                         }
@@ -226,7 +164,7 @@ const CommonController = {
             }
             else {
                 return res.status(200).json({
-                    message: 'Please Enter Your Phone. Do not leave any field blank !',
+                    message: 'Please enter your phone and step. Do not leave any field blank !',
                     status: false
                 })
             }

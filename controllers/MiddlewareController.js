@@ -29,7 +29,6 @@ const middlewareController = {
     VerifyTokenByMySelf: (req, res, next) => {
         try {
             middlewareController.verifyToken(req, res, () => {
-                console.log(req.params.phone);
                 if (req.user.id === req.params.id || req.user.phone === req.params.phone || req.user.phone === req.body.phone) {
                     next();
                 }

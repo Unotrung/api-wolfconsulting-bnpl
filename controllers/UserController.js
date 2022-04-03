@@ -74,7 +74,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter the phone number !",
+                    message: "Please enter your phone. Do not leave any field blank !",
                     status: false
                 });
             }
@@ -108,7 +108,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter the nid !",
+                    message: "Please enter your nid. Do not leave any field blank !",
                     status: false
                 });
             }
@@ -126,7 +126,7 @@ const UserController = {
                 const auth = await Customer.findOne({ phone: req.body.phone });
                 if (auth) {
                     return res.status(200).json({
-                        message: "This account is already exists ! Please Login",
+                        message: "This account is already exists. Please login !",
                     });
                 }
                 else {
@@ -139,7 +139,7 @@ const UserController = {
                             const { pin, ...others } = data._doc;
                             buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(201).json({
-                                message: "Register Successfully",
+                                message: "Register successfully",
                                 data: { ...others },
                                 token: accessToken,
                                 status: true
@@ -148,7 +148,7 @@ const UserController = {
                         else {
                             buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(200).json({
-                                message: "Register Failure",
+                                message: "Register failure",
                                 status: false
                             });
                         }
@@ -157,7 +157,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter your phone number and pin code. Do not leave any fields blank !",
+                    message: "Please enter your phone and pin code. Do not leave any fields blank !",
                     status: false
                 });
             }
@@ -174,11 +174,11 @@ const UserController = {
             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
                 const user = await Customer.findOne({ phone: PHONE });
                 if (!user) {
-                    return res.status(200).json({ message: "Wrong phone. Please Try Again !", status: false });
+                    return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
                 }
                 const valiPin = await bcrypt.compare(PIN, user.pin);
                 if (!valiPin) {
-                    return res.status(200).json({ message: "Wrong pin. Please Try Again !", status: false });
+                    return res.status(200).json({ message: "Wrong pin. Please try again !", status: false });
                 }
                 if (user && valiPin) {
                     const accessToken = UserController.generateAccessToken(user);
@@ -193,7 +193,7 @@ const UserController = {
                     const { pin, ...others } = user._doc;
                     buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                     return res.status(200).json({
-                        message: "Login Successfully",
+                        message: "Login successfully",
                         data: { ...others },
                         token: accessToken,
                         status: true
@@ -202,7 +202,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter your phone number and pin code. Do not leave any fields blank !",
+                    message: "Please enter your phone and pin code. Do not leave any fields blank !",
                     status: false
                 });
             }
@@ -223,14 +223,14 @@ const UserController = {
                 const result = await dataTemp.save((err) => {
                     if (!err) {
                         return res.status(200).json({
-                            message: "Send OTP Successfully",
+                            message: "Send otp successfully",
                             otp: OTP,
                             status: true
                         });
                     }
                     else {
                         return res.status(200).json({
-                            message: "Send OTP Failure",
+                            message: "Send otp failure",
                             status: false
                         });
                     }
@@ -238,7 +238,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter the phone number !",
+                    message: "Please enter your phone. Do not leave any field blank !",
                     status: false
                 });
             }
@@ -256,7 +256,7 @@ const UserController = {
                 const otpUser = await Otp.find({ phone: PHONE });
                 if (otpUser.length === 0) {
                     return res.status(200).json({
-                        message: "Expired OTP. Please Resend OTP !",
+                        message: "Expired otp. Please resend otp !",
                         status: false
                     });
                 }
@@ -265,13 +265,13 @@ const UserController = {
                     if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
                         await Otp.deleteMany({ phone: lastOtp.phone });
                         return res.status(200).json({
-                            message: "Successfully. OTP VALID",
+                            message: "Successfully. OTP valid",
                             status: true,
                         })
                     }
                     else {
                         return res.status(200).json({
-                            message: "Failure. OTP INVALID",
+                            message: "Failure. OTP invalid",
                             status: false,
                         })
                     }
@@ -279,7 +279,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter your phone number and otp code. Do not leave any fields blank !",
+                    message: "Please enter your phone and otp code. Do not leave any fields blank !",
                     status: false
                 });
             }
@@ -305,14 +305,14 @@ const UserController = {
                         const result = await dataTemp.save((err) => {
                             if (!err) {
                                 return res.status(200).json({
-                                    message: "Send OTP Successfully",
+                                    message: "Send otp successfully",
                                     otp: OTP,
                                     status: true
                                 });
                             }
                             else {
                                 return res.status(200).json({
-                                    message: "Send OTP Failure",
+                                    message: "Send otp failure",
                                     status: false
                                 });
                             }
@@ -320,14 +320,14 @@ const UserController = {
                     }
                     else {
                         return res.status(200).json({
-                            message: "Wrong Nid. Please Try Again !",
+                            message: "Wrong nid. Please try again !",
                             status: false
                         });
                     }
                 }
                 else {
                     return res.status(200).json({
-                        message: "Wrong phone. Please Try Again !",
+                        message: "Wrong phone. Please try again !",
                         status: false
                     });
                 }
@@ -353,7 +353,7 @@ const UserController = {
                 const validUser = await Otp.find({ phone: PHONE, nid: NID });
                 if (validUser.length === 0) {
                     return res.status(200).json({
-                        message: "Expired OTP. Please Resend OTP !",
+                        message: "Expired otp. Please resend otp !",
                         status: false
                     });
                 }
@@ -363,14 +363,14 @@ const UserController = {
                         const accessToken = UserController.generateAccessToken(lastOtp);
                         await Otp.deleteMany({ phone: PHONE, nid: NID });
                         return res.status(200).json({
-                            message: "Successfully. OTP VALID",
+                            message: "Successfully. OTP valid",
                             token: accessToken,
                             status: true,
                         })
                     }
                     else {
                         return res.status(401).json({
-                            message: "Failure. OTP INVALID",
+                            message: "Failure. OTP invalid",
                             status: false,
                         })
                     }
@@ -378,7 +378,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter your phone number, nid and otp code. Do not leave any fields blank !",
+                    message: "Please enter your phone, nid and otp code. Do not leave any fields blank !",
                     status: false
                 });
             }
@@ -401,14 +401,14 @@ const UserController = {
                         if (!err) {
                             buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(201).json({
-                                message: "Reset Pin Successfully",
+                                message: "Reset pin successfully",
                                 status: true
                             })
                         }
                         else {
                             buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(200).json({
-                                message: "Reset Pin Failure",
+                                message: "Reset pin failure",
                                 status: false
                             });
                         }
@@ -422,7 +422,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter your phone number and new pin code. Do not leave any fields blank !",
+                    message: "Please enter your phone and new pin code. Do not leave any fields blank !",
                     status: false
                 });
             }
@@ -448,14 +448,14 @@ const UserController = {
                             if (!err) {
                                 buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(201).json({
-                                    message: "Update Pin Successfully",
+                                    message: "Update pin successfully",
                                     status: true
                                 })
                             }
                             else {
                                 buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(200).json({
-                                    message: "Update Pin Failure",
+                                    message: "Update pin failure",
                                     status: false
                                 });
                             }
@@ -477,7 +477,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "Please enter your phone number, old pin code and new pin code. Do not leave any fields blank !",
+                    message: "Please enter your phone, old pin code and new pin code. Do not leave any fields blank !",
                     status: false
                 });
             }
@@ -494,13 +494,13 @@ const UserController = {
                 return res.status(200).json({
                     count: users.length,
                     data: users,
-                    message: "Get List User Success",
+                    message: "Get list user success",
                     status: true
                 })
             }
             else {
                 return res.status(200).json({
-                    message: "List User Is Empty",
+                    message: "List user is empty",
                     status: false
                 })
             }

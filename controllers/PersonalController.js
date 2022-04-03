@@ -62,7 +62,7 @@ const PersonalController = {
                         const { user, ...others } = data._doc;
                         buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(201).json({
-                            message: "Add Personal BNPL Successfully",
+                            message: "Add personal BNPL successfully",
                             data: { ...others },
                             status: true
                         });
@@ -70,7 +70,7 @@ const PersonalController = {
                     else {
                         buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(200).json({
-                            message: "Add Personal BNPL Failure",
+                            message: "Add personal BNPL failure",
                             status: false
                         });
                     }
@@ -78,7 +78,7 @@ const PersonalController = {
             }
             else {
                 return res.status(200).json({
-                    message: 'Personal Is Exists',
+                    message: 'This personal is already exists !',
                     status: false
                 })
             }
@@ -138,7 +138,7 @@ const PersonalController = {
             }
             else {
                 return res.status(401).json({
-                    message: "List Personal Is Empty",
+                    message: "List personal is empty",
                     status: false
                 });
             }
@@ -160,7 +160,7 @@ const PersonalController = {
             }
             else {
                 return res.status(200).json({
-                    message: "This Personal Infomation is not exists !",
+                    message: "This personal infomation is not exists !",
                     status: false
                 });
             }
@@ -182,7 +182,7 @@ const PersonalController = {
                         if (!err) {
                             buildProdLogger('info', 'register_provider_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                             return res.status(200).json({
-                                message: "Register Provider Successfully",
+                                message: "Register provider successfully",
                                 data: {
                                     nid: nid,
                                     provider: provider
@@ -193,7 +193,7 @@ const PersonalController = {
                         else {
                             buildProdLogger('error', 'register_provider_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                             return res.status(200).json({
-                                message: "Register Provider Failure",
+                                message: "Register provider failure",
                                 status: false
                             })
                         }
@@ -201,7 +201,7 @@ const PersonalController = {
                 }
                 else {
                     return res.status(200).json({
-                        message: "This Nid is not exists !",
+                        message: "This nid is not exists !",
                         status: false
                     })
                 }
@@ -231,7 +231,7 @@ const PersonalController = {
                             if (!err) {
                                 buildProdLogger('info', 'update_tenor_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(201).json({
-                                    message: "Update Tenor Successfully",
+                                    message: "Update tenor successfully",
                                     data: {
                                         tenor: tenorId,
                                         phone: phone
@@ -242,7 +242,7 @@ const PersonalController = {
                             else {
                                 buildProdLogger('error', 'update_tenor_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(200).json({
-                                    message: "Update Tenor Failure",
+                                    message: "Update tenor failure",
                                     status: false
                                 })
                             }

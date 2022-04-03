@@ -5,8 +5,6 @@ const bnpl_otpSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: [true, 'Phone is required'],
-        minlength: [10, 'Phone only includes 10 numbers'],
-        maxlength: [10, 'Phone only includes 10 numbers']
     },
     otp: {
         type: String,
