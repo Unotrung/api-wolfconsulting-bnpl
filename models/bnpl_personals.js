@@ -27,8 +27,6 @@ const bnpl_personalSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Phone is required'],
         unique: [true, 'Phone is already exists'],
-        minlength: [10, 'Phone only includes 10 numbers'],
-        maxlength: [10, 'Phone only includes 10 numbers'],
         validate: {
             validator: function (value) {
                 return /^(09|03|07|08|05)+([0-9]{8}$)/g.test(value);
@@ -85,8 +83,6 @@ const bnpl_personalSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Phone Ref is required'],
         unique: [true, 'Phone Ref is already exists'],
-        minlength: [10, 'Phone Ref only includes 10 numbers'],
-        maxlength: [10, 'Phone Ref only includes 10 numbers'],
         validate: {
             validator: function (value) {
                 return /^(09|03|07|08|05)+([0-9]{8}$)/g.test(value);
