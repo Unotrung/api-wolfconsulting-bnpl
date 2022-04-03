@@ -82,7 +82,9 @@ const CommonController = {
                         else {
                             return res.status(200).json({
                                 message: `Update step failure for phone ${phone}`,
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             })
                         }
                     });
@@ -99,7 +101,9 @@ const CommonController = {
                         else {
                             return res.status(200).json({
                                 message: `Update step failure for phone ${phone}`,
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             })
                         }
                     });
@@ -116,7 +120,9 @@ const CommonController = {
                         else {
                             return res.status(200).json({
                                 message: `Update step failure for phone ${phone}`,
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             })
                         }
                     });
@@ -133,7 +139,9 @@ const CommonController = {
                         else {
                             return res.status(200).json({
                                 message: `Update step failure for phone ${phone}`,
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             })
                         }
                     });
@@ -150,7 +158,9 @@ const CommonController = {
                         else {
                             return res.status(200).json({
                                 message: `Update step failure for phone ${phone}`,
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             })
                         }
                     });
@@ -158,7 +168,7 @@ const CommonController = {
                 else {
                     return res.status(200).json({
                         message: 'Step is not valid',
-                        status: false
+                        status: false,
                     })
                 }
             }

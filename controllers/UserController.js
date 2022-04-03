@@ -149,7 +149,9 @@ const UserController = {
                             buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(200).json({
                                 message: "Register failure",
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             });
                         }
                     });
@@ -231,7 +233,9 @@ const UserController = {
                     else {
                         return res.status(200).json({
                             message: "Send otp failure",
-                            status: false
+                            status: false,
+                            ErrorStatus: err.status || 500,
+                            ErrorMessage: err.message
                         });
                     }
                 });
@@ -313,7 +317,9 @@ const UserController = {
                             else {
                                 return res.status(200).json({
                                     message: "Send otp failure",
-                                    status: false
+                                    status: false,
+                                    ErrorStatus: err.status || 500,
+                                    ErrorMessage: err.message
                                 });
                             }
                         });
@@ -409,7 +415,9 @@ const UserController = {
                             buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(200).json({
                                 message: "Reset pin failure",
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             });
                         }
                     })
@@ -456,7 +464,9 @@ const UserController = {
                                 buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(200).json({
                                     message: "Update pin failure",
-                                    status: false
+                                    status: false,
+                                    ErrorStatus: err.status || 500,
+                                    ErrorMessage: err.message
                                 });
                             }
                         })

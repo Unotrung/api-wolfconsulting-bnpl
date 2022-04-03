@@ -71,7 +71,9 @@ const PersonalController = {
                         buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(200).json({
                             message: "Add personal BNPL failure",
-                            status: false
+                            status: false,
+                            ErrorStatus: err.status || 500,
+                            ErrorMessage: err.message
                         });
                     }
                 });
@@ -127,6 +129,7 @@ const PersonalController = {
                 const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
 
                 return res.status(200).json({
+                    message: "Get list BNPL user success",
                     data: result,
                     totalItem: totalItem,
                     totalPage: totalPage,
@@ -137,7 +140,7 @@ const PersonalController = {
                 });
             }
             else {
-                return res.status(401).json({
+                return res.status(200).json({
                     message: "List personal is empty",
                     status: false
                 });
@@ -194,7 +197,9 @@ const PersonalController = {
                             buildProdLogger('error', 'register_provider_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                             return res.status(200).json({
                                 message: "Register provider failure",
-                                status: false
+                                status: false,
+                                ErrorStatus: err.status || 500,
+                                ErrorMessage: err.message
                             })
                         }
                     })
@@ -243,7 +248,9 @@ const PersonalController = {
                                 buildProdLogger('error', 'update_tenor_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(200).json({
                                     message: "Update tenor failure",
-                                    status: false
+                                    status: false,
+                                    ErrorStatus: err.status || 500,
+                                    ErrorMessage: err.message
                                 })
                             }
                         })
