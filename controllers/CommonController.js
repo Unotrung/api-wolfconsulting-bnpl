@@ -69,7 +69,7 @@ const CommonController = {
         try {
             let phone = req.body.phone;
             let step = req.body.step;
-            if (phone !== null && phone !== '') {
+            if (phone !== null && phone !== '' && step !== null && step !== '') {
                 if (step === 'not_exist') {
                     await Customer.updateOne({ phone: phone }, { $set: { step: 'not_exist' } }).then((data, err) => {
                         if (!err) {
