@@ -38,7 +38,7 @@ const PersonalController = {
                 if (!customerValid) {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(pin.toString(), salt);
-                    const customer = await new Customer({ phone: phone, pin: hashed });
+                    const customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
                     await customer.save();
                     buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
                 }
@@ -59,7 +59,7 @@ const PersonalController = {
                 });
                 await personal.save((err, data) => {
                     if (!err) {
-                        const { user, ...others } = data._doc;
+                        const { ...others } = data._doc;
                         buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(201).json({
                             message: "Add personal BNPL successfully",
