@@ -270,7 +270,7 @@ const UserController = {
                         await Otp.deleteMany({ phone: lastOtp.phone })
                             .then(async (data, err) => {
                                 if (!err) {
-                                    await Customer.updateOne({ phone: phone }, { $set: { step: 3 } });
+                                    await Customer.updateOne({ phone: PHONE }, { $set: { step: 3 } });
                                     return res.status(200).json({
                                         message: "Successfully. OTP valid",
                                         status: true,
