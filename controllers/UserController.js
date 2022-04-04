@@ -280,9 +280,9 @@ const UserController = {
                     const lastOtp = otpUser[otpUser.length - 1];
                     if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
                         await Otp.deleteMany({ phone: lastOtp.phone })
-                            .then((err, data) => {
+                            .then((data, err) => {
                                 if (!err) {
-                                    await Customer.updateOne({ phone: phone }, { $set: { step: 3 } });
+                                    Customer.updateOne({ phone: phone }, { $set: { step: 3 } });
                                 }
                                 return res.status(200).json({
                                     message: "Successfully. OTP valid",
