@@ -283,7 +283,7 @@ const UserController = {
                         await Otp.deleteMany({ phone: lastOtp.phone })
                             .then((data, err) => {
                                 if (!err) {
-                                    await Customer.findOneAndUpdate({ phone: phone }, { step: 3 });
+                                    await Customer.updateOne({ phone: phone }, { step: 3 });
                                 }
                             })
                     }
