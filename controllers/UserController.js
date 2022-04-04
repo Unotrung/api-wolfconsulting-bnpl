@@ -263,7 +263,6 @@ const UserController = {
     },
 
     verifyOtp: async (req, res, next) => {
-        // Cập nhật lại step kyc_process từ 2 thành 3
         try {
             let PHONE = req.body.phone;
             let OTP = req.body.otp;
@@ -283,7 +282,7 @@ const UserController = {
                         await Otp.deleteMany({ phone: lastOtp.phone })
                             .then((data, err) => {
                                 if (!err) {
-                                    await Customer.updateOne({ phone: phone }, { step: 3 });
+                                    await Customer.updateOne({ phone: phone }, { $set: { step: 3 } });
                                 }
                             })
                     }
