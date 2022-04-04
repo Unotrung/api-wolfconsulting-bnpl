@@ -268,7 +268,7 @@ const UserController = {
                     const lastOtp = otpUser[otpUser.length - 1];
                     if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
                         await Otp.deleteMany({ phone: lastOtp.phone })
-                            .then((data, err) => {
+                            .then(async (data, err) => {
                                 if (!err) {
                                     await Customer.updateOne({ phone: phone }, { $set: { step: 3 } });
                                     return res.status(200).json({
