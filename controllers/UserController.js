@@ -71,7 +71,7 @@ const UserController = {
                         message: "This phone number is not exists !",
                         status: false,
                         errCode: 1003,
-                        step: 0
+                        step: 1
                     });
                 }
             }
@@ -208,7 +208,7 @@ const UserController = {
                         message: "Login successfully",
                         data: { ...others },
                         token: accessToken,
-                        status: true
+                        status: true,
                     });
                 }
             }
@@ -282,12 +282,12 @@ const UserController = {
                         await Otp.deleteMany({ phone: lastOtp.phone })
                             .then((data, err) => {
                                 if (!err) {
-                                    Customer.updateOne({ phone: phone }, { $set: { step: 3 } });
+                                    await Customer.updateOne({ phone: phone }, { $set: { step: 3 } });
+                                    return res.status(200).json({
+                                        message: "Successfully. OTP valid",
+                                        status: true,
+                                    })
                                 }
-                                return res.status(200).json({
-                                    message: "Successfully. OTP valid",
-                                    status: true,
-                                })
                             })
                     }
                     else {

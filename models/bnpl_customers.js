@@ -21,7 +21,7 @@ const bnpl_customerSchema = new mongoose.Schema({
         required: [true, 'Pin is required'],
     },
     step: {
-        type: String,
+        type: Number,
     }
 
 }, { timestamps: true });
