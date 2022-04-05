@@ -43,6 +43,7 @@ const UserController = {
                         data: {
                             _id: user.id,
                             phone: user.phone,
+                            step: user.step
                         },
                         message: "This phone number is already exists !",
                         status: true
@@ -131,7 +132,7 @@ const UserController = {
                 else {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(PIN, salt);
-                    const user = await new Customer({ phone: PHONE, pin: hashed });
+                    const user = await new Customer({ phone: PHONE, pin: hashed, step: 2 });
                     const accessToken = UserController.generateAccessToken(user);
                     const result = await user.save((err, data) => {
                         if (!err) {
@@ -269,7 +270,7 @@ const UserController = {
                         await Otp.deleteMany({ phone: lastOtp.phone })
                             .then(async (data, err) => {
                                 if (!err) {
-                                    await Customer.updateOne({ phone: PHONE }, { $set: { step: 3 } });
+                                    await Customer.updateOne({ phone: PHONE }, { $set: { step: 4 } });
                                     return res.status(200).json({
                                         message: "Successfully. OTP valid",
                                         status: true,
