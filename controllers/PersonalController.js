@@ -62,24 +62,30 @@ const PersonalController = {
                     name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[itemRandom1], arrayItem[itemRandom2]],
                     credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
                 });
-                await personal.save((err, data) => {
+                await personal.save().then(async (data, err) => {
                     if (!err) {
                         const { ...others } = data._doc;
                         buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                        return res.status(201).json({
-                            message: "Add personal BNPL successfully",
-                            data: { ...others },
-                            status: true
-                        });
-                    }
-                    else {
-                        buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                        return res.status(200).json({
-                            message: "Add personal BNPL failure",
-                            status: false,
-                            ErrorStatus: err.status || 500,
-                            ErrorMessage: err.message
-                        });
+                        await Customer.updateOne({ phone: phone }, { $set: { step: 3 } })
+                            .then((data, err) => {
+                                if (!err) {
+                                    return res.status(201).json({
+                                        message: "Add personal BNPL successfully",
+                                        data: { ...others },
+                                        status: true
+                                    });
+                                }
+                                else {
+                                    buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                    return res.status(200).json({
+                                        message: "Add personal BNPL failure",
+                                        status: false,
+                                        ErrorStatus: err.status || 500,
+                                        ErrorMessage: err.message
+                                    });
+                                }
+                            });
+
                     }
                 });
             }

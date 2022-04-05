@@ -45,6 +45,7 @@ const UserController = {
                         data: {
                             _id: user.id,
                             phone: user.phone,
+                            step: user.step
                         },
                         // user,
                         message: "This phone number is already exists !",
@@ -137,9 +138,7 @@ const UserController = {
                 else {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(PIN, salt);
-                    const user = await new Customer({ phone: PHONE, pin: hashed });
-                    console.log(user)
-
+                    const user = await new Customer({ phone: PHONE, pin: hashed, step: 2 });
                     const accessToken = UserController.generateAccessToken(user);
                     const result = await user.save((err, data) => {
                         if (!err) {
@@ -281,7 +280,7 @@ const UserController = {
                         await Otp.deleteMany({ phone: lastOtp.phone })
                             .then(async (data, err) => {
                                 if (!err) {
-                                    await Customer.updateOne({ phone: PHONE }, { $set: { step: 3 } });
+                                    await Customer.updateOne({ phone: PHONE }, { $set: { step: 4 } });
                                     return res.status(200).json({
                                         message: "Successfully. OTP valid",
                                         status: true,
@@ -426,7 +425,7 @@ const UserController = {
                 if (user) {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(NEW_PIN, salt);
-                    await user.findByIdAndUpdate(user._id, {...user, pin: hashed}).then((data, err) => {
+                    await user.findByIdAndUpdate(user._id, { ...user, pin: hashed }).then((data, err) => {
                         if (!err) {
                             buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(201).json({
@@ -477,7 +476,7 @@ const UserController = {
                     if (validPin) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(NEW_PIN, salt);
-                        await user.save({...user, pin: hashed } ).then((data, err) => {
+                        await user.save({ ...user, pin: hashed }).then((data, err) => {
                             if (!err) {
                                 buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(201).json({
