@@ -43,7 +43,6 @@ const UserController = {
                         data: {
                             _id: user.id,
                             phone: user.phone,
-                            step: 1,
                         },
                         message: "This phone number is already exists !",
                         status: true
