@@ -45,7 +45,6 @@ const UserController = {
                         data: {
                             _id: user.id,
                             phone: user.phone,
-                            step: 1,
                         },
                         // user,
                         message: "This phone number is already exists !",
