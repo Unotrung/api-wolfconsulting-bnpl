@@ -3,6 +3,10 @@ const item = require('./items');
 const tenor = require('./tenors');
 const bnpl_provider = require('./bnpl_providers');
 
+const encrypt = require('mongoose-encryption')
+const dotenv = require('dotenv')
+dotenv.config()
+
 const bnpl_personalSchema = new mongoose.Schema({
 
     name: {
@@ -26,7 +30,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: [true, 'Phone is required'],
-        unique: [true, 'Phone is already exists'],
+        // unique: [true, 'Phone is already exists'],
         validate: {
             validator: function (value) {
                 return /^(09|03|07|08|05)+([0-9]{8}$)/g.test(value);
@@ -69,10 +73,10 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     personal_title_ref: {
         type: String,
-        enum: {
-            values: ['Ông', 'Bà'],
-            message: 'Personal title ref is only allowed Ông or Bà'
-        }
+        // enum: {
+        //     values: ['Ông', 'Bà'],
+        //     message: 'Personal title ref is only allowed Ông or Bà'
+        // }
     },
     name_ref: {
         type: String,
@@ -98,5 +102,6 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
 
 }, { timestamps: true });
+bnpl_personalSchema.plugin(encrypt, { encryptionKey: process.env.encKey, signingKey: process.env.sigKey })
 
 module.exports = mongoose.model('bnpl_personal', bnpl_personalSchema);

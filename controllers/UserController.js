@@ -37,7 +37,9 @@ const UserController = {
         try {
             let phone = req.body.phone;
             if (phone !== null && phone !== '') {
-                const user = await Customer.findOne({ phone: phone });
+                const users = await Customer.find();
+                const user = users.find(user => user.phone === phone)
+
                 if (user) {
                     return res.status(200).json({
                         data: {
@@ -45,6 +47,7 @@ const UserController = {
                             phone: user.phone,
                             step: user.step,
                         },
+                        // user,
                         message: "This phone number is already exists !",
                         status: true
                     });
@@ -88,7 +91,8 @@ const UserController = {
         try {
             let nid = req.body.nid;
             if (nid !== null && nid !== '') {
-                const user = await Personal.findOne({ citizenId: nid });
+                const users = await Personal.find()
+                const user = users.find(user => user.citizenId === nid)
                 if (user) {
                     return res.status(200).json({
                         data: {
@@ -123,7 +127,9 @@ const UserController = {
             let PHONE = req.body.phone;
             let PIN = req.body.pin;
             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                const auth = await Customer.findOne({ phone: req.body.phone });
+                const customers = await Customer.find()
+                const auth = customers.find(customer => customer.phone === req.body.phone)
+                // const auth = await Customer.findOne({ phone: req.body.phone });
                 if (auth) {
                     return res.status(200).json({
                         message: "This account is already exists. Please login !",
@@ -174,7 +180,9 @@ const UserController = {
             let PHONE = req.body.phone;
             let PIN = req.body.pin;
             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                const user = await Customer.findOne({ phone: PHONE });
+                const users = await Customer.find()
+                // const user = await Customer.findOne({ phone: PHONE });
+                const user = users.find(user => user.phone === PHONE)
                 if (!user) {
                     return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
                 }
@@ -257,7 +265,9 @@ const UserController = {
             let PHONE = req.body.phone;
             let OTP = req.body.otp;
             if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
-                const otpUser = await Otp.find({ phone: PHONE });
+                const otps = await Otp.find()
+                const otpUser = otps.filter(user => user.phone === PHONE)
+                // const otpUser = await Otp.find({ phone: PHONE });
                 if (otpUser.length === 0) {
                     return res.status(200).json({
                         message: "Expired otp. Please resend otp !",
@@ -301,9 +311,13 @@ const UserController = {
             let PHONE = req.body.phone;
             let NID = req.body.nid;
             if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '') {
-                const validPhone = await Customer.findOne({ phone: PHONE });
+                const customers = await Customer.find()
+                const validPhone = customers.find(customer => customer.phone === PHONE)
+                // const validPhone = await Customer.findOne({ phone: PHONE });
                 if (validPhone) {
-                    const validNid = await Personal.findOne({ citizenId: NID });
+                    const personals = await Personal.find()
+                    const validNid = personals.find(personal => personal.citizenId === NID)
+
                     if (validNid && validPhone.phone === validNid.phone) {
                         const dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID });
                         const result = await dataTemp.save((err) => {
@@ -356,7 +370,9 @@ const UserController = {
             let NID = req.body.nid;
             let OTP = req.body.otp;
             if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '' && OTP !== null && OTP !== '') {
-                const validUser = await Otp.find({ phone: PHONE, nid: NID });
+                const Otps = await Otp.find()
+                const validUser = Otps.find(otp => otp.phone === PHONE && otp.nid === NID)
+                // const validUser = await Otp.find({ phone: PHONE, nid: NID });
                 if (validUser.length === 0) {
                     return res.status(200).json({
                         message: "Expired otp. Please resend otp !",
@@ -399,7 +415,8 @@ const UserController = {
             let PHONE = req.body.phone;
             let NEW_PIN = req.body.new_pin;
             if (PHONE !== null && PHONE !== '' && NEW_PIN !== null && NEW_PIN !== '') {
-                const user = await Customer.findOne({ phone: PHONE });
+                const users = await Customer.find()
+                const user = users.find(user => user.phone === PHONE)
                 if (user) {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(NEW_PIN, salt);
@@ -446,13 +463,15 @@ const UserController = {
             let PIN = req.body.pin;
             let NEW_PIN = req.body.new_pin;
             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '' && NEW_PIN !== null && NEW_PIN !== '') {
-                const user = await Customer.findOne({ phone: PHONE });
+                const users = await Customer.find()
+                const user = users.find(user => user.phone === PHONE)
+                // const user = await Customer.findOne({ phone: PHONE });
                 if (user) {
                     const validPin = await bcrypt.compare(PIN, user.pin);
                     if (validPin) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(NEW_PIN, salt);
-                        await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
+                        await user.save({...user, pin: hashed } ).then((data, err) => {
                             if (!err) {
                                 buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(201).json({

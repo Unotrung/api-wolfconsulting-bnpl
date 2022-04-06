@@ -32,8 +32,10 @@ const PersonalController = {
             let phone_ref = req.body.phone_ref;
 
             let pin = req.body.pin;
-
-            const customerValid = await Customer.findOne({ phone: phone });
+            const customers = await Customer.find()
+            const customerValid = customers.find(customer => customer.phone === phone)
+            // const customerValid = await Customer.findOne({ phone: phone });
+            console.log('save')
             if (pin) {
                 if (!customerValid) {
                     const salt = await bcrypt.genSalt(10);
@@ -44,19 +46,22 @@ const PersonalController = {
                 }
             }
 
-            const items = await Item.find({});
+            const items = await Item.find();
 
             const arrayItem = [];
             items.map((item) => { arrayItem.push(item._id) });
 
             const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
 
-            const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
+            const personals = await Personal.find()
+            const personalValid = personals.find(personal => personal.phone === phone && personal.citizenId === citizenId)
+            // const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
             if (!personalValid) {
                 const personal = await new Personal({
                     name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
                     credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
                 });
+                console.log(personal)
                 await personal.save((err, data) => {
                     if (!err) {
                         const { user, ...others } = data._doc;
