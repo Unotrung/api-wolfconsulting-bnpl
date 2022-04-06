@@ -4,6 +4,7 @@ const Provider = require('../models/bnpl_providers');
 const Tenor = require('../models/tenors');
 const Item = require('../models/items');
 const bcrypt = require('bcrypt');
+const { validationResult } = require('express-validator');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
 
@@ -32,65 +33,72 @@ const PersonalController = {
             let phone_ref = req.body.phone_ref;
 
             let pin = req.body.pin;
-
-            const customerValid = await Customer.findOne({ phone: phone });
-            if (pin) {
-                if (!customerValid) {
-                    const salt = await bcrypt.genSalt(10);
-                    const hashed = await bcrypt.hash(pin.toString(), salt);
-                    const customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
-                    await customer.save();
-                    buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
-                }
-            }
-
-            const items = await Item.find({});
-
-            const arrayItem = [];
-            items.map((item) => { arrayItem.push(item._id) });
-
-            const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
-
-            const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
-            if (!personalValid) {
-                const personal = await new Personal({
-                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
-                    credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
-                });
-                await personal.save().then(async (data, err) => {
-                    if (!err) {
-                        const { ...others } = data._doc;
-                        buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                        await Customer.updateOne({ phone: phone }, { $set: { step: 3 } })
-                            .then((data, err) => {
-                                if (!err) {
-                                    return res.status(201).json({
-                                        message: "Add personal BNPL successfully",
-                                        data: { ...others },
-                                        status: true
-                                    });
-                                }
-                                else {
-                                    buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                                    return res.status(200).json({
-                                        message: "Add personal BNPL failure",
-                                        status: false,
-                                        ErrorStatus: err.status || 500,
-                                        ErrorMessage: err.message
-                                    });
-                                }
-                            });
-
-                    }
+            const validData = validationResult(req);
+            if (validData.errors.length > 0) {
+                return res.status(200).json({
+                    message: validData.errors[0].msg,
+                    status: false
                 });
             }
             else {
-                return res.status(200).json({
-                    message: 'This personal is already exists !',
-                    status: false
-                })
-            }
+                const customerValid = await Customer.findOne({ phone: phone });
+                if (pin) {
+                    if (!customerValid) {
+                        const salt = await bcrypt.genSalt(10);
+                        const hashed = await bcrypt.hash(pin.toString(), salt);
+                        const customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
+                        await customer.save();
+                        buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                    }
+                }
 
+                const items = await Item.find({});
+
+                const arrayItem = [];
+                items.map((item) => { arrayItem.push(item._id) });
+
+                const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
+
+                const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
+                if (!personalValid) {
+                    const personal = await new Personal({
+                        name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
+                        credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
+                    });
+                    await personal.save().then(async (data, err) => {
+                        if (!err) {
+                            const { ...others } = data._doc;
+                            buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                            await Customer.updateOne({ phone: phone }, { $set: { step: 3 } })
+                                .then((data, err) => {
+                                    if (!err) {
+                                        return res.status(201).json({
+                                            message: "Add personal BNPL successfully",
+                                            data: { ...others },
+                                            status: true
+                                        });
+                                    }
+                                    else {
+                                        buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                        return res.status(200).json({
+                                            message: "Add personal BNPL failure",
+                                            status: false,
+                                            errorStatus: err.status || 500,
+                                            errorMessage: err.message
+                                        });
+                                    }
+                                });
+
+                        }
+                    });
+                }
+                else {
+                    return res.status(200).json({
+                        message: 'This personal is already exists !',
+                        status: false
+                    })
+                }
+            }
         }
         catch (err) {
             next(err);
@@ -183,45 +191,54 @@ const PersonalController = {
         try {
             let provider = req.body.provider;
             let nid = req.body.nid;
-            if (provider !== null && provider !== '' && nid !== null && nid !== '') {
-                let validProvider = await Provider.findOne({ provider: provider });
-                let validNid = await Personal.findOne({ citizenId: nid });
-                if (validNid) {
-                    await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
-                        if (!err) {
-                            buildProdLogger('info', 'register_provider_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
-                            return res.status(200).json({
-                                message: "Register provider successfully",
-                                data: {
-                                    nid: nid,
-                                    provider: provider
-                                },
-                                status: true
-                            })
-                        }
-                        else {
-                            buildProdLogger('error', 'register_provider_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
-                            return res.status(200).json({
-                                message: "Register provider failure",
-                                status: false,
-                                ErrorStatus: err.status || 500,
-                                ErrorMessage: err.message
-                            })
-                        }
-                    })
+            const validData = validationResult(req);
+            if (validData.errors.length > 0) {
+                return res.status(200).json({
+                    message: validData.errors[0].msg,
+                    status: false
+                });
+            }
+            else {
+                if (provider !== null && provider !== '' && nid !== null && nid !== '') {
+                    let validProvider = await Provider.findOne({ provider: provider });
+                    let validNid = await Personal.findOne({ citizenId: nid });
+                    if (validNid) {
+                        await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
+                            if (!err) {
+                                buildProdLogger('info', 'register_provider_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
+                                return res.status(200).json({
+                                    message: "Register provider successfully",
+                                    data: {
+                                        nid: nid,
+                                        provider: provider
+                                    },
+                                    status: true
+                                })
+                            }
+                            else {
+                                buildProdLogger('error', 'register_provider_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
+                                return res.status(200).json({
+                                    message: "Register provider failure",
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                })
+                            }
+                        })
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "This nid is not exists !",
+                            status: false
+                        })
+                    }
                 }
                 else {
                     return res.status(200).json({
-                        message: "This nid is not exists !",
+                        message: "Please enter your nid and choose provider BNPL. Do not leave any fields blank !",
                         status: false
-                    })
+                    });
                 }
-            }
-            else {
-                return res.status(200).json({
-                    message: "Please enter your nid and choose provider BNPL. Do not leave any fields blank !",
-                    status: false
-                });
             }
         }
         catch (err) {
@@ -233,53 +250,62 @@ const PersonalController = {
         try {
             let tenorId = req.body.id;
             let phone = req.body.phone;
-            if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
-                let tenor = await Tenor.findById(tenorId);
-                let validPhone = await Personal.findOne({ phone: phone });
-                if (validPhone) {
-                    if (tenor) {
-                        await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
-                            if (!err) {
-                                buildProdLogger('info', 'update_tenor_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
-                                return res.status(201).json({
-                                    message: "Update tenor successfully",
-                                    data: {
-                                        tenor: tenorId,
-                                        phone: phone
-                                    },
-                                    status: true
-                                })
-                            }
-                            else {
-                                buildProdLogger('error', 'update_tenor_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
-                                return res.status(200).json({
-                                    message: "Update tenor failure",
-                                    status: false,
-                                    ErrorStatus: err.status || 500,
-                                    ErrorMessage: err.message
-                                })
-                            }
-                        })
+            const validData = validationResult(req);
+            if (validData.errors.length > 0) {
+                return res.status(200).json({
+                    message: validData.errors[0].msg,
+                    status: false
+                });
+            }
+            else {
+                if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
+                    let tenor = await Tenor.findById(tenorId);
+                    let validPhone = await Personal.findOne({ phone: phone });
+                    if (validPhone) {
+                        if (tenor) {
+                            await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
+                                if (!err) {
+                                    buildProdLogger('info', 'update_tenor_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
+                                    return res.status(201).json({
+                                        message: "Update tenor successfully",
+                                        data: {
+                                            tenor: tenorId,
+                                            phone: phone
+                                        },
+                                        status: true
+                                    })
+                                }
+                                else {
+                                    buildProdLogger('error', 'update_tenor_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
+                                    return res.status(200).json({
+                                        message: "Update tenor failure",
+                                        status: false,
+                                        errorStatus: err.status || 500,
+                                        errorMessage: err.message
+                                    })
+                                }
+                            })
+                        }
+                        else {
+                            return res.status(200).json({
+                                message: "This tenor is not exists !",
+                                status: false
+                            });
+                        }
                     }
                     else {
                         return res.status(200).json({
-                            message: "This tenor is not exists !",
+                            message: "This phone number is not exists !",
                             status: false
                         });
                     }
                 }
                 else {
                     return res.status(200).json({
-                        message: "This phone number is not exists !",
+                        message: "Please enter your phone and choose tenor. Do not leave any fields blank !",
                         status: false
                     });
                 }
-            }
-            else {
-                return res.status(200).json({
-                    message: "Please enter your phone and choose tenor. Do not leave any fields blank !",
-                    status: false
-                });
             }
         }
         catch (err) {

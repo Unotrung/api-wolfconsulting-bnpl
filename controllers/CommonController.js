@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const Tenor = require('../models/tenors');
 const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
+const { validationResult } = require('express-validator');
 
 dotenv.config();
 
@@ -25,13 +26,13 @@ const CommonController = {
             const response = await fetch(url, options);
             const data = await response.json();
             if (data !== null) {
-                return res.json({
+                return res.status(200).json({
                     token: data.result.token,
                     status: true
                 })
             }
             else {
-                return res.json({
+                return res.status(200).json({
                     message: "Fail to get api",
                     status: false,
                 })
@@ -69,114 +70,123 @@ const CommonController = {
         try {
             let phone = req.body.phone;
             let step = req.body.process;
-            if (phone !== null && phone !== '' && step !== null && step !== '') {
-                if (step === 0) {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 0 } }).then((data, err) => {
-                        if (!err) {
-                            return res.status(201).json({
-                                message: `Update step successfully for phone ${phone}`,
-                                step: data.step,
-                                status: true
-                            })
-                        }
-                        else {
-                            return res.status(200).json({
-                                message: `Update step failure for phone ${phone}`,
-                                status: false,
-                                ErrorStatus: err.status || 500,
-                                ErrorMessage: err.message
-                            })
-                        }
-                    });
-                }
-                else if (step === 1) {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 1 } }).then((data, err) => {
-                        if (!err) {
-                            return res.status(201).json({
-                                message: `Update step successfully for phone ${phone}`,
-                                step: data.step,
-                                status: true
-                            })
-                        }
-                        else {
-                            return res.status(200).json({
-                                message: `Update step failure for phone ${phone}`,
-                                status: false,
-                                ErrorStatus: err.status || 500,
-                                ErrorMessage: err.message
-                            })
-                        }
-                    });
-                }
-                else if (step === 2) {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 2 } }).then((data, err) => {
-                        if (!err) {
-                            return res.status(201).json({
-                                message: `Update step successfully for phone ${phone}`,
-                                step: data.step,
-                                status: true
-                            })
-                        }
-                        else {
-                            return res.status(200).json({
-                                message: `Update step failure for phone ${phone}`,
-                                status: false,
-                                ErrorStatus: err.status || 500,
-                                ErrorMessage: err.message
-                            })
-                        }
-                    });
-                }
-                else if (step === 3) {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 3 } }).then((data, err) => {
-                        if (!err) {
-                            return res.status(201).json({
-                                message: `Update step successfully for phone ${phone}`,
-                                step: data.step,
-                                status: true
-                            })
-                        }
-                        else {
-                            return res.status(200).json({
-                                message: `Update step failure for phone ${phone}`,
-                                status: false,
-                                ErrorStatus: err.status || 500,
-                                ErrorMessage: err.message
-                            })
-                        }
-                    });
-                }
-                else if (step === 4) {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 4 } }).then((data, err) => {
-                        if (!err) {
-                            return res.status(201).json({
-                                message: `Update step successfully for phone ${phone}`,
-                                step: data.step,
-                                status: true
-                            })
-                        }
-                        else {
-                            return res.status(200).json({
-                                message: `Update step failure for phone ${phone}`,
-                                status: false,
-                                ErrorStatus: err.status || 500,
-                                ErrorMessage: err.message
-                            })
-                        }
-                    });
+            const validData = validationResult(req);
+            if (validData.errors.length > 0) {
+                return res.status(200).json({
+                    message: validData.errors[0].msg,
+                    status: false
+                });
+            }
+            else {
+                if (phone !== null && phone !== '' && step !== null && step !== '') {
+                    if (step === 0) {
+                        await Customer.updateOne({ phone: phone }, { $set: { step: 0 } }).then((data, err) => {
+                            if (!err) {
+                                return res.status(201).json({
+                                    message: `Update step successfully for phone ${phone}`,
+                                    step: data.step,
+                                    status: true
+                                })
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: `Update step failure for phone ${phone}`,
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                })
+                            }
+                        });
+                    }
+                    else if (step === 1) {
+                        await Customer.updateOne({ phone: phone }, { $set: { step: 1 } }).then((data, err) => {
+                            if (!err) {
+                                return res.status(201).json({
+                                    message: `Update step successfully for phone ${phone}`,
+                                    step: data.step,
+                                    status: true
+                                })
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: `Update step failure for phone ${phone}`,
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                })
+                            }
+                        });
+                    }
+                    else if (step === 2) {
+                        await Customer.updateOne({ phone: phone }, { $set: { step: 2 } }).then((data, err) => {
+                            if (!err) {
+                                return res.status(201).json({
+                                    message: `Update step successfully for phone ${phone}`,
+                                    step: data.step,
+                                    status: true
+                                })
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: `Update step failure for phone ${phone}`,
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                })
+                            }
+                        });
+                    }
+                    else if (step === 3) {
+                        await Customer.updateOne({ phone: phone }, { $set: { step: 3 } }).then((data, err) => {
+                            if (!err) {
+                                return res.status(201).json({
+                                    message: `Update step successfully for phone ${phone}`,
+                                    step: data.step,
+                                    status: true
+                                })
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: `Update step failure for phone ${phone}`,
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                })
+                            }
+                        });
+                    }
+                    else if (step === 4) {
+                        await Customer.updateOne({ phone: phone }, { $set: { step: 4 } }).then((data, err) => {
+                            if (!err) {
+                                return res.status(201).json({
+                                    message: `Update step successfully for phone ${phone}`,
+                                    step: data.step,
+                                    status: true
+                                })
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: `Update step failure for phone ${phone}`,
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                })
+                            }
+                        });
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: 'Step is not valid',
+                            status: false,
+                        })
+                    }
                 }
                 else {
                     return res.status(200).json({
-                        message: 'Step is not valid',
-                        status: false,
+                        message: 'Please enter your phone and step. Do not leave any field blank !',
+                        status: false
                     })
                 }
-            }
-            else {
-                return res.status(200).json({
-                    message: 'Please enter your phone and step. Do not leave any field blank !',
-                    status: false
-                })
             }
         }
         catch (err) {
