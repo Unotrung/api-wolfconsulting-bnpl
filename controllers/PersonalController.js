@@ -41,62 +41,70 @@ const PersonalController = {
                 });
             }
             else {
-                const customerValid = await Customer.findOne({ phone: phone });
+                const customers = await Customer.find();
+                const personals = await Personal.find();
+
                 if (pin) {
-                    if (!customerValid) {
-                        const salt = await bcrypt.genSalt(10);
-                        const hashed = await bcrypt.hash(pin.toString(), salt);
-                        const customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
-                        await customer.save();
-                        buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                    if (customers) {
+                        const customerExists = customers.find(x => x.phone === phone);
+                        if (!customerExists) {
+                            const salt = await bcrypt.genSalt(10);
+                            const hashed = await bcrypt.hash(pin.toString(), salt);
+                            const customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
+                            await customer.save();
+                            buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                        }
                     }
                 }
 
                 const items = await Item.find({});
-
                 const arrayItem = [];
                 items.map((item) => { arrayItem.push(item._id) });
 
                 const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
 
-                const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
-                if (!personalValid) {
-                    const personal = await new Personal({
-                        name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
-                        credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
-                    });
-                    await personal.save().then(async (data, err) => {
-                        if (!err) {
-                            const { ...others } = data._doc;
-                            buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                            await Customer.updateOne({ phone: phone }, { $set: { step: 3 } })
-                                .then((data, err) => {
-                                    if (!err) {
-                                        return res.status(201).json({
-                                            message: "Add personal BNPL successfully",
-                                            data: { ...others },
-                                            status: true
-                                        });
-                                    }
-                                    else {
-                                        buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                                        return res.status(200).json({
-                                            message: "Add personal BNPL failure",
-                                            status: false,
-                                            errorStatus: err.status || 500,
-                                            errorMessage: err.message
-                                        });
-                                    }
-                                });
-
-                        }
-                    });
-                }
-                else {
-                    return res.status(200).json({
-                        message: 'This personal is already exists !',
-                        status: false
-                    })
+                if (personals) {
+                    const personalExists = personals.find(x => x.phone === phone || x.citizenId === citizenId);
+                    if (!personalExists) {
+                        const personal = await new Personal({
+                            name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
+                            credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
+                        });
+                        await personal.save().then(async (data, err) => {
+                            if (!err) {
+                                const { ...others } = data._doc;
+                                buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                const customerList = await Customer.find();
+                                const customerAccount = customerList.find(x => x.phone === phone);
+                                customerAccount.step = 3;
+                                await customerAccount.save()
+                                    .then((data, err) => {
+                                        if (!err) {
+                                            return res.status(201).json({
+                                                message: "Add personal BNPL successfully",
+                                                data: { ...others },
+                                                status: true
+                                            });
+                                        }
+                                        else {
+                                            buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                            return res.status(200).json({
+                                                message: "Add personal BNPL failure",
+                                                status: false,
+                                                errorStatus: err.status || 500,
+                                                errorMessage: err.message
+                                            });
+                                        }
+                                    });
+                            }
+                        });
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: 'This personal is already exists !',
+                            status: false
+                        })
+                    }
                 }
             }
         }
@@ -109,15 +117,9 @@ const PersonalController = {
         try {
             let personals = await Personal.find();
             if (personals.length > 0) {
-                const totalItem = await Personal.countDocuments({});
-                console.log("Total Item: ", totalItem);
-
+                const totalItem = personals.length;
                 const PAGE_SIZE = req.query.pageSize;
-                console.log("Page Size: ", PAGE_SIZE);
-
                 const totalPage = Math.ceil(totalItem / PAGE_SIZE);
-                console.log("Total Page: ", totalPage);
-
                 let page = req.query.page || 1;
                 if (page < 1) {
                     page = 1
@@ -125,23 +127,13 @@ const PersonalController = {
                 if (page > totalPage) {
                     page = totalPage
                 }
-
                 page = parseInt(page);
-                console.log("Current Page: ", page);
-
                 let sortByField = req.query.sortByField;
-                console.log("Sort By Field: ", sortByField);
-
                 let sortValue = req.query.sortValue;
                 sortValue = parseInt(sortValue);
-                console.log("Sort Value: ", sortValue);
-
                 var skipItem = (page - 1) * PAGE_SIZE;
-
                 const sort = sortValue === 1 ? `${sortByField}` : `-${(sortByField)}`;
-
                 const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
-
                 return res.status(200).json({
                     message: "Get list BNPL user success",
                     data: result,
@@ -157,7 +149,7 @@ const PersonalController = {
                 return res.status(200).json({
                     message: "List personal is empty",
                     status: false
-                });
+                })
             }
         }
         catch (err) {
@@ -167,7 +159,9 @@ const PersonalController = {
 
     getInfomation: async (req, res, next) => {
         try {
-            let personal = await Personal.findOne({ phone: req.params.phone }).populate('providers').populate('items').populate('tenor');
+            let phone = req.params.phone;
+            let personals = await Personal.find().populate('providers').populate('items').populate('tenor');
+            let personal = personals.find(x => x.phone === phone);
             if (personal) {
                 return res.status(200).json({
                     message: "Get information of personal successfully",
@@ -201,7 +195,8 @@ const PersonalController = {
             else {
                 if (provider !== null && provider !== '' && nid !== null && nid !== '') {
                     let validProvider = await Provider.findOne({ provider: provider });
-                    let validNid = await Personal.findOne({ citizenId: nid });
+                    let nids = await Personal.find();
+                    let validNid = nids.find(x => x.citizenId === nid)
                     if (validNid) {
                         await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
                             if (!err) {
@@ -260,7 +255,8 @@ const PersonalController = {
             else {
                 if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
                     let tenor = await Tenor.findById(tenorId);
-                    let validPhone = await Personal.findOne({ phone: phone });
+                    let phones = await Personal.find();
+                    let validPhone = phones.find(x => x.phone === phone);
                     if (validPhone) {
                         if (tenor) {
                             await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
@@ -311,28 +307,6 @@ const PersonalController = {
         catch (err) {
             next(err);
         }
-    },
-
-    deletePersonalandAccount: async (req, res, next) => {
-        const phone = "0359349582";
-        const nid = "030094009394";
-        await Customer.findOneAndDelete({ phone: phone });
-        await Personal.findOneAndDelete({ citizenId: nid });
-        return res.status(200).json({
-            message: "Delete Successfully",
-            status: true
-        })
-    },
-
-    deletePersonalandAccountPhu: async (req, res, next) => {
-        const phone = req.body.phone;
-        const nid = req.body.nid;
-        await Customer.findOneAndDelete({ phone: phone });
-        await Personal.findOneAndDelete({ citizenId: nid });
-        return res.status(200).json({
-            message: "Delete Successfully",
-            status: true
-        })
     },
 
 };

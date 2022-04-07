@@ -47,7 +47,8 @@ const UserController = {
             }
             else {
                 if (phone !== null && phone !== '') {
-                    const user = await Customer.findOne({ phone: phone });
+                    const users = await Customer.find();
+                    const user = users.find(x => x.phone === phone);
                     if (user) {
                         return res.status(200).json({
                             data: {
@@ -107,7 +108,8 @@ const UserController = {
             }
             else {
                 if (nid !== null && nid !== '') {
-                    const user = await Personal.findOne({ citizenId: nid });
+                    const users = await Personal.find();
+                    const user = users.find(x => x.citizenId === nid);
                     if (user) {
                         return res.status(200).json({
                             data: {
@@ -151,7 +153,8 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                    const auth = await Customer.findOne({ phone: (PHONE) });
+                    const auths = await Customer.find();
+                    const auth = auths.find(x => x.phone === PHONE);
                     if (auth) {
                         return res.status(200).json({
                             message: "This account is already exists. Please login !",
@@ -191,8 +194,6 @@ const UserController = {
                         status: false
                     });
                 }
-
-
             }
         }
         catch (err) {
@@ -213,7 +214,8 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                    const user = await Customer.findOne({ phone: (PHONE) });
+                    const users = await Customer.find();
+                    const user = users.find(x => x.phone === PHONE);
                     if (!user) {
                         return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
                     }
@@ -372,9 +374,11 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '') {
-                    const validPhone = await Customer.findOne({ phone: PHONE });
+                    const phones = await Customer.find();
+                    const validPhone = phones.find(x => x.phone === PHONE);
                     if (validPhone) {
-                        const validNid = await Personal.findOne({ citizenId: NID });
+                        const nids = await Personal.find();
+                        const validNid = nids.find(x => x.citizenId === NID);
                         if (validNid && validPhone.phone === validNid.phone) {
                             const dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID });
                             const result = await dataTemp.save((err) => {
@@ -488,7 +492,8 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && NEW_PIN !== null && NEW_PIN !== '') {
-                    const user = await Customer.findOne({ phone: PHONE });
+                    const users = await Customer.find();
+                    const user = users.find(x => x.phone === PHONE);
                     if (user) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(NEW_PIN, salt);
@@ -544,7 +549,8 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '' && NEW_PIN !== null && NEW_PIN !== '') {
-                    const user = await Customer.findOne({ phone: PHONE });
+                    const users = await Customer.find();
+                    const user = users.find(x => x.phone === PHONE);
                     if (user) {
                         const validPin = await bcrypt.compare(PIN, user.pin);
                         if (validPin) {
@@ -598,7 +604,7 @@ const UserController = {
 
     getAllUser: async (req, res, next) => {
         try {
-            const users = await Customer.find().select('_id phone');
+            const users = await Customer.find();
             if (users.length > 0) {
                 return res.status(200).json({
                     count: users.length,
@@ -609,7 +615,7 @@ const UserController = {
             }
             else {
                 return res.status(200).json({
-                    message: "List user is empty",
+                    message: "List user is empty ",
                     status: false
                 })
             }

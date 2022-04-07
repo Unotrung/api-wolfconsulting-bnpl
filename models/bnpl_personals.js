@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const item = require('./items');
 const tenor = require('./tenors');
 const bnpl_provider = require('./bnpl_providers');
+const encrypt = require('mongoose-encryption');
+const dotenv = require('dotenv')
+
+dotenv.config();
 
 const bnpl_personalSchema = new mongoose.Schema({
 
@@ -24,11 +28,9 @@ const bnpl_personalSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: [true, 'Phone is required'],
-        unique: [true, 'Phone is already exists'],
     },
     citizenId: {
         type: String,
-        unique: [true, 'CitizenId is already exists'],
         required: [true, 'CitizenId is required'],
     },
     issueDate: {
@@ -64,7 +66,6 @@ const bnpl_personalSchema = new mongoose.Schema({
     phone_ref: {
         type: String,
         required: [true, 'Phone Ref is required'],
-        unique: [true, 'Phone Ref is already exists'],
     },
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
@@ -74,5 +75,8 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
 
 }, { timestamps: true });
+
+const secret = process.env.SECRET_MONGOOSE;
+bnpl_personalSchema.plugin(encrypt, { secret: secret, encryptedFields: ['name', 'phone', 'citizenId', 'name_ref', 'phone_ref'] });
 
 module.exports = mongoose.model('bnpl_personal', bnpl_personalSchema);

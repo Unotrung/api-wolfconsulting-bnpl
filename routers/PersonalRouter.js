@@ -51,7 +51,4 @@ router.put("/updateTenor",
 
 router.get("/:phone", MiddlewareController.VerifyTokenByMySelf, PersonalController.getInfomation);
 
-router.delete("/deletePersonalandAccount", PersonalController.deletePersonalandAccount);
-router.delete("/deletePersonalandAccountPhu", PersonalController.deletePersonalandAccountPhu);
-
 module.exports = router;
