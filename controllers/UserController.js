@@ -139,6 +139,8 @@ const UserController = {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(PIN, salt);
                     const user = await new Customer({ phone: PHONE, pin: hashed });
+                    console.log(user)
+
                     const accessToken = UserController.generateAccessToken(user);
                     const result = await user.save((err, data) => {
                         if (!err) {
@@ -420,7 +422,7 @@ const UserController = {
                 if (user) {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(NEW_PIN, salt);
-                    await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
+                    await user.findByIdAndUpdate(user._id, {...user, pin: hashed}).then((data, err) => {
                         if (!err) {
                             buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(201).json({

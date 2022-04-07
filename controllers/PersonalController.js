@@ -35,7 +35,6 @@ const PersonalController = {
             const customers = await Customer.find()
             const customerValid = customers.find(customer => customer.phone === phone)
             // const customerValid = await Customer.findOne({ phone: phone });
-            console.log('save')
             if (pin) {
                 if (!customerValid) {
                     const salt = await bcrypt.genSalt(10);
@@ -57,18 +56,22 @@ const PersonalController = {
             const personalValid = personals.find(personal => personal.phone === phone && personal.citizenId === citizenId)
             // const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
             if (!personalValid) {
+                 const itemRandom1 = PersonalController.randomIndex(items)
+                const itemRandom2 = PersonalController.randomIndex(items)
                 const personal = await new Personal({
-                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
+                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[itemRandom1], arrayItem[itemRandom2]],
                     credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
                 });
-                console.log(personal)
                 await personal.save((err, data) => {
                     if (!err) {
+                        console.log(data)
                         const { user, ...others } = data._doc;
+                        console.log(others)
+                        const newOther = {...others, items: [items[itemRandom1], items[itemRandom2]]}
                         buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(201).json({
                             message: "Add personal BNPL successfully",
-                            data: { ...others },
+                            data: { ...newOther },
                             status: true
                         });
                     }
@@ -131,7 +134,7 @@ const PersonalController = {
 
                 const sort = sortValue === 1 ? `${sortByField}` : `-${(sortByField)}`;
 
-                const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
+                const result = await Personal.find().skip(skipItem).limit(PAGE_SIZE).sort(sort);
 
                 return res.status(200).json({
                     message: "Get list BNPL user success",
@@ -158,7 +161,9 @@ const PersonalController = {
 
     getInfomation: async (req, res, next) => {
         try {
-            let personal = await Personal.findOne({ phone: req.params.phone }).populate('providers').populate('items').populate('tenor');
+            const personals = await Personal.find()
+            const per = personals.find(personal => personal.phone === req.params.phone)
+            const personal = await Personal.findOne({ _id: per._id }).populate('providers').populate('items').populate('tenor');
             if (personal) {
                 return res.status(200).json({
                     message: "Get information of personal successfully",

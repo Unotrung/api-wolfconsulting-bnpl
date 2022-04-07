@@ -11,7 +11,7 @@ const bnpl_personalSchema = new mongoose.Schema({
 
     name: {
         type: String,
-        required: [true, 'Name is required'],
+        // required: [true, 'Name is required'],
         minlength: [1, 'Name have a minimum length is 1 and a maximum length is 255'],
         maxlength: [255, 'Name have a minimum length is 1 and a maximum length is 255']
     },
@@ -40,7 +40,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     citizenId: {
         type: String,
-        unique: [true, 'CitizenId is already exists'],
+        // unique: [true, 'CitizenId is already exists'],
         required: [true, 'CitizenId is required'],
     },
     issueDate: {
@@ -86,7 +86,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     phone_ref: {
         type: String,
         required: [true, 'Phone Ref is required'],
-        unique: [true, 'Phone Ref is already exists'],
+        // unique: [true, 'Phone Ref is already exists'],
         validate: {
             validator: function (value) {
                 return /^(09|03|07|08|05)+([0-9]{8}$)/g.test(value);
