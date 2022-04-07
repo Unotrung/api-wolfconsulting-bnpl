@@ -39,7 +39,7 @@ const PersonalController = {
                 if (!customerValid) {
                     const salt = await bcrypt.genSalt(10);
                     const hashed = await bcrypt.hash(pin.toString(), salt);
-                    const customer = await new Customer({ phone: phone, pin: hashed });
+                    const customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
                     await customer.save();
                     buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
                 }
@@ -56,7 +56,7 @@ const PersonalController = {
             const personalValid = personals.find(personal => personal.phone === phone && personal.citizenId === citizenId)
             // const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
             if (!personalValid) {
-                 const itemRandom1 = PersonalController.randomIndex(items)
+                const itemRandom1 = PersonalController.randomIndex(items)
                 const itemRandom2 = PersonalController.randomIndex(items)
                 const personal = await new Personal({
                     name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[itemRandom1], arrayItem[itemRandom2]],
@@ -64,14 +64,11 @@ const PersonalController = {
                 });
                 await personal.save((err, data) => {
                     if (!err) {
-                        console.log(data)
-                        const { user, ...others } = data._doc;
-                        console.log(others)
-                        const newOther = {...others, items: [items[itemRandom1], items[itemRandom2]]}
+                        const { ...others } = data._doc;
                         buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                         return res.status(201).json({
                             message: "Add personal BNPL successfully",
-                            data: { ...newOther },
+                            data: { ...others },
                             status: true
                         });
                     }

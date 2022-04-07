@@ -45,7 +45,7 @@ const UserController = {
                         data: {
                             _id: user.id,
                             phone: user.phone,
-                            step: user.step,
+                            step: 1,
                         },
                         // user,
                         message: "This phone number is already exists !",
@@ -263,6 +263,7 @@ const UserController = {
     },
 
     verifyOtp: async (req, res, next) => {
+        // Cập nhật lại step kyc_process từ 2 thành 3
         try {
             let PHONE = req.body.phone;
             let OTP = req.body.otp;
@@ -279,11 +280,12 @@ const UserController = {
                 else {
                     const lastOtp = otpUser[otpUser.length - 1];
                     if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
-                        await Otp.deleteMany({ phone: lastOtp.phone });
-                        return res.status(200).json({
-                            message: "Successfully. OTP valid",
-                            status: true,
-                        })
+                        await Otp.deleteMany({ phone: lastOtp.phone })
+                            .then((data, err) => {
+                                if (!err) {
+                                    await Customer.findOneAndUpdate({ phone: phone }, { step: 3 });
+                                }
+                            })
                     }
                     else {
                         return res.status(200).json({

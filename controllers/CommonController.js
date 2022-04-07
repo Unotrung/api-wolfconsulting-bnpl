@@ -68,10 +68,10 @@ const CommonController = {
     updateStep: async (req, res, next) => {
         try {
             let phone = req.body.phone;
-            let step = req.body.step;
+            let step = req.body.process;
             if (phone !== null && phone !== '' && step !== null && step !== '') {
-                if (step === 'not_exist') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'not_exist' } }).then((data, err) => {
+                if (step === 0) {
+                    await Customer.updateOne({ phone: phone }, { $set: { step: 0 } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
                                 message: `Update step successfully for phone ${phone}`,
@@ -89,8 +89,8 @@ const CommonController = {
                         }
                     });
                 }
-                else if (step === 'register_success') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'register_success' } }).then((data, err) => {
+                else if (step === 1) {
+                    await Customer.updateOne({ phone: phone }, { $set: { step: 1 } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
                                 message: `Update step successfully for phone ${phone}`,
@@ -108,8 +108,8 @@ const CommonController = {
                         }
                     });
                 }
-                else if (step === 'kyc_process') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_process' } }).then((data, err) => {
+                else if (step === 2) {
+                    await Customer.updateOne({ phone: phone }, { $set: { step: 2 } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
                                 message: `Update step successfully for phone ${phone}`,
@@ -127,8 +127,8 @@ const CommonController = {
                         }
                     });
                 }
-                else if (step === 'kyc_completed') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_completed' } }).then((data, err) => {
+                else if (step === 3) {
+                    await Customer.updateOne({ phone: phone }, { $set: { step: 3 } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
                                 message: `Update step successfully for phone ${phone}`,
@@ -146,8 +146,8 @@ const CommonController = {
                         }
                     });
                 }
-                else if (step === 'kyc_failure') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_failure' } }).then((data, err) => {
+                else if (step === 4) {
+                    await Customer.updateOne({ phone: phone }, { $set: { step: 4 } }).then((data, err) => {
                         if (!err) {
                             return res.status(201).json({
                                 message: `Update step successfully for phone ${phone}`,
