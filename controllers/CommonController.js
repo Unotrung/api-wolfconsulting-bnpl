@@ -196,8 +196,6 @@ const CommonController = {
         }
     },
 
-
-
 };
 
 module.exports = CommonController;
