@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const middlewareController = {
+const MiddlewareController = {
 
     verifyToken: (req, res, next) => {
         try {
@@ -28,7 +28,7 @@ const middlewareController = {
 
     VerifyTokenByMySelf: (req, res, next) => {
         try {
-            middlewareController.verifyToken(req, res, () => {
+            MiddlewareController.verifyToken(req, res, () => {
                 if (req.user.id === req.params.id || req.user.phone === req.params.phone || req.user.phone === req.body.phone) {
                     next();
                 }
@@ -44,4 +44,4 @@ const middlewareController = {
 
 }
 
-module.exports = middlewareController;
+module.exports = MiddlewareController;

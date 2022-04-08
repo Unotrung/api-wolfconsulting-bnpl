@@ -1,6 +1,7 @@
 const OtpConfig = require('../models/otp_config')
 
 const OtpConfigController = {
+
     getOtpConfig: async (req, res, next) => {
         const otpConfig = await OtpConfig.find();
         if (otpConfig.length > 0) {
@@ -17,7 +18,8 @@ const OtpConfigController = {
             })
         }
     },
-    postOtpConfig : async (req, res, next) => {
+
+    postOtpConfig: async (req, res, next) => {
         if (req.error) {
             return res.status(401).json({
                 message: 'key invalid'
@@ -27,15 +29,15 @@ const OtpConfigController = {
         if (config !== null && config !== '') {
             if (config === 'EMAIL' || config === 'SMS') {
                 const otpConfig = await OtpConfig.findOne()
-                if (! otpConfig) {
-                    const otp = await new OtpConfig({config})
+                if (!otpConfig) {
+                    const otp = await new OtpConfig({ config })
                     await otp.save()
                     return res.status(200).json({
                         message: 'Save successful',
                         status: true
                     })
                 }
-                OtpConfig.findByIdAndUpdate(otpConfig._id, {config},
+                OtpConfig.findByIdAndUpdate(otpConfig._id, { config },
                     (err, doc) => {
                         if (err) {
                             next(err)
@@ -46,7 +48,7 @@ const OtpConfigController = {
                                 status: true
                             })
                         }
-                })
+                    })
             }
             else {
                 return res.status(200).json({
@@ -62,7 +64,8 @@ const OtpConfigController = {
             })
         }
     },
-    putOtpConfig : async (req, res, next) => {
+
+    putOtpConfig: async (req, res, next) => {
         if (req.error) {
             return res.status(401).json({
                 message: 'key invalid'
@@ -72,15 +75,15 @@ const OtpConfigController = {
         if (config !== null && config !== '') {
             if (config === 'EMAIL' || config === 'SMS') {
                 const otpConfig = await OtpConfig.findOne()
-                if (! otpConfig) {
-                    const otp = await new OtpConfig({config})
+                if (!otpConfig) {
+                    const otp = await new OtpConfig({ config })
                     await otp.save()
                     return res.status(200).json({
                         message: 'Create successful',
                         status: true
                     })
                 }
-                OtpConfig.findByIdAndUpdate(otpConfig._id, {config},
+                OtpConfig.findByIdAndUpdate(otpConfig._id, { config },
                     (err, doc) => {
                         if (err) {
                             next(err)
@@ -107,5 +110,6 @@ const OtpConfigController = {
             })
         }
     }
+
 }
 module.exports = OtpConfigController;
