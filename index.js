@@ -15,6 +15,7 @@ const { v4: uuid } = require('uuid');
 const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
 const commonRoute = require('./routers/CommonRouter');
+const otpConfigRoute = require('./routers/otpConfigRouter')
 
 dotenv.config();
 
@@ -56,6 +57,8 @@ app.use(limiter);
 app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
+app.use('/v1/bnpl/otp_config', otpConfigRoute)
+
 
 app.use((req, res, next) => {
     next(createError.NotFound('This route dose not exists !'));
