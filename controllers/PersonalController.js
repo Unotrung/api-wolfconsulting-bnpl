@@ -59,7 +59,7 @@ const PersonalController = {
 
                 const items = await Item.find({});
                 const arrayItem = [];
-                items.map((item) => { arrayItem.push(item._id) });
+                items.map((item) => { arrayItem.push(item) });
 
                 const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
 
