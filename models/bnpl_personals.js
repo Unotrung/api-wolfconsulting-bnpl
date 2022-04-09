@@ -50,8 +50,7 @@ const bnpl_personalSchema = new mongoose.Schema({
         required: [true, 'Ward is required'],
     },
     street: {
-        type: String,
-        required: [true, 'Street is required'],
+        type: String
     },
     personal_title_ref: {
         type: String,
