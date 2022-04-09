@@ -25,9 +25,11 @@ router.post("/addInfoPersonal",
             .isLength({ min: 1 }).withMessage('Minimum length of ward is 1')
             .isLength({ max: 64 }).withMessage('Maximum length of ward is 64'),
 
-        check('street')
+        // FIXME: thôn/xóm không có tên đường
+        /*check('street')
             .isLength({ min: 1 }).withMessage('Minimum length of street is 1')
             .isLength({ max: 64 }).withMessage('Maximum length of street is 64'),
+            */
 
         check('name_ref')
             .isLength({ min: 1 }).withMessage('Minimum length of name ref is 1')
