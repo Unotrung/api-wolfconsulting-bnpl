@@ -9,7 +9,7 @@ router.post("/checkPhoneExists",
     UserController.checkPhoneExists);
 
 router.post("/checkNidExists",
-    [check('nid').matches(/^\d{12}$/).withMessage('Nid only accept numbers. Minimum and maximum length of nid is 12')],
+    [check('nid').matches(/^\d{12}$|^\d{9}$/).withMessage('Nid only accept numbers. Length of nid is 9 or 12')],
     UserController.checkNidExists);
 
 router.post("/sendOtp",
@@ -37,14 +37,14 @@ router.post("/login",
 router.post("/sendOtpPin",
     [
         check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),
-        check('nid').matches(/^\d{12}$/).withMessage('Nid only accept numbers. Minimum and maximum length of nid is 12'),
+        check('nid').matches(/^\d{12}$|^\d{9}$/).withMessage('Nid only accept numbers. Length of nid is 9 or 12'),
     ],
     UserController.sendOtpPin);
 
 router.post("/verifyOtpPin",
     [
         check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),
-        check('nid').matches(/^\d{12}$/).withMessage('Nid only accept numbers. Minimum and maximum length of nid is 12'),
+        check('nid').matches(/^\d{12}$|^\d{9}$/).withMessage('Nid only accept numbers. Length of nid is 9 or 12'),
     ],
     UserController.verifyOtpPin);
 
