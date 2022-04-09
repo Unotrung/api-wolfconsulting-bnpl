@@ -7,7 +7,7 @@ router.post("/addInfoPersonal",
     [
         check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),
 
-        check('citizenId').matches(/^\d{12}$|^\d{9}$/).withMessage('Nid only accept numbers. Minimum and maximum length of nid is 12'),
+        check('citizenId').matches(/^\d{12}$|^\d{9}$/).withMessage('Nid only accept numbers. Length of nid is 9 or 12'),
 
         check('name')
             .isLength({ min: 1 }).withMessage('Minimum length of name is 1')
