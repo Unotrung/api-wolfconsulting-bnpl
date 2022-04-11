@@ -53,7 +53,7 @@ router.put("/resetPin",
         check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),
         check('new_pin').matches(/^\d{4}$/).withMessage('New pin codes only accept numbers. Minimum and maximum length of new pin is 4'),
     ],
-    MiddlewareController.VerifyTokenByMySelf, UserController.resetPin);
+    MiddlewareController.verifyTokenByMySelf, UserController.resetPin);
 
 router.put("/updatePin",
     [

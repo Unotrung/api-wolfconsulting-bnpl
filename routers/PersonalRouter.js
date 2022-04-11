@@ -49,8 +49,8 @@ router.put("/registerProvider",
 
 router.put("/updateTenor",
     [check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),],
-    MiddlewareController.VerifyTokenByMySelf, PersonalController.updateTenor);
+    MiddlewareController.verifyTokenByMySelf, PersonalController.updateTenor);
 
-router.get("/:phone", MiddlewareController.VerifyTokenByMySelf, PersonalController.getInfomation);
+router.get("/:phone", MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
 
 module.exports = router;

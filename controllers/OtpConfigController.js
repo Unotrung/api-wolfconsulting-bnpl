@@ -34,7 +34,7 @@ const OtpConfigController = {
             const config = req.body.otp_config;
             if (config !== null && config !== '') {
                 if (config === 'EMAIL' || config === 'SMS') {
-                    const otpConfig = await OtpConfig.findOne({ config: config })
+                    const otpConfig = await OtpConfig.findOne()
                     if (!otpConfig) {
                         const otp = await new OtpConfig({ config })
                         await otp.save()
