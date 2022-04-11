@@ -20,4 +20,7 @@ const bnpl_customerSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+const secret = process.env.SECRET_MONGOOSE;
+bnpl_personalSchema.plugin(encrypt, { secret: secret, encryptedFields: ['phone', 'pin'] });
+
 module.exports = mongoose.model('bnpl_customer', bnpl_customerSchema);
