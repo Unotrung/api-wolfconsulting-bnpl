@@ -70,9 +70,6 @@ const PersonalController = {
                             name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(items)], arrayItem[PersonalController.randomIndex(items)]],
                             credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
                         });
-                        console.log('Item 1: ', arrayItem[PersonalController.randomIndex(items)]);
-                        console.log('Item 2: ', arrayItem[PersonalController.randomIndex(items)]);
-                        console.log('Credit limit: ', arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)]);
                         await personal.save().then(async (data, err) => {
                             if (!err) {
                                 const { ...others } = data._doc;

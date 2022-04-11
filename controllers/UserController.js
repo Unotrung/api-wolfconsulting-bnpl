@@ -7,7 +7,6 @@ const otpGenerator = require('otp-generator');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
 const { validationResult } = require('express-validator');
-const { decrypt_data, encrypt_data } = require('../helpers/encrypt_decrypt');
 
 let refreshTokens = [];
 
@@ -272,7 +271,7 @@ const UserController = {
             else {
                 if (PHONE !== null && PHONE !== '') {
                     const dataTemp = new Otp({ phone: PHONE, otp: OTP });
-                    const result = await dataTemp.save((err) => {
+                    await dataTemp.save((err) => {
                         if (!err) {
                             return res.status(200).json({
                                 message: "Send otp successfully",
@@ -381,7 +380,7 @@ const UserController = {
                         const validNid = nids.find(x => x.citizenId === NID);
                         if (validNid && validPhone.phone === validNid.phone) {
                             const dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID });
-                            const result = await dataTemp.save((err) => {
+                            await dataTemp.save((err) => {
                                 if (!err) {
                                     return res.status(200).json({
                                         message: "Send otp successfully",
@@ -624,8 +623,6 @@ const UserController = {
             next(err);
         }
     },
-
-
 
 };
 

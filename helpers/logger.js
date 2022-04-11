@@ -1,6 +1,5 @@
 const { createLogger, format, transports } = require('winston');
-const { combine, errors, timestamp, colorize, printf } = format;
-const winstonMongodb = require('winston-mongodb');
+const { combine, errors, timestamp, printf } = format;
 const path = require('path');
 
 function buildProdLogger(level, name) {
