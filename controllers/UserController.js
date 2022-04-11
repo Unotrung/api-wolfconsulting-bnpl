@@ -328,11 +328,25 @@ const UserController = {
                             await Otp.deleteMany({ phone: lastOtp.phone })
                                 .then(async (data, err) => {
                                     if (!err) {
-                                        await Customer.updateOne({ phone: PHONE }, { $set: { step: 4 } });
-                                        return res.status(200).json({
-                                            message: "Successfully. OTP valid",
-                                            status: true,
-                                        })
+                                        const users = await Customer.find();
+                                        const user = users.find(x => x.phone === PHONE);
+                                        if (user) {
+                                            user.step = 4;
+                                            await user.save()
+                                                .then((data) => {
+                                                    return res.status(200).json({
+                                                        message: "Successfully. OTP valid",
+                                                        status: true,
+                                                    })
+                                                })
+                                                .catch((err) => {
+                                                    return res.status(200).json({
+                                                        errorStatus: err.status || 500,
+                                                        errorMessage: err.message,
+                                                        status: false,
+                                                    })
+                                                })
+                                        }
                                     }
                                 })
                         }
