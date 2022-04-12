@@ -213,33 +213,41 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                    const users = await Customer.find();
-                    const user = users.find(x => x.phone === PHONE);
-                    if (!user) {
-                        return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
-                    }
-                    const valiPin = await bcrypt.compare(PIN, user.pin);
-                    if (!valiPin) {
-                        return res.status(200).json({ message: "Wrong pin. Please try again !", status: false });
-                    }
-                    if (user && valiPin) {
-                        const accessToken = UserController.generateAccessToken(user);
-                        const refreshToken = UserController.generateRefreshToken(user);
-                        refreshTokens.push(refreshToken);
-                        res.cookie("refreshToken", refreshToken, {
-                            httpOnly: true,
-                            secure: false,
-                            path: '/',
-                            sameSite: 'strict',
-                        });
-                        const { pin, __v, ...others } = user._doc;
-                        buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                    if (PHONE === "0312312399") {
                         return res.status(200).json({
-                            message: "Login successfully",
-                            data: { ...others },
-                            token: accessToken,
-                            status: true,
+                            message: "This phone is block. You have no rights. Please contact for help !",
+                            status: false
                         });
+                    }
+                    else {
+                        const users = await Customer.find();
+                        const user = users.find(x => x.phone === PHONE);
+                        if (!user) {
+                            return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
+                        }
+                        const valiPin = await bcrypt.compare(PIN, user.pin);
+                        if (!valiPin) {
+                            return res.status(200).json({ message: "Wrong pin. Please try again !", status: false });
+                        }
+                        if (user && valiPin) {
+                            const accessToken = UserController.generateAccessToken(user);
+                            const refreshToken = UserController.generateRefreshToken(user);
+                            refreshTokens.push(refreshToken);
+                            res.cookie("refreshToken", refreshToken, {
+                                httpOnly: true,
+                                secure: false,
+                                path: '/',
+                                sameSite: 'strict',
+                            });
+                            const { pin, __v, ...others } = user._doc;
+                            buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                            return res.status(200).json({
+                                message: "Login successfully",
+                                data: { ...others },
+                                token: accessToken,
+                                status: true,
+                            });
+                        }
                     }
                 }
                 else {
