@@ -3,11 +3,19 @@ const MiddlewareController = require('../controllers/MiddlewareController');
 const { check } = require('express-validator');
 const router = require("express").Router();
 
+const formatPhone = /^(09|03|07|08|05)+([0-9]{8}$)/;
+const formatNid = /^\d{12}$|^\d{9}$/;
+const formatPin = /^\d{4}$/;
+const errMessagePhone = 'Invalid phone number format';
+const errMessageRefPhone = 'Invalid phone ref number format'
+const errMessageNid = 'Nid only accepts numbers. Length of nid is 9 or 12';
+const errMessagePin = 'Pin codes only accepts numbers. Length of pin is 4';
+
 router.post("/addInfoPersonal",
     [
-        check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),
+        check('phone').matches(formatPhone).withMessage(errMessagePhone),
 
-        check('citizenId').matches(/^\d{12}$|^\d{9}$/).withMessage('Nid only accept numbers. Length of nid is 9 or 12'),
+        check('citizenId').matches(formatNid).withMessage(errMessageNid),
 
         check('name')
             .isLength({ min: 1 }).withMessage('Minimum length of name is 1')
@@ -29,26 +37,26 @@ router.post("/addInfoPersonal",
         /*check('street')
             .isLength({ min: 1 }).withMessage('Minimum length of street is 1')
             .isLength({ max: 64 }).withMessage('Maximum length of street is 64'),
-            */
+        */
 
         check('name_ref')
             .isLength({ min: 1 }).withMessage('Minimum length of name ref is 1')
             .isLength({ max: 255 }).withMessage('Maximum length of name ref is 255'),
 
-        check('phone_ref').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone ref number format'),
+        check('phone_ref').matches(formatPhone).withMessage(errMessageRefPhone),
 
-        check('pin').matches(/^\d{4}$/).withMessage('Pin codes only accept numbers. Minimum and maximum length of pin is 4'),
+        check('pin').matches(formatPin).withMessage(errMessagePin),
     ],
     PersonalController.addInfoPersonal);
 
 router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
 
 router.put("/registerProvider",
-    [check('nid').matches(/^\d{12}$/).withMessage('Nid only accept numbers. Minimum and maximum length of nid is 12')],
+    [check('nid').matches(formatNid).withMessage(errMessageNid)],
     PersonalController.registerProvider);
 
 router.put("/updateTenor",
-    [check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),],
+    [check('phone').matches(formatPhone).withMessage(errMessagePhone),],
     MiddlewareController.verifyTokenByMySelf, PersonalController.updateTenor);
 
 router.get("/:phone", MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);

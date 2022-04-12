@@ -164,9 +164,9 @@ const UserController = {
                         const hashed = await bcrypt.hash(PIN, salt);
                         const user = await new Customer({ phone: PHONE, pin: hashed, step: 2 });
                         const accessToken = UserController.generateAccessToken(user);
-                        const result = await user.save((err, data) => {
+                        await user.save((err, data) => {
                             if (!err) {
-                                const { pin, ...others } = data._doc;
+                                const { pin, __v, ...others } = data._doc;
                                 buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(201).json({
                                     message: "Register successfully",
@@ -232,7 +232,7 @@ const UserController = {
                             path: '/',
                             sameSite: 'strict',
                         });
-                        const { pin, ...others } = user._doc;
+                        const { pin, __v, ...others } = user._doc;
                         buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                         return res.status(200).json({
                             message: "Login successfully",
@@ -510,24 +510,24 @@ const UserController = {
                     if (user) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(NEW_PIN, salt);
-                        await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
-                            if (!err) {
+                        user.pin = hashed;
+                        await user.save()
+                            .then((data) => {
                                 buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-                                return res.status(201).json({
+                                return res.status(200).json({
                                     message: "Reset pin successfully",
                                     status: true
                                 })
-                            }
-                            else {
+                            })
+                            .catch((err) => {
                                 buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(200).json({
                                     message: "Reset pin failure",
                                     status: false,
                                     errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                });
-                            }
-                        })
+                                    errorMessage: err.message,
+                                })
+                            })
                     }
                     else {
                         return res.status(200).json({
@@ -569,24 +569,24 @@ const UserController = {
                         if (validPin) {
                             const salt = await bcrypt.genSalt(10);
                             const hashed = await bcrypt.hash(NEW_PIN, salt);
-                            await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
-                                if (!err) {
+                            user.pin = hashed;
+                            await user.save()
+                                .then((data) => {
                                     buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                     return res.status(201).json({
                                         message: "Update pin successfully",
                                         status: true
                                     })
-                                }
-                                else {
+                                })
+                                .catch((err) => {
                                     buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                     return res.status(200).json({
                                         message: "Update pin failure",
                                         status: false,
                                         errorStatus: err.status || 500,
                                         errorMessage: err.message
-                                    });
-                                }
-                            })
+                                    })
+                                })
                         }
                         else {
                             return res.status(200).json({
@@ -618,10 +618,15 @@ const UserController = {
     getAllUser: async (req, res, next) => {
         try {
             const users = await Customer.find();
+            let result = [];
+            users.map((user, index) => {
+                let { pin, __v, ...others } = user._doc;
+                result.push({ ...others });
+            });
             if (users.length > 0) {
                 return res.status(200).json({
                     count: users.length,
-                    data: users,
+                    data: result,
                     message: "Get list user success",
                     status: true
                 })
