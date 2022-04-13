@@ -73,6 +73,12 @@ const UserController = {
                             errCode: 1002,
                         });
                     }
+                    else if (phone === "0312312399") {
+                        return res.status(200).json({
+                            message: "This phone is block. You have no rights. Please contact for help !",
+                            status: false
+                        });
+                    }
                     else {
                         return res.status(200).json({
                             message: "This phone number is not exists !",
