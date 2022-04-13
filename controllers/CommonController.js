@@ -45,7 +45,7 @@ const CommonController = {
 
     getAllTenor: async (req, res, next) => {
         try {
-            const tenors = await Tenor.find();
+            const tenors = await Tenor.find().select("_id convertFee paymentSchedule createdAt updatedAt");
             if (tenors.length > 0) {
                 return res.status(200).json({
                     count: tenors.length,
@@ -82,99 +82,118 @@ const CommonController = {
                     const customers = await Customer.find();
                     const customer = customers.find(x => x.phone === phone);
                     if (step === 0) {
-                        await customer.updateOne({ $set: { step: 0 } }).then((data, err) => {
-                            if (!err) {
+                        customer.step = 0
+                        await customer.save()
+                            .then((data) => {
                                 return res.status(201).json({
                                     message: `Update step successfully for phone ${phone}`,
                                     step: data.step,
                                     status: true
                                 })
-                            }
-                            else {
+                            })
+                            .catch((err) => {
                                 return res.status(200).json({
                                     message: `Update step failure for phone ${phone}`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
                                 })
-                            }
-                        });
+                            })
                     }
                     else if (step === 1) {
-                        await customer.updateOne({ $set: { step: 1 } }).then((data, err) => {
-                            if (!err) {
+                        customer.step = 1
+                        await customer.save()
+                            .then((data) => {
                                 return res.status(201).json({
                                     message: `Update step successfully for phone ${phone}`,
                                     step: data.step,
                                     status: true
                                 })
-                            }
-                            else {
+                            })
+                            .catch((err) => {
                                 return res.status(200).json({
                                     message: `Update step failure for phone ${phone}`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
                                 })
-                            }
-                        });
+                            })
                     }
                     else if (step === 2) {
-                        await customer.updateOne({ $set: { step: 2 } }).then((data, err) => {
-                            if (!err) {
+                        customer.step = 2
+                        await customer.save()
+                            .then((data) => {
                                 return res.status(201).json({
                                     message: `Update step successfully for phone ${phone}`,
                                     step: data.step,
                                     status: true
                                 })
-                            }
-                            else {
+                            })
+                            .catch((err) => {
                                 return res.status(200).json({
                                     message: `Update step failure for phone ${phone}`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
                                 })
-                            }
-                        });
+                            })
                     }
                     else if (step === 3) {
-                        await customer.updateOne({ $set: { step: 3 } }).then((data, err) => {
-                            if (!err) {
+                        customer.step = 3
+                        await customer.save()
+                            .then((data) => {
                                 return res.status(201).json({
                                     message: `Update step successfully for phone ${phone}`,
                                     step: data.step,
                                     status: true
                                 })
-                            }
-                            else {
+                            })
+                            .catch((err) => {
                                 return res.status(200).json({
                                     message: `Update step failure for phone ${phone}`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
                                 })
-                            }
-                        });
+                            })
                     }
                     else if (step === 4) {
-                        await customer.updateOne({ $set: { step: 4 } }).then((data, err) => {
-                            if (!err) {
+                        customer.step = 4
+                        await customer.save()
+                            .then((data) => {
                                 return res.status(201).json({
                                     message: `Update step successfully for phone ${phone}`,
                                     step: data.step,
                                     status: true
                                 })
-                            }
-                            else {
+                            })
+                            .catch((err) => {
                                 return res.status(200).json({
                                     message: `Update step failure for phone ${phone}`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
                                 })
-                            }
-                        });
+                            })
+                    }
+                    else if (step === 5) {
+                        customer.step = 5
+                        await customer.save()
+                            .then((data) => {
+                                return res.status(201).json({
+                                    message: `Update step successfully for phone ${phone}`,
+                                    step: data.step,
+                                    status: true
+                                })
+                            })
+                            .catch((err) => {
+                                return res.status(200).json({
+                                    message: `Update step failure for phone ${phone}`,
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                })
+                            })
                     }
                     else {
                         return res.status(200).json({

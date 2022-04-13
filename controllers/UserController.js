@@ -75,6 +75,12 @@ const UserController = {
                             errCode: 1002,
                         });
                     }
+                    else if (phone === "0312312399") {
+                        return res.status(200).json({
+                            message: "This phone is block. You have no rights. Please contact for help !",
+                            status: false
+                        });
+                    }
                     else {
                         return res.status(200).json({
                             message: "This phone number is not exists !",
@@ -141,6 +147,52 @@ const UserController = {
         }
     },
 
+    checkNidPhoneExists: async (req, res, next) => {
+        try {
+            let nid = req.body.nid;
+            let phone = req.body.phone;
+            const validData = validationResult(req);
+            if (validData.errors.length > 0) {
+                return res.status(200).json({
+                    message: validData.errors[0].msg,
+                    status: false
+                });
+            }
+            else {
+                if (nid !== null && nid !== '' && phone !== null && phone !== '') {
+                    const users = await Personal.find();
+                    const user = users.find(x => x.citizenId === nid && x.phone === phone);
+                    if (user) {
+                        return res.status(200).json({
+                            data: {
+                                _id: user.id,
+                                nid: user.citizenId,
+                                phone: user.phone
+                            },
+                            message: "This nid and phone is already exists !",
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "This nid and phone is not exists !",
+                            status: false,
+                        });
+                    }
+                }
+                else {
+                    return res.status(200).json({
+                        message: "Please enter your nid and phone. Do not leave any field blank !",
+                        status: false
+                    });
+                }
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
     register: async (req, res, next) => {
         try {
             let PHONE = req.body.phone;
@@ -166,15 +218,11 @@ const UserController = {
                         const hashed = await bcrypt.hash(PIN, salt);
                         const user = await new Customer({ phone: PHONE, pin: hashed, step: 2 });
                         const accessToken = UserController.generateAccessToken(user);
-                        const result = await user.save((err, data) => {
+                        await user.save((err, data) => {
                             if (!err) {
-                                // console.log('new user event')
-                                pubsub.publish('new_user_event', { newUserEvent: {
-                                        id: '123',
-                                        name: 'Phung',
-                                        credit_limit: '1000000000'
-                                    }})
-                                const { pin, ...others } = data._doc;
+
+                                const { pin, __v, ...others } = data._doc;
+
                                 buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(201).json({
                                     message: "Register successfully",
@@ -221,33 +269,41 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                    const users = await Customer.find();
-                    const user = users.find(x => x.phone === PHONE);
-                    if (!user) {
-                        return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
-                    }
-                    const valiPin = await bcrypt.compare(PIN, user.pin);
-                    if (!valiPin) {
-                        return res.status(200).json({ message: "Wrong pin. Please try again !", status: false });
-                    }
-                    if (user && valiPin) {
-                        const accessToken = UserController.generateAccessToken(user);
-                        const refreshToken = UserController.generateRefreshToken(user);
-                        refreshTokens.push(refreshToken);
-                        res.cookie("refreshToken", refreshToken, {
-                            httpOnly: true,
-                            secure: false,
-                            path: '/',
-                            sameSite: 'strict',
-                        });
-                        const { pin, ...others } = user._doc;
-                        buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                    if (PHONE === "0312312399") {
                         return res.status(200).json({
-                            message: "Login successfully",
-                            data: { ...others },
-                            token: accessToken,
-                            status: true,
+                            message: "This phone is block. You have no rights. Please contact for help !",
+                            status: false
                         });
+                    }
+                    else {
+                        const users = await Customer.find();
+                        const user = users.find(x => x.phone === PHONE);
+                        if (!user) {
+                            return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
+                        }
+                        const valiPin = await bcrypt.compare(PIN, user.pin);
+                        if (!valiPin) {
+                            return res.status(200).json({ message: "Wrong pin. Please try again !", status: false });
+                        }
+                        if (user && valiPin) {
+                            const accessToken = UserController.generateAccessToken(user);
+                            const refreshToken = UserController.generateRefreshToken(user);
+                            refreshTokens.push(refreshToken);
+                            res.cookie("refreshToken", refreshToken, {
+                                httpOnly: true,
+                                secure: false,
+                                path: '/',
+                                sameSite: 'strict',
+                            });
+                            const { pin, __v, ...others } = user._doc;
+                            buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                            return res.status(200).json({
+                                message: "Login successfully",
+                                data: { ...others },
+                                token: accessToken,
+                                status: true,
+                            });
+                        }
                     }
                 }
                 else {
@@ -518,24 +574,24 @@ const UserController = {
                     if (user) {
                         const salt = await bcrypt.genSalt(10);
                         const hashed = await bcrypt.hash(NEW_PIN, salt);
-                        await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
-                            if (!err) {
+                        user.pin = hashed;
+                        await user.save()
+                            .then((data) => {
                                 buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-                                return res.status(201).json({
+                                return res.status(200).json({
                                     message: "Reset pin successfully",
                                     status: true
                                 })
-                            }
-                            else {
+                            })
+                            .catch((err) => {
                                 buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(200).json({
                                     message: "Reset pin failure",
                                     status: false,
                                     errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                });
-                            }
-                        })
+                                    errorMessage: err.message,
+                                })
+                            })
                     }
                     else {
                         return res.status(200).json({
@@ -577,24 +633,24 @@ const UserController = {
                         if (validPin) {
                             const salt = await bcrypt.genSalt(10);
                             const hashed = await bcrypt.hash(NEW_PIN, salt);
-                            await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
-                                if (!err) {
+                            user.pin = hashed;
+                            await user.save()
+                                .then((data) => {
                                     buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                     return res.status(201).json({
                                         message: "Update pin successfully",
                                         status: true
                                     })
-                                }
-                                else {
+                                })
+                                .catch((err) => {
                                     buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                     return res.status(200).json({
                                         message: "Update pin failure",
                                         status: false,
                                         errorStatus: err.status || 500,
                                         errorMessage: err.message
-                                    });
-                                }
-                            })
+                                    })
+                                })
                         }
                         else {
                             return res.status(200).json({
@@ -626,10 +682,15 @@ const UserController = {
     getAllUser: async (req, res, next) => {
         try {
             const users = await Customer.find();
+            let result = [];
+            users.map((user, index) => {
+                let { pin, __v, ...others } = user._doc;
+                result.push({ ...others });
+            });
             if (users.length > 0) {
                 return res.status(200).json({
                     count: users.length,
-                    data: users,
+                    data: result,
                     message: "Get list user success",
                     status: true
                 })

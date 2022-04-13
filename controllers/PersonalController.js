@@ -134,9 +134,14 @@ const PersonalController = {
                 var skipItem = (page - 1) * PAGE_SIZE;
                 const sort = sortValue === 1 ? `${sortByField}` : `-${(sortByField)}`;
                 const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
+                let arrPersonals = [];
+                result.map((user, index) => {
+                    let { pin, __v, ...others } = user._doc;
+                    arrPersonals.push({ ...others });
+                })
                 return res.status(200).json({
                     message: "Get list BNPL user success",
-                    data: result,
+                    data: arrPersonals,
                     totalItem: totalItem,
                     totalPage: totalPage,
                     currentPage: page,
@@ -163,9 +168,10 @@ const PersonalController = {
             let personals = await Personal.find().populate('providers').populate('items').populate('tenor');
             let personal = personals.find(x => x.phone === phone);
             if (personal) {
+                const { __v, ...others } = personal._doc;
                 return res.status(200).json({
                     message: "Get information of personal successfully",
-                    data: personal,
+                    data: { ...others },
                     status: true
                 });
             }
@@ -196,7 +202,7 @@ const PersonalController = {
                 if (provider !== null && provider !== '' && nid !== null && nid !== '') {
                     let validProvider = await Provider.findOne({ provider: provider });
                     let nids = await Personal.find();
-                    let validNid = nids.find(x => x.citizenId === nid)
+                    let validNid = nids.find(x => x.citizenId === nid);
                     if (validNid) {
                         await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
                             if (!err) {
