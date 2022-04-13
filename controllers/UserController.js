@@ -707,6 +707,34 @@ const UserController = {
         }
     },
 
+    updateESignUser: async (req, res, next) => {
+        try {
+            console.log(req.error)
+            if (req.error) {
+                return res.status(401).json({
+                    message: 'You are not authorize'
+                })
+            }
+            const {id, tenors, credit_limit, name} = req.body
+            if (!id || !credit_limit || !name || tenors.length === 0) {
+                return res.status(400).json({
+                    message: 'Bad request'
+                })
+            }
+            const customers = await Customer.find()
+            const user = customers.find(customer => customer._id === id)
+            if (! user) return res.status(400).json({
+                message: 'Bad request'
+            })
+            //todo: update user status esign confirm here
+
+            //public an event
+            await pubsub.publish('new_user_event', {newUserEvent : {id, name, credit_limit}})
+        } catch (e) {
+            next(e)
+        }
+    }
+
 };
 
 module.exports = UserController;

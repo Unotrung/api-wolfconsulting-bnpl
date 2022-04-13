@@ -1,6 +1,7 @@
 const UserController = require('../controllers/UserController');
 const MiddlewareController = require('../controllers/MiddlewareController');
 const { check } = require('express-validator');
+const { master } = require('../helpers/auth')
 
 const router = require("express").Router();
 
@@ -79,5 +80,7 @@ router.put("/updatePin",
     UserController.updatePin);
 
 router.get("/getAllUser", UserController.getAllUser);
+
+router.post("/eSignUser", master ,UserController.updateESignUser)
 
 module.exports = router;

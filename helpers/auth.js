@@ -4,13 +4,13 @@ dotenv.config()
 const master = async (req, res, next) => {
     try {
         const masterKey = req.query.masterKey
-        console.log('master')
-        if (!masterKey || masterKey !== process.env.masterKey) {
+
+        if (!masterKey || masterKey !== process.env.MASTER_KEY) {
             req.error = new Error('Authenticate error')
             req.error.code = 401
             return next()
         }
-        req.isAuthenticad = true
+        req.isAuthenticated = true
         return next()
     }
     catch (err) {
