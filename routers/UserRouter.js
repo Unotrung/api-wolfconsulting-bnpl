@@ -20,6 +20,13 @@ router.post("/checkNidExists",
     [check('nid').matches(formatNid).withMessage(errMessageNid)],
     UserController.checkNidExists);
 
+router.post("/checkNidPhoneExists",
+    [
+        check('nid').matches(formatNid).withMessage(errMessageNid),
+        check('phone').matches(formatPhone).withMessage(errMessagePhone)
+    ],
+    UserController.checkNidPhoneExists);
+
 router.post("/sendOtp",
     [check('phone').matches(formatPhone).withMessage(errMessagePhone)],
     UserController.sendOtp);

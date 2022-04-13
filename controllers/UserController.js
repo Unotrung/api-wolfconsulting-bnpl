@@ -139,6 +139,52 @@ const UserController = {
         }
     },
 
+    checkNidPhoneExists: async (req, res, next) => {
+        try {
+            let nid = req.body.nid;
+            let phone = req.body.phone;
+            const validData = validationResult(req);
+            if (validData.errors.length > 0) {
+                return res.status(200).json({
+                    message: validData.errors[0].msg,
+                    status: false
+                });
+            }
+            else {
+                if (nid !== null && nid !== '' && phone !== null && phone !== '') {
+                    const users = await Personal.find();
+                    const user = users.find(x => x.citizenId === nid && x.phone === phone);
+                    if (user) {
+                        return res.status(200).json({
+                            data: {
+                                _id: user.id,
+                                nid: user.citizenId,
+                                phone: user.phone
+                            },
+                            message: "This nid and phone is already exists !",
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "This nid and phone is not exists !",
+                            status: false,
+                        });
+                    }
+                }
+                else {
+                    return res.status(200).json({
+                        message: "Please enter your nid and phone. Do not leave any field blank !",
+                        status: false
+                    });
+                }
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
     register: async (req, res, next) => {
         try {
             let PHONE = req.body.phone;
