@@ -10,9 +10,15 @@
   "author": "nguyen trung kien",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "^7.17.9",
+    "@graphql-tools/schema": "^8.3.7",
+    "@graphql-tools/utils": "^8.6.6",
+    "apollo-server": "^3.6.7",
+    "apollo-server-core": "^3.6.7",
     "axios": "^0.26.0",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.2",
+    "bodymen": "^1.1.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -20,6 +26,7 @@
     "date-fns": "^2.28.0",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "express-graphql": "https://gitpkg.now.sh/cofdness/express-graphql/npmDist?chore/graphql-16",
     "express-rate-limit": "^6.3.0",
     "express-validator": "^6.14.0",
     "helmet": "^5.0.2",
@@ -38,6 +45,7 @@
     "rotating-file-stream": "^3.0.3",
     "uuid": "^8.3.2",
     "winston": "^3.6.0",
-    "winston-mongodb": "^5.0.7"
+    "winston-mongodb": "^5.0.7",
+    "ws": "^8.5.0"
   }
 }

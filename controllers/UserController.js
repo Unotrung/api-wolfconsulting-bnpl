@@ -7,6 +7,8 @@ const otpGenerator = require('otp-generator');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
 const { validationResult } = require('express-validator');
+const pubsub = require('../utils/pubsub')
+const {pubSubEvent} = require('../graphql/users/user.resolvers')
 
 let refreshTokens = [];
 
@@ -218,7 +220,9 @@ const UserController = {
                         const accessToken = UserController.generateAccessToken(user);
                         await user.save((err, data) => {
                             if (!err) {
+
                                 const { pin, __v, ...others } = data._doc;
+
                                 buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                 return res.status(201).json({
                                     message: "Register successfully",
