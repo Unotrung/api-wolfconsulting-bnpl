@@ -23,20 +23,20 @@ router.post("/addInfoPersonal",
 
         check('city')
             .isLength({ min: 1 }).withMessage('Minimum length of city is 1')
-            .isLength({ max: 64 }).withMessage('Maximum length of city is 64'),
+            .isLength({ max: 255 }).withMessage('Maximum length of city is 255'),
 
         check('district')
             .isLength({ min: 1 }).withMessage('Minimum length of district is 1')
-            .isLength({ max: 64 }).withMessage('Maximum length of district is 64'),
+            .isLength({ max: 255 }).withMessage('Maximum length of district is 255'),
 
         check('ward')
             .isLength({ min: 1 }).withMessage('Minimum length of ward is 1')
-            .isLength({ max: 64 }).withMessage('Maximum length of ward is 64'),
+            .isLength({ max: 255 }).withMessage('Maximum length of ward is 255'),
 
         // FIXME: thôn/xóm không có tên đường
         /*check('street')
             .isLength({ min: 1 }).withMessage('Minimum length of street is 1')
-            .isLength({ max: 64 }).withMessage('Maximum length of street is 64'),
+            .isLength({ max: 255 }).withMessage('Maximum length of street is 255'),
         */
 
         check('name_ref')
