@@ -55,10 +55,6 @@ const bnpl_personalSchema = new mongoose.Schema({
     personal_title_ref: {
         type: String,
         required: [true, 'Personal Title Ref is required'],
-        enum: {
-            values: ['Ông', 'Bà'],
-            message: 'Personal title ref is only allowed Ông or Bà'
-        },
     },
     name_ref: {
         type: String,
