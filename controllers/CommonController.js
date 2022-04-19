@@ -86,14 +86,14 @@ const CommonController = {
                         await customer.save()
                             .then((data) => {
                                 return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone}`,
+                                    message: `Update step successfully for phone ${phone} (Kyc failure)`,
                                     step: data.step,
                                     status: true
                                 })
                             })
                             .catch((err) => {
                                 return res.status(200).json({
-                                    message: `Update step failure for phone ${phone}`,
+                                    message: `Update step failure for phone ${phone} (Kyc failure)`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
@@ -105,14 +105,14 @@ const CommonController = {
                         await customer.save()
                             .then((data) => {
                                 return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone}`,
+                                    message: `Update step successfully for phone ${phone} (Not exists)`,
                                     step: data.step,
                                     status: true
                                 })
                             })
                             .catch((err) => {
                                 return res.status(200).json({
-                                    message: `Update step failure for phone ${phone}`,
+                                    message: `Update step failure for phone ${phone} (Not exists)`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
@@ -124,14 +124,14 @@ const CommonController = {
                         await customer.save()
                             .then((data) => {
                                 return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone}`,
+                                    message: `Update step successfully for phone ${phone} (Registered success)`,
                                     step: data.step,
                                     status: true
                                 })
                             })
                             .catch((err) => {
                                 return res.status(200).json({
-                                    message: `Update step failure for phone ${phone}`,
+                                    message: `Update step failure for phone ${phone} (Registered fail)`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
@@ -143,14 +143,14 @@ const CommonController = {
                         await customer.save()
                             .then((data) => {
                                 return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone}`,
+                                    message: `Update step successfully for phone ${phone} (Kyc process)`,
                                     step: data.step,
                                     status: true
                                 })
                             })
                             .catch((err) => {
                                 return res.status(200).json({
-                                    message: `Update step failure for phone ${phone}`,
+                                    message: `Update step failure for phone ${phone} (Kyc process)`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
@@ -162,33 +162,14 @@ const CommonController = {
                         await customer.save()
                             .then((data) => {
                                 return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone}`,
+                                    message: `Update step successfully for phone ${phone} (Kyc completed)`,
                                     step: data.step,
                                     status: true
                                 })
                             })
                             .catch((err) => {
                                 return res.status(200).json({
-                                    message: `Update step failure for phone ${phone}`,
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                })
-                            })
-                    }
-                    else if (step === 5) {
-                        customer.step = 5
-                        await customer.save()
-                            .then((data) => {
-                                return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone}`,
-                                    step: data.step,
-                                    status: true
-                                })
-                            })
-                            .catch((err) => {
-                                return res.status(200).json({
-                                    message: `Update step failure for phone ${phone}`,
+                                    message: `Update step failure for phone ${phone} (Kyc completed)`,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message

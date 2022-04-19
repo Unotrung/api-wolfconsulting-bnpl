@@ -36,12 +36,12 @@ router.post("/verifyOtp",
     [check('phone').matches(formatPhone).withMessage(errMessagePhone)],
     UserController.verifyOtp);
 
-router.post("/register",
-    [
-        check('phone').matches(formatPhone).withMessage(errMessagePhone),
-        check('pin').matches(formatPin).withMessage(errMessagePin),
-    ],
-    UserController.register);
+// router.post("/register",
+//     [
+//         check('phone').matches(formatPhone).withMessage(errMessagePhone),
+//         check('pin').matches(formatPin).withMessage(errMessagePin),
+//     ],
+//     UserController.register);
 
 router.post("/login",
     [
@@ -81,6 +81,6 @@ router.put("/updatePin",
 
 router.get("/getAllUser", UserController.getAllUser);
 
-router.post("/eSignUser", master ,UserController.updateESignUser)
+router.post("/eSignUser", master, UserController.updateESignUser)
 
 module.exports = router;

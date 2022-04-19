@@ -50,7 +50,7 @@ const PersonalController = {
                         if (!customerExists) {
                             const salt = await bcrypt.genSalt(10);
                             const hashed = await bcrypt.hash(pin.toString(), salt);
-                            const customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
+                            const customer = await new Customer({ phone: phone, pin: hashed });
                             await customer.save();
                             buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
                         }
@@ -76,7 +76,7 @@ const PersonalController = {
                                 buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                                 const customerList = await Customer.find();
                                 const customerAccount = customerList.find(x => x.phone === phone);
-                                customerAccount.step = 3;
+                                customerAccount.step = 2;
                                 await customerAccount.save()
                                     .then((data, err) => {
                                         if (!err) {

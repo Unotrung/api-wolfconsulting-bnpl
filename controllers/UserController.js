@@ -193,66 +193,66 @@ const UserController = {
         }
     },
 
-    register: async (req, res, next) => {
-        try {
-            let PHONE = req.body.phone;
-            let PIN = req.body.pin;
-            const validData = validationResult(req);
-            if (validData.errors.length > 0) {
-                return res.status(200).json({
-                    message: validData.errors[0].msg,
-                    status: false
-                });
-            }
-            else {
-                if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                    const auths = await Customer.find();
-                    const auth = auths.find(x => x.phone === PHONE);
-                    if (auth) {
-                        return res.status(200).json({
-                            message: "This account is already exists. Please login !",
-                        });
-                    }
-                    else {
-                        const salt = await bcrypt.genSalt(10);
-                        const hashed = await bcrypt.hash(PIN, salt);
-                        const user = await new Customer({ phone: PHONE, pin: hashed, step: 2 });
-                        const accessToken = UserController.generateAccessToken(user);
-                        await user.save((err, data) => {
-                            if (!err) {
-                                const { pin, __v, ...others } = data._doc;
-                                buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-                                return res.status(201).json({
-                                    message: "Register successfully",
-                                    data: { ...others },
-                                    token: accessToken,
-                                    status: true
-                                });
-                            }
-                            else {
-                                buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-                                return res.status(200).json({
-                                    message: "Register failure",
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                });
-                            }
-                        });
-                    }
-                }
-                else {
-                    return res.status(200).json({
-                        message: "Please enter your phone and pin code. Do not leave any fields blank !",
-                        status: false
-                    });
-                }
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
+    // register: async (req, res, next) => {
+    //     try {
+    //         let PHONE = req.body.phone;
+    //         let PIN = req.body.pin;
+    //         const validData = validationResult(req);
+    //         if (validData.errors.length > 0) {
+    //             return res.status(200).json({
+    //                 message: validData.errors[0].msg,
+    //                 status: false
+    //             });
+    //         }
+    //         else {
+    //             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
+    //                 const auths = await Customer.find();
+    //                 const auth = auths.find(x => x.phone === PHONE);
+    //                 if (auth) {
+    //                     return res.status(200).json({
+    //                         message: "This account is already exists. Please login !",
+    //                     });
+    //                 }
+    //                 else {
+    //                     const salt = await bcrypt.genSalt(10);
+    //                     const hashed = await bcrypt.hash(PIN, salt);
+    //                     const user = await new Customer({ phone: PHONE, pin: hashed, step: 2 });
+    //                     const accessToken = UserController.generateAccessToken(user);
+    //                     await user.save((err, data) => {
+    //                         if (!err) {
+    //                             const { pin, __v, ...others } = data._doc;
+    //                             buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+    //                             return res.status(201).json({
+    //                                 message: "Register successfully",
+    //                                 data: { ...others },
+    //                                 token: accessToken,
+    //                                 status: true
+    //                             });
+    //                         }
+    //                         else {
+    //                             buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+    //                             return res.status(200).json({
+    //                                 message: "Register failure",
+    //                                 status: false,
+    //                                 errorStatus: err.status || 500,
+    //                                 errorMessage: err.message
+    //                             });
+    //                         }
+    //                     });
+    //                 }
+    //             }
+    //             else {
+    //                 return res.status(200).json({
+    //                     message: "Please enter your phone and pin code. Do not leave any fields blank !",
+    //                     status: false
+    //                 });
+    //             }
+    //         }
+    //     }
+    //     catch (err) {
+    //         next(err);
+    //     }
+    // },
 
     login: async (req, res, next) => {
         try {
@@ -393,7 +393,7 @@ const UserController = {
                                         const users = await Customer.find();
                                         const user = users.find(x => x.phone === PHONE);
                                         if (user) {
-                                            user.step = 4;
+                                            user.step = 3;
                                             await user.save()
                                                 .then((data) => {
                                                     return res.status(200).json({
@@ -713,7 +713,7 @@ const UserController = {
                     message: 'You are not authorize'
                 })
             }
-            const {id, tenors, credit_limit, name} = req.body
+            const { id, tenors, credit_limit, name } = req.body
             if (!id || !credit_limit || !name || tenors.length === 0) {
                 return res.status(400).json({
                     message: 'Bad request'
@@ -721,13 +721,13 @@ const UserController = {
             }
             const customers = await Customer.find()
             const user = customers.find(customer => customer._id === id)
-            if (! user) return res.status(400).json({
+            if (!user) return res.status(400).json({
                 message: 'Bad request'
             })
             //todo: update user status esign confirm here
 
             //public an event
-            await pubsub.publish('new_user_event', {newUserEvent : {id, name, credit_limit}})
+            await pubsub.publish('new_user_event', { newUserEvent: { id, name, credit_limit } })
         } catch (e) {
             next(e)
         }
