@@ -275,6 +275,10 @@ const UserController = {
                     }
                     else {
                         const users = await Customer.find();
+                        const isBlock = users.find(x => x.deleted === true && x.deletedAt !== null);
+                        if (isBlock) {
+                            return res.status(403).json({ message: "This phone is blocked", status: false });
+                        }
                         const user = users.find(x => x.phone === PHONE);
                         if (!user) {
                             return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
