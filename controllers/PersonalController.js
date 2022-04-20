@@ -50,12 +50,6 @@ const PersonalController = {
                         status: false,
                     });
                 }
-                else if (name === name_ref) {
-                    return res.status(200).json({
-                        message: "The name and the reference name are not allowed to overlap",
-                        status: false,
-                    });
-                }
                 else {
                     if (pin) {
                         if (customers) {
