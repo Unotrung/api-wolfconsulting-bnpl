@@ -193,67 +193,6 @@ const UserController = {
         }
     },
 
-    // register: async (req, res, next) => {
-    //     try {
-    //         let PHONE = req.body.phone;
-    //         let PIN = req.body.pin;
-    //         const validData = validationResult(req);
-    //         if (validData.errors.length > 0) {
-    //             return res.status(200).json({
-    //                 message: validData.errors[0].msg,
-    //                 status: false
-    //             });
-    //         }
-    //         else {
-    //             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-    //                 const auths = await Customer.find();
-    //                 const auth = auths.find(x => x.phone === PHONE);
-    //                 if (auth) {
-    //                     return res.status(200).json({
-    //                         message: "This account is already exists. Please login !",
-    //                     });
-    //                 }
-    //                 else {
-    //                     const salt = await bcrypt.genSalt(10);
-    //                     const hashed = await bcrypt.hash(PIN, salt);
-    //                     const user = await new Customer({ phone: PHONE, pin: hashed, step: 2 });
-    //                     const accessToken = UserController.generateAccessToken(user);
-    //                     await user.save((err, data) => {
-    //                         if (!err) {
-    //                             const { pin, __v, ...others } = data._doc;
-    //                             buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-    //                             return res.status(201).json({
-    //                                 message: "Register successfully",
-    //                                 data: { ...others },
-    //                                 token: accessToken,
-    //                                 status: true
-    //                             });
-    //                         }
-    //                         else {
-    //                             buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-    //                             return res.status(200).json({
-    //                                 message: "Register failure",
-    //                                 status: false,
-    //                                 errorStatus: err.status || 500,
-    //                                 errorMessage: err.message
-    //                             });
-    //                         }
-    //                     });
-    //                 }
-    //             }
-    //             else {
-    //                 return res.status(200).json({
-    //                     message: "Please enter your phone and pin code. Do not leave any fields blank !",
-    //                     status: false
-    //                 });
-    //             }
-    //         }
-    //     }
-    //     catch (err) {
-    //         next(err);
-    //     }
-    // },
-
     login: async (req, res, next) => {
         try {
             let PHONE = req.body.phone;
@@ -267,46 +206,52 @@ const UserController = {
             }
             else {
                 if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                    if (PHONE === "0312312399") {
+                    const deletedUser = await Customer.findDeleted();
+                    const isBlock = deletedUser.find(x => x.deleted === Boolean(true) && x.deletedAt !== null);
+                    if (isBlock) {
+                        return res.status(403).json({ message: "This phone is blocked by admin", status: false });
+                    }
+                    const users = await Customer.find();
+                    const user = users.find(x => x.phone === PHONE);
+                    if (!user) {
+                        return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
+                    }
+                    else if (user) {
+                        if (user.lockUntil && user.lockUntil < Date.now()) {
+                            await user.updateOne({ $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } })
+                        }
+                    }
+                    const valiPin = await bcrypt.compare(PIN, user.pin);
+                    if (!valiPin) {
+                        if (user.loginAttempts === 5 && user.lockUntil > Date.now()) {
+                            return res.status(404).json({ message: "You are logged in failure 5 times so this account is block 24h. Please wait 24 hours to login again !", status: false });
+                        }
+                        else if (user.loginAttempts < 5) {
+                            await user.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { loginAttempts: 1 } });
+                            return res.status(200).json({ message: `Wrong pin. You are logged in failure ${user.loginAttempts + 1} times !`, status: false });
+                        }
+                    }
+                    if (user && valiPin && user.loginAttempts !== 5) {
+                        const accessToken = UserController.generateAccessToken(user);
+                        const refreshToken = UserController.generateRefreshToken(user);
+                        refreshTokens.push(refreshToken);
+                        res.cookie("refreshToken", refreshToken, {
+                            httpOnly: true,
+                            secure: false,
+                            path: '/',
+                            sameSite: 'strict',
+                        });
+                        const { pin, __v, ...others } = user._doc;
+                        buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                         return res.status(200).json({
-                            message: "This phone is block. You have no rights. Please contact for help !",
-                            status: false
+                            message: "Login successfully",
+                            data: { ...others },
+                            token: accessToken,
+                            status: true,
                         });
                     }
                     else {
-                        const deletedUser = await Customer.findDeleted();
-                        const isBlock = deletedUser.find(x => x.deleted === Boolean(true) && x.deletedAt !== null);
-                        if (isBlock) {
-                            return res.status(403).json({ message: "This phone is blocked", status: false });
-                        }
-                        const users = await Customer.find();
-                        const user = users.find(x => x.phone === PHONE);
-                        if (!user) {
-                            return res.status(200).json({ message: "Wrong phone. Please try again !", status: false });
-                        }
-                        const valiPin = await bcrypt.compare(PIN, user.pin);
-                        if (!valiPin) {
-                            return res.status(200).json({ message: "Wrong pin. Please try again !", status: false });
-                        }
-                        if (user && valiPin) {
-                            const accessToken = UserController.generateAccessToken(user);
-                            const refreshToken = UserController.generateRefreshToken(user);
-                            refreshTokens.push(refreshToken);
-                            res.cookie("refreshToken", refreshToken, {
-                                httpOnly: true,
-                                secure: false,
-                                path: '/',
-                                sameSite: 'strict',
-                            });
-                            const { pin, __v, ...others } = user._doc;
-                            buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-                            return res.status(200).json({
-                                message: "Login successfully",
-                                data: { ...others },
-                                token: accessToken,
-                                status: true,
-                            });
-                        }
+                        return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false });
                     }
                 }
                 else {

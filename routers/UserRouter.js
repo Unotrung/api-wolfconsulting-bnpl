@@ -36,13 +36,6 @@ router.post("/verifyOtp",
     [check('phone').matches(formatPhone).withMessage(errMessagePhone)],
     UserController.verifyOtp);
 
-// router.post("/register",
-//     [
-//         check('phone').matches(formatPhone).withMessage(errMessagePhone),
-//         check('pin').matches(formatPin).withMessage(errMessagePin),
-//     ],
-//     UserController.register);
-
 router.post("/login",
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),

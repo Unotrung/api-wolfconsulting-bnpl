@@ -17,6 +17,16 @@ const bnpl_customerSchema = new mongoose.Schema({
     },
     step: {
         type: Number,
+    },
+    loginAttempts: {
+        type: Number,
+        required: true,
+        default: 0,
+        max: 5,
+        min: 0
+    },
+    lockUntil: {
+        type: Number
     }
 
 }, { timestamps: true });
