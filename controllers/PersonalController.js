@@ -304,6 +304,94 @@ const PersonalController = {
         }
     },
 
+    getDataFromVoolo: async (req, res, next) => {
+        try {
+            let phone = req.body.phone;
+            if (phone !== null && phone !== '') {
+                let personals = await Personal.find();
+                let personal = personals.find(x => x.phone === phone);
+                if (personal) {
+                    const { __v, providers, items, ...others } = personal._doc;
+                    return res.status(200).json({
+                        message: "Get information of personal successfully",
+                        data: { ...others },
+                        status: true
+                    });
+                }
+                else {
+                    return res.status(404).json({
+                        message: "This personal infomation is not exists !",
+                        status: false,
+                        statusCode: 900
+                    });
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: "Please enter your phone. Do not leave any fields blank !",
+                    status: false,
+                    statusCode: 1005
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    signContract: async (req, res, next) => {
+        try {
+            let phone = req.body.phone;
+            let status = Boolean(req.body.status);
+            if (phone !== null && phone !== '' && status !== null && status !== '') {
+                let personals = await Personal.find();
+                let personal = personals.find(x => x.phone === phone);
+                if (personal) {
+                    await personal.updateOne({ $set: { status: status } })
+                        .then((data) => {
+                            if (status === true) {
+                                return res.status(201).json({
+                                    message: "Your contract has been accepted",
+                                    status: true
+                                })
+                            }
+                            else if (status === false) {
+                                return res.status(201).json({
+                                    message: "Your contract is not accepted",
+                                    status: true
+                                })
+                            }
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: "There was an error in the contract approval process",
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message,
+                            })
+                        })
+                }
+                else {
+                    return res.status(404).json({
+                        message: "This personal infomation is not exists !",
+                        status: false,
+                        statusCode: 900
+                    });
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: "Please enter your phone and status. Do not leave any fields blank !",
+                    status: false,
+                    statusCode: 1005
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
 };
 
 module.exports = PersonalController;

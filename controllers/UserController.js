@@ -208,7 +208,7 @@ const UserController = {
                     user.refreshToken = refreshToken;
                     await user.save()
                         .then((data) => {
-                            const { password, __v, ...others } = data._doc;
+                            const { pin, __v, ...others } = data._doc;
                             return res.status(200).json({
                                 message: "Login successfully",
                                 data: { ...others },

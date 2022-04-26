@@ -64,6 +64,10 @@ const bnpl_personalSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Phone Ref is required'],
     },
+    status: {
+        type: Boolean,
+        default: false
+    },
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
     tenor: { type: mongoose.Schema.Types.ObjectId, ref: 'tenor' },
