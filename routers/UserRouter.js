@@ -14,55 +14,63 @@ const errMessagePin = 'Pin codes only accepts numbers. Length of pin is 4';
 const errMessageNewPin = 'New pin codes only accepts numbers. Length of of new pin is 4';
 
 router.post("/checkPhoneExists",
-    [check('phone').matches(formatPhone).withMessage(errMessagePhone)],
-    UserController.checkPhoneExists);
+    [
+        check('phone').matches(formatPhone).withMessage(errMessagePhone)
+    ],
+    MiddlewareController.validateRequestSchema, UserController.checkPhoneExists);
 
 router.post("/checkNidExists",
-    [check('nid').matches(formatNid).withMessage(errMessageNid)],
-    UserController.checkNidExists);
+    [
+        check('nid').matches(formatNid).withMessage(errMessageNid)
+    ],
+    MiddlewareController.validateRequestSchema, UserController.checkNidExists);
 
 router.post("/checkNidPhoneExists",
     [
         check('nid').matches(formatNid).withMessage(errMessageNid),
         check('phone').matches(formatPhone).withMessage(errMessagePhone)
     ],
-    UserController.checkNidPhoneExists);
+    MiddlewareController.validateRequestSchema, UserController.checkNidPhoneExists);
 
 router.post("/sendOtp",
-    [check('phone').matches(formatPhone).withMessage(errMessagePhone)],
-    UserController.sendOtp);
+    [
+        check('phone').matches(formatPhone).withMessage(errMessagePhone)
+    ],
+    MiddlewareController.validateRequestSchema, UserController.sendOtp);
 
 router.post("/verifyOtp",
-    [check('phone').matches(formatPhone).withMessage(errMessagePhone)],
-    UserController.verifyOtp);
+    [
+        check('phone').matches(formatPhone).withMessage(errMessagePhone)
+    ],
+    MiddlewareController.validateRequestSchema, UserController.verifyOtp);
 
 router.post("/login",
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('pin').matches(formatPin).withMessage(errMessagePin),
     ],
-    UserController.login);
+    MiddlewareController.validateRequestSchema, UserController.login);
 
 router.post("/sendOtpPin",
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('nid').matches(formatNid).withMessage(errMessageNid),
     ],
-    UserController.sendOtpPin);
+    MiddlewareController.validateRequestSchema, UserController.sendOtpPin);
 
 router.post("/verifyOtpPin",
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('nid').matches(formatNid).withMessage(errMessageNid),
     ],
-    UserController.verifyOtpPin);
+    MiddlewareController.validateRequestSchema, UserController.verifyOtpPin);
 
 router.put("/resetPin",
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('new_pin').matches(formatPin).withMessage(errMessageNewPin),
     ],
-    MiddlewareController.verifyTokenByMySelf, UserController.resetPin);
+    MiddlewareController.verifyTokenByMySelf, MiddlewareController.validateRequestSchema, UserController.resetPin);
 
 router.put("/updatePin",
     [
@@ -70,10 +78,10 @@ router.put("/updatePin",
         check('pin').matches(formatPin).withMessage(errMessagePin),
         check('new_pin').matches(formatPin).withMessage(errMessageNewPin),
     ],
-    UserController.updatePin);
+    MiddlewareController.validateRequestSchema, UserController.updatePin);
 
 router.get("/getAllUser", UserController.getAllUser);
 
-router.post("/eSignUser", master, UserController.updateESignUser)
+router.post("/eSignUser", master, UserController.updateESignUser);
 
 module.exports = router;

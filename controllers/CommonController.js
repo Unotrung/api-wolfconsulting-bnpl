@@ -3,7 +3,6 @@ const dotenv = require('dotenv');
 const Tenor = require('../models/tenors');
 const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
-const { validationResult } = require('express-validator');
 
 dotenv.config();
 
@@ -32,9 +31,10 @@ const CommonController = {
                 })
             }
             else {
-                return res.status(200).json({
+                return res.status(400).json({
                     message: "Fail to get api",
                     status: false,
+                    statusCode: 5000
                 })
             }
         }
@@ -70,125 +70,118 @@ const CommonController = {
         try {
             let phone = req.body.phone;
             let step = req.body.process;
-            const validData = validationResult(req);
-            if (validData.errors.length > 0) {
-                return res.status(200).json({
-                    message: validData.errors[0].msg,
-                    status: false
-                });
-            }
-            else {
-                if (phone !== null && phone !== '' && step !== null && step !== '') {
-                    const customers = await Customer.find();
-                    const customer = customers.find(x => x.phone === phone);
-                    if (step === 0) {
-                        customer.step = 0
-                        await customer.save()
-                            .then((data) => {
-                                return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone} (Kyc failure)`,
-                                    step: data.step,
-                                    status: true
-                                })
+            if (phone !== null && phone !== '' && step !== null && step !== '') {
+                const customers = await Customer.find();
+                const customer = customers.find(x => x.phone === phone);
+                if (step === 0) {
+                    customer.step = 0
+                    await customer.save()
+                        .then((data) => {
+                            return res.status(201).json({
+                                message: `Update step successfully for phone ${phone} (Kyc failure)`,
+                                step: data.step,
+                                status: true
                             })
-                            .catch((err) => {
-                                return res.status(200).json({
-                                    message: `Update step failure for phone ${phone} (Kyc failure)`,
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                })
-                            })
-                    }
-                    else if (step === 1) {
-                        customer.step = 1
-                        await customer.save()
-                            .then((data) => {
-                                return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone} (Not exists)`,
-                                    step: data.step,
-                                    status: true
-                                })
-                            })
-                            .catch((err) => {
-                                return res.status(200).json({
-                                    message: `Update step failure for phone ${phone} (Not exists)`,
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                })
-                            })
-                    }
-                    else if (step === 2) {
-                        customer.step = 2
-                        await customer.save()
-                            .then((data) => {
-                                return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone} (Registered success)`,
-                                    step: data.step,
-                                    status: true
-                                })
-                            })
-                            .catch((err) => {
-                                return res.status(200).json({
-                                    message: `Update step failure for phone ${phone} (Registered fail)`,
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                })
-                            })
-                    }
-                    else if (step === 3) {
-                        customer.step = 3
-                        await customer.save()
-                            .then((data) => {
-                                return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone} (Kyc process)`,
-                                    step: data.step,
-                                    status: true
-                                })
-                            })
-                            .catch((err) => {
-                                return res.status(200).json({
-                                    message: `Update step failure for phone ${phone} (Kyc process)`,
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                })
-                            })
-                    }
-                    else if (step === 4) {
-                        customer.step = 4
-                        await customer.save()
-                            .then((data) => {
-                                return res.status(201).json({
-                                    message: `Update step successfully for phone ${phone} (Kyc completed)`,
-                                    step: data.step,
-                                    status: true
-                                })
-                            })
-                            .catch((err) => {
-                                return res.status(200).json({
-                                    message: `Update step failure for phone ${phone} (Kyc completed)`,
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                })
-                            })
-                    }
-                    else {
-                        return res.status(200).json({
-                            message: 'Step is not valid',
-                            status: false,
                         })
-                    }
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Kyc failure)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
+                            })
+                        })
+                }
+                else if (step === 1) {
+                    customer.step = 1
+                    await customer.save()
+                        .then((data) => {
+                            return res.status(201).json({
+                                message: `Update step successfully for phone ${phone} (Not exists)`,
+                                step: data.step,
+                                status: true
+                            })
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Not exists)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
+                            })
+                        })
+                }
+                else if (step === 2) {
+                    customer.step = 2
+                    await customer.save()
+                        .then((data) => {
+                            return res.status(201).json({
+                                message: `Update step successfully for phone ${phone} (Registered success)`,
+                                step: data.step,
+                                status: true
+                            })
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Registered fail)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
+                            })
+                        })
+                }
+                else if (step === 3) {
+                    customer.step = 3
+                    await customer.save()
+                        .then((data) => {
+                            return res.status(201).json({
+                                message: `Update step successfully for phone ${phone} (Kyc process)`,
+                                step: data.step,
+                                status: true
+                            })
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Kyc process)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
+                            })
+                        })
+                }
+                else if (step === 4) {
+                    customer.step = 4
+                    await customer.save()
+                        .then((data) => {
+                            return res.status(201).json({
+                                message: `Update step successfully for phone ${phone} (Kyc completed)`,
+                                step: data.step,
+                                status: true
+                            })
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Kyc completed)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
+                            })
+                        })
                 }
                 else {
-                    return res.status(200).json({
-                        message: 'Please enter your phone and step. Do not leave any field blank !',
-                        status: false
+                    return res.status(400).json({
+                        message: 'Step is not valid',
+                        status: false,
+                        statusCode: 4000
                     })
                 }
+            }
+            else {
+                return res.status(400).json({
+                    message: 'Please enter your phone and step. Do not leave any field blank !',
+                    status: false,
+                    statusCode: 1005
+                })
             }
         }
         catch (err) {
@@ -197,6 +190,5 @@ const CommonController = {
     },
 
 };
-
 
 module.exports = CommonController;

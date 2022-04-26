@@ -13,15 +13,7 @@ const bnpl_otpSchema = new mongoose.Schema({
     nid: {
         type: String,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-        index: { expires: 60 }
-    }
-    // After 1 minutes it deleted automatically from the database
 
 }, { timestamps: true });
-
-bnpl_otpSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 });
 
 module.exports = mongoose.model('bnpl_otp', bnpl_otpSchema);

@@ -47,17 +47,21 @@ router.post("/addInfoPersonal",
 
         check('pin').matches(formatPin).withMessage(errMessagePin),
     ],
-    PersonalController.addInfoPersonal);
+    MiddlewareController.validateRequestSchema, PersonalController.addInfoPersonal);
 
 router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
 
 router.put("/registerProvider",
-    [check('nid').matches(formatNid).withMessage(errMessageNid)],
-    PersonalController.registerProvider);
+    [
+        check('nid').matches(formatNid).withMessage(errMessageNid)
+    ],
+    MiddlewareController.validateRequestSchema, PersonalController.registerProvider);
 
 router.put("/updateTenor",
-    [check('phone').matches(formatPhone).withMessage(errMessagePhone),],
-    MiddlewareController.verifyTokenByMySelf, PersonalController.updateTenor);
+    [
+        check('phone').matches(formatPhone).withMessage(errMessagePhone),
+    ],
+    MiddlewareController.verifyTokenByMySelf, MiddlewareController.validateRequestSchema, PersonalController.updateTenor);
 
 router.get("/:phone", MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
 

@@ -27,6 +27,10 @@ const bnpl_customerSchema = new mongoose.Schema({
     },
     lockUntil: {
         type: Number
+    },
+    refreshToken: {
+        type: String,
+        default: ''
     }
 
 }, { timestamps: true });
