@@ -611,26 +611,31 @@ const UserController = {
                 if (user) {
                     const validPin = await bcrypt.compare(PIN, user.pin);
                     if (validPin) {
-                        const salt = await bcrypt.genSalt(10);
-                        const hashed = await bcrypt.hash(NEW_PIN, salt);
-                        user.pin = hashed;
-                        await user.save()
-                            .then((data) => {
-                                buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-                                return res.status(201).json({
-                                    message: "Update pin successfully",
-                                    status: true
+                        if (PIN === NEW_PIN) {
+                            return res.status(400).json({ message: "Old password and new password are the same. Please try again !", status: false, statusCode: 1006 });
+                        }
+                        else {
+                            const salt = await bcrypt.genSalt(10);
+                            const hashed = await bcrypt.hash(NEW_PIN, salt);
+                            user.pin = hashed;
+                            await user.save()
+                                .then((data) => {
+                                    buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                                    return res.status(201).json({
+                                        message: "Update pin successfully",
+                                        status: true
+                                    })
                                 })
-                            })
-                            .catch((err) => {
-                                buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
-                                return res.status(409).json({
-                                    message: "Update pin failure",
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
+                                .catch((err) => {
+                                    buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                                    return res.status(409).json({
+                                        message: "Update pin failure",
+                                        status: false,
+                                        errorStatus: err.status || 500,
+                                        errorMessage: err.message
+                                    })
                                 })
-                            })
+                        }
                     }
                     else {
                         return res.status(404).json({
