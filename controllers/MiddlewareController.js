@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const e = require('express');
 
 const MiddlewareController = {
 
@@ -39,10 +40,12 @@ const MiddlewareController = {
                 if (req.user.id === req.params.id || req.user.phone === req.params.phone || req.user.phone === req.body.phone) {
                     next();
                 }
-                return res.status(403).json({
-                    message: 'You are not allowed to do this action',
-                    statusCode: 4004
-                });
+                else {
+                    return res.status(403).json({
+                        message: 'You are not allowed to do this action',
+                        statusCode: 4004
+                    });
+                }
             })
         }
         catch (err) {
