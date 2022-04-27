@@ -4,7 +4,7 @@ const { check } = require('express-validator');
 const router = require("express").Router();
 
 const formatPhone = /^(09|03|07|08|05)+([0-9]{8}$)/;
-const formatPhoneRef = /^(09|03|07|08|05|02)+([0-9]{9}$)/;
+const formatPhoneRef = /^(09|03|07|08|05|02)+([0-9]{8,9}$)/;
 const formatNid = /^\d{12}$|^\d{9}$/;
 const formatPin = /^\d{4}$/;
 const errMessagePhone = 'Invalid phone number format';
