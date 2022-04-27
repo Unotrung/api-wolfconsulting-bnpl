@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const e = require('express');
 
 const MiddlewareController = {
 

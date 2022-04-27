@@ -15,21 +15,22 @@ const { v4: uuid } = require('uuid');
 const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
 const commonRoute = require('./routers/CommonRouter');
-const otpConfigRoute = require('./routers/otpConfigRouter')
+const otpConfigRoute = require('./routers/otpConfigRouter');
+
 const http = require("http");
 const authGraphql = require("./middlewares/auth-graphql");
-const {graphqlHTTP} = require("express-graphql");
+const { graphqlHTTP } = require("express-graphql");
 const schema = require("./graphql");
 const ws = require("ws");
-const {useServer} = require("graphql-ws/lib/use/ws");
-const {execute, subscribe} = require("graphql");
+const { useServer } = require("graphql-ws/lib/use/ws");
+const { execute, subscribe } = require("graphql");
 
 dotenv.config();
 
 const app = express();
 
 app.use(morgan('combined'));
-//
+
 // app.use(helmet());
 
 app.use(compression());
@@ -64,10 +65,7 @@ app.use(limiter);
 app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
-app.use('/v1/bnpl/otp_config', otpConfigRoute)
-
-
-
+app.use('/v1/bnpl/otp_config', otpConfigRoute);
 
 app.use((err, req, res, next) => {
     buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
@@ -79,38 +77,38 @@ app.use((err, req, res, next) => {
 
 
 app.use('/graphql',
-    authGraphql ,
+    authGraphql,
     graphqlHTTP(req => ({
-    schema: schema,
-    graphiql: true,
-    context: {
-        isAuthenticated: req.isAuthenticated,
-        user: req.user,
-        error: req.error,
-        masterKey: req.masterKey
-    },
-    customFormatErrorFn: (err) => {
-        if (!err.originalError) {
-            return err
+        schema: schema,
+        graphiql: true,
+        context: {
+            isAuthenticated: req.isAuthenticated,
+            user: req.user,
+            error: req.error,
+            masterKey: req.masterKey
+        },
+        customFormatErrorFn: (err) => {
+            if (!err.originalError) {
+                return err
+            }
+            /*
+                You can add the following to any resolver
+                const error = new Error('My message')
+                error.data = [...]
+                error.code = 001
+            */
+            const message = err.message || 'An error occured.'
+            const code = err.originalError.code
+            const data = err.originalError.data
+            return {
+                // ...err,
+                message,
+                code,
+                data
+            }
         }
-        /*
-            You can add the following to any resolver
-            const error = new Error('My message')
-            error.data = [...]
-            error.code = 001
-        */
-        const message = err.message || 'An error occured.'
-        const code = err.originalError.code
-        const data = err.originalError.data
-        return {
-            // ...err,
-            message,
-            code,
-            data
-        }
-    }
 
-})))
+    })))
 // app.listen(4000)
 // app.use((req, res, next) => {
 //     next(createError.NotFound('This route dose not exists !'));

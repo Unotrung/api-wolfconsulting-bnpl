@@ -184,7 +184,7 @@ const UserController = {
                 const users = await Customer.find();
                 const user = users.find(x => x.phone === PHONE);
                 if (!user) {
-                    return res.status(200).json({ message: "Wrong phone. Please try again !", status: false, statusCode: 1002 });
+                    return res.status(404).json({ message: "Wrong phone. Please try again !", status: false, statusCode: 1002 });
                 }
                 else if (user) {
                     if (user.lockUntil && user.lockUntil < Date.now()) {
@@ -198,7 +198,7 @@ const UserController = {
                     }
                     else if (user.loginAttempts < 5) {
                         await user.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { loginAttempts: 1 } });
-                        return res.status(200).json({ message: `Wrong pin. You are logged in failure ${user.loginAttempts + 1} times !`, status: false, statusCode: 1003, countFail: user.loginAttempts + 1 });
+                        return res.status(404).json({ message: `Wrong pin. You are logged in failure ${user.loginAttempts + 1} times !`, status: false, statusCode: 1003, countFail: user.loginAttempts + 1 });
                     }
                 }
                 if (user && valiPin && user.loginAttempts !== 5) {
