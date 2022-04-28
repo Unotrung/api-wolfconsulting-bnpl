@@ -61,7 +61,7 @@ const PersonalController = {
                 const arrayItem = [];
                 items.map((item) => { arrayItem.push(item) });
 
-                const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
+                const arrayCreditlimit = [500000, 1000000, 2000000, 3000000];
 
                 if (personals) {
                     const personalExists = personals.find(x => x.phone === phone || x.citizenId === citizenId);
