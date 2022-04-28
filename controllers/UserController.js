@@ -346,7 +346,7 @@ const UserController = {
             });
             let PHONE = req.body.phone;
             if (PHONE !== null && PHONE !== '') {
-                const dataTemp = new Otp({ phone: PHONE, otp: OTP });
+                const dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
                 await dataTemp.save((err) => {
                     if (!err) {
                         return res.status(200).json({
@@ -393,38 +393,48 @@ const UserController = {
                 }
                 else {
                     const lastOtp = otpUser[otpUser.length - 1];
-                    if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
+                    if (lastOtp.expiredAt < Date.now()) {
                         await Otp.deleteMany({ phone: lastOtp.phone })
-                            .then(async (data, err) => {
-                                if (!err) {
-                                    const users = await Customer.find();
-                                    const user = users.find(x => x.phone === PHONE);
-                                    if (user) {
-                                        user.step = 3;
-                                        await user.save()
-                                            .then((data) => {
-                                                return res.status(200).json({
-                                                    message: "Successfully. OTP valid",
-                                                    status: true,
-                                                })
-                                            })
-                                            .catch((err) => {
-                                                return res.status(409).json({
-                                                    errorStatus: err.status || 500,
-                                                    errorMessage: err.message,
-                                                    status: false,
-                                                })
-                                            })
-                                    }
-                                }
-                            })
+                        return res.status(401).json({
+                            message: "Expired otp. Please resend otp !",
+                            status: false,
+                            statusCode: 3000
+                        });
                     }
                     else {
-                        return res.status(404).json({
-                            message: "Failure. OTP invalid",
-                            status: false,
-                            statusCode: 4000
-                        })
+                        if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
+                            await Otp.deleteMany({ phone: lastOtp.phone })
+                                .then(async (data, err) => {
+                                    if (!err) {
+                                        const users = await Customer.find();
+                                        const user = users.find(x => x.phone === PHONE);
+                                        if (user) {
+                                            user.step = 3;
+                                            await user.save()
+                                                .then((data) => {
+                                                    return res.status(200).json({
+                                                        message: "Successfully. OTP valid",
+                                                        status: true,
+                                                    })
+                                                })
+                                                .catch((err) => {
+                                                    return res.status(409).json({
+                                                        errorStatus: err.status || 500,
+                                                        errorMessage: err.message,
+                                                        status: false,
+                                                    })
+                                                })
+                                        }
+                                    }
+                                })
+                        }
+                        else {
+                            return res.status(404).json({
+                                message: "Failure. OTP invalid",
+                                status: false,
+                                statusCode: 4000
+                            })
+                        }
                     }
                 }
             }
@@ -455,7 +465,7 @@ const UserController = {
                     const nids = await Personal.find();
                     const validNid = nids.find(x => x.citizenId === NID);
                     if (validNid && validPhone.phone === validNid.phone) {
-                        const dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID });
+                        const dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID, expiredAt: Date.now() + 1 * 60 * 1000 });
                         await dataTemp.save((err) => {
                             if (!err) {
                                 return res.status(200).json({
@@ -519,21 +529,31 @@ const UserController = {
                 }
                 else {
                     const lastOtp = validUser[validUser.length - 1];
-                    if (lastOtp.phone === PHONE && lastOtp.nid === NID && lastOtp.otp === OTP) {
-                        const accessToken = UserController.generateAccessToken(lastOtp);
+                    if (lastOtp.expiredAt < Date.now()) {
                         await Otp.deleteMany({ phone: PHONE, nid: NID });
-                        return res.status(200).json({
-                            message: "Successfully. OTP valid",
-                            token: accessToken,
-                            status: true,
-                        })
+                        return res.status(401).json({
+                            message: "Expired otp. Please resend otp !",
+                            status: false,
+                            statusCode: 3000
+                        });
                     }
                     else {
-                        return res.status(404).json({
-                            message: "Failure. OTP invalid",
-                            status: false,
-                            statusCode: 4000
-                        })
+                        if (lastOtp.phone === PHONE && lastOtp.nid === NID && lastOtp.otp === OTP) {
+                            const accessToken = UserController.generateAccessToken(lastOtp);
+                            await Otp.deleteMany({ phone: PHONE, nid: NID });
+                            return res.status(200).json({
+                                message: "Successfully. OTP valid",
+                                token: accessToken,
+                                status: true,
+                            })
+                        }
+                        else {
+                            return res.status(404).json({
+                                message: "Failure. OTP invalid",
+                                status: false,
+                                statusCode: 4000
+                            })
+                        }
                     }
                 }
             }

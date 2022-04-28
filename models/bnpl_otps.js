@@ -13,6 +13,9 @@ const bnpl_otpSchema = new mongoose.Schema({
     nid: {
         type: String,
     },
+    expiredAt: {
+        type: Date
+    }
 
 }, { timestamps: true });
 
