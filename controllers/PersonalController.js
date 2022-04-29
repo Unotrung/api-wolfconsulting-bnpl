@@ -44,7 +44,7 @@ const PersonalController = {
                     return res.status(403).json({ message: "Your phone is blocked. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
                 }
                 else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
-                    await Blacklists.deleteMany({ phone: PHONE });
+                    await Blacklists.deleteMany({ phone: phone });
                     if (phone === phone_ref) {
                         return res.status(400).json({
                             message: "The phone number and the reference phone number are not allowed to overlap",
