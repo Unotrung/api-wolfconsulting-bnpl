@@ -1,12 +1,13 @@
 const Customer = require('../models/bnpl_customers');
 const Personal = require('../models/bnpl_personals');
 const Otp = require('../models/bnpl_otps');
+const Blacklists = require('../models/bnpl_blacklists');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
-const pubsub = require('../utils/pubsub')
+const pubsub = require('../utils/pubsub');
 
 const UserController = {
 
@@ -346,24 +347,54 @@ const UserController = {
             });
             let PHONE = req.body.phone;
             if (PHONE !== null && PHONE !== '') {
-                const dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
-                await dataTemp.save((err) => {
-                    if (!err) {
-                        return res.status(200).json({
-                            message: "Send otp successfully",
-                            otp: OTP,
-                            status: true
+                const blacklists = await Blacklists.find();
+                const isExists = blacklists.find(x => x.phone === PHONE);
+                if (isExists) {
+                    if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
+                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
+                    }
+                    else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
+                        await Blacklists.deleteMany({ phone: PHONE })
+                        let dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
+                        await dataTemp.save((err) => {
+                            if (!err) {
+                                return res.status(200).json({
+                                    message: "Send otp successfully",
+                                    otp: OTP,
+                                    status: true
+                                });
+                            }
+                            else {
+                                return res.status(409).json({
+                                    message: "Send otp failure",
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                });
+                            }
                         });
                     }
-                    else {
-                        return res.status(409).json({
-                            message: "Send otp failure",
-                            status: false,
-                            errorStatus: err.status || 500,
-                            errorMessage: err.message
-                        });
-                    }
-                });
+                }
+                else {
+                    let dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
+                    await dataTemp.save((err) => {
+                        if (!err) {
+                            return res.status(200).json({
+                                message: "Send otp successfully",
+                                otp: OTP,
+                                status: true
+                            });
+                        }
+                        else {
+                            return res.status(409).json({
+                                message: "Send otp failure",
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
+                            });
+                        }
+                    });
+                }
             }
             else {
                 return res.status(400).json({
@@ -429,11 +460,25 @@ const UserController = {
                                 })
                         }
                         else {
-                            return res.status(404).json({
-                                message: "Failure. OTP invalid",
-                                status: false,
-                                statusCode: 4000
-                            })
+                            const blacklists = await Blacklists.find();
+                            const isExists = blacklists.find(x => x.phone === PHONE);
+                            if (isExists) {
+                                if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
+                                    return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
+                                }
+                                else if (isExists.attempts < 5) {
+                                    await isExists.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { attempts: 1 } });
+                                    return res.status(404).json({ message: `Failure. OTP invalid. You are verified otp failure ${isExists.attempts + 1} times !`, status: false, statusCode: 4000, countFail: isExists.attempts + 1 });
+                                }
+                            }
+                            else {
+                                const blackPhone = await new Blacklists({ phone: PHONE, attempts: 1, lockUntil: Date.now() + 24 * 60 * 60 * 1000 });
+                                await blackPhone.save((err, data) => {
+                                    if (!err) {
+                                        return res.status(404).json({ message: `Failure. OTP invalid. You are verified otp failure 1 times !`, status: false, statusCode: 4000, countFail: 1 });
+                                    }
+                                });
+                            }
                         }
                     }
                 }
