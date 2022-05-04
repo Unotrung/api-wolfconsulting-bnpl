@@ -64,8 +64,7 @@ router.put("/updateTenor",
     ],
     MiddlewareController.verifyTokenByMySelf, MiddlewareController.validateRequestSchema, PersonalController.updateTenor);
 
-// router.get("/:phone", MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
-router.get("/:phone", PersonalController.getInfomation);
+router.get("/:phone", MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
 
 router.post("/getDataFromVoolo",
     [
