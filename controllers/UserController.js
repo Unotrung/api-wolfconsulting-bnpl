@@ -257,7 +257,7 @@ const UserController = {
                 else {
                     const lastOtp = otpUser[otpUser.length - 1];
                     if (lastOtp.expiredAt < Date.now()) {
-                        await Otp.deleteMany({ phone: lastOtp.phone })
+                        await Otp.deleteMany({ phone: lastOtp.phone });
                         return res.status(401).json({
                             message: "Expired otp. Please resend otp !",
                             status: false,
@@ -266,6 +266,7 @@ const UserController = {
                     }
                     else {
                         if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
+                            await Blacklists.deleteMany({ phone: PHONE });
                             await Otp.deleteMany({ phone: lastOtp.phone })
                                 .then(async (data, err) => {
                                     if (!err) {
@@ -476,6 +477,7 @@ const UserController = {
                                 process.env.JWT_ACCESS_KEY,
                                 { expiresIn: "1m" }
                             );
+                            await Blacklists.deleteMany({ phone: PHONE });
                             await Otp.deleteMany({ phone: PHONE, nid: NID });
                             return res.status(200).json({
                                 message: "Successfully. OTP valid",
