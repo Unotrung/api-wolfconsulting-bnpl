@@ -250,24 +250,24 @@ const PersonalController = {
 
     getInfomation: async (req, res, next) => {
         try {
-            // let phone = req.params.phone;
-            // let personals = await Personal.find().populate('providers').populate('items').populate('tenor');
-            // let personal = personals.find(x => x.phone === phone);
-            // if (personal) {
-            //     const { __v, ...others } = personal._doc;
-            //     return res.status(200).json({
-            //         message: "Get information of personal successfully",
-            //         data: { ...others },
-            //         status: true
-            //     });
-            // }
-            // else {
-            //     return res.status(404).json({
-            //         message: "This personal infomation is not exists !",
-            //         status: false,
-            //         statusCode: 900
-            //     });
-            // }
+            let phone = req.params.phone;
+            let personals = await Personal.find().populate('providers').populate('items').populate('tenor');
+            let personal = personals.find(x => x.phone === phone);
+            if (personal) {
+                const { __v, ...others } = personal._doc;
+                return res.status(200).json({
+                    message: "Get information of personal successfully",
+                    data: { ...others },
+                    status: true
+                });
+            }
+            else {
+                return res.status(404).json({
+                    message: "This personal infomation is not exists !",
+                    status: false,
+                    statusCode: 900
+                });
+            }
         }
         catch (err) {
             next(err);
