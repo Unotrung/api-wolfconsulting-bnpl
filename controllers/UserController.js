@@ -36,58 +36,68 @@ const UserController = {
     checkPhoneExists: async (req, res, next) => {
         try {
             let phone = req.body.phone;
-            if (phone !== null && phone !== '') {
-                const users = await Customer.find();
-                const user = users.find(x => x.phone === phone);
-                if (user) {
-                    return res.status(200).json({
-                        data: {
-                            _id: user.id,
-                            phone: user.phone,
-                            step: user.step
-                        },
-                        message: "This phone number is already exists !",
-                        status: true,
-                        errCode: 1000
-                    });
-                }
-                else if (phone.startsWith('033')) {
-                    return res.status(404).json({
-                        message: "This phone number is not exists in EAP !",
-                        status: false,
-                        errCode: 1001
-                    });
-                }
-                else if (phone.startsWith('044')) {
-                    return res.status(404).json({
-                        message: "This phone number is not exists in BNPL !",
-                        status: false,
-                        errCode: 1002
-                    });
-                }
-                else if (phone === "0312312399") {
-                    return res.status(403).json({
-                        message: "This phone is block. Please contact for help !",
-                        status: false,
-                        errCode: 1004,
-                    });
-                }
-                else {
-                    return res.status(200).json({
-                        message: "This phone number is not exists !",
-                        status: false,
-                        step: 1,
-                        errCode: 1003
-                    });
-                }
-            }
-            else {
-                return res.status(400).json({
-                    message: "Please enter your phone. Do not leave any field blank !",
-                    status: false,
-                    errCode: 1005
-                });
-            }
+            // if (phone !== null && phone !== '') {
+            //     const users = await Customer.find();
+            //     const user = users.find(x => x.phone === phone);
+            //     if (user) {
+            //         return res.status(200).json({
+            //             data: {
+            //                 _id: user.id,
+            //                 phone: user.phone,
+            //                 step: user.step
+            //             },
+            //             message: "This phone number is already exists !",
+            //             status: true,
+            //             errCode: 1000
+            //         });
+            //     }
+            //     else if (phone.startsWith('033')) {
+            //         return res.status(404).json({
+            //             message: "This phone number is not exists in EAP !",
+            //             status: false,
+            //             errCode: 1001
+            //         });
+            //     }
+            //     else if (phone.startsWith('044')) {
+            //         return res.status(404).json({
+            //             message: "This phone number is not exists in BNPL !",
+            //             status: false,
+            //             errCode: 1002
+            //         });
+            //     }
+            //     else if (phone === "0312312399") {
+            //         return res.status(403).json({
+            //             message: "This phone is block. Please contact for help !",
+            //             status: false,
+            //             errCode: 1004,
+            //         });
+            //     }
+            //     else {
+            //         return res.status(200).json({
+            //             message: "This phone number is not exists !",
+            //             status: false,
+            //             step: 1,
+            //             errCode: 1003
+            //         });
+            //     }
+            // }
+            // else {
+            //     return res.status(400).json({
+            //         message: "Please enter your phone. Do not leave any field blank !",
+            //         status: false,
+            //         errCode: 1005
+            //     });
+            // }
+            return res.status(200).json({
+                data: {
+                    // _id: user.id,
+                    // phone: user.phone,
+                    // step: user.step
+                },
+                message: "This phone number is already exists !",
+                status: true,
+                errCode: 1000
+            });
         }
         catch (err) {
             next(err);
@@ -529,67 +539,74 @@ const UserController = {
         try {
             let PHONE = req.body.phone;
             let PIN = req.body.pin;
-            if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
-                const deletedUser = await Customer.findDeleted();
-                const isBlock = deletedUser.find(x => x.deleted === Boolean(true) && x.deletedAt !== null);
-                if (isBlock) {
-                    return res.status(403).json({ message: "This phone is blocked by admin", status: false, statusCode: 1001 });
-                }
-                const users = await Customer.find();
-                const user = users.find(x => x.phone === PHONE);
-                if (!user) {
-                    return res.status(404).json({ message: "Wrong phone. Please try again !", status: false, statusCode: 1002 });
-                }
-                else if (user) {
-                    if (user.lockUntil && user.lockUntil < Date.now()) {
-                        await user.updateOne({ $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } })
-                    }
-                }
-                const valiPin = await bcrypt.compare(PIN, user.pin);
-                if (!valiPin) {
-                    if (user.loginAttempts === 5 && user.lockUntil > Date.now()) {
-                        return res.status(404).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, statusCode: 1004 });
-                    }
-                    else if (user.loginAttempts < 5) {
-                        await user.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { loginAttempts: 1 } });
-                        return res.status(404).json({ message: `Wrong pin. You are logged in failure ${user.loginAttempts + 1} times !`, status: false, statusCode: 1003, countFail: user.loginAttempts + 1 });
-                    }
-                }
-                if (user && valiPin && user.loginAttempts !== 5) {
-                    await user.updateOne({ $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } })
-                    const accessToken = UserController.generateAccessToken(user);
-                    const refreshToken = UserController.generateRefreshToken(user);
-                    user.refreshToken = refreshToken;
-                    await user.save()
-                        .then((data) => {
-                            const { pin, __v, ...others } = data._doc;
-                            return res.status(200).json({
-                                message: "Login successfully",
-                                data: { ...others },
-                                token: accessToken,
-                                status: true
-                            });
-                        })
-                        .catch((err) => {
-                            return res.status(409).json({
-                                message: "Login failure",
-                                status: false,
-                                errorStatus: err.status || 500,
-                                errorMessage: err.message
-                            });
-                        })
-                }
-                else {
-                    return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false });
-                }
-            }
-            else {
-                return res.status(400).json({
-                    message: "Please enter your phone and pin code. Do not leave any fields blank !",
-                    status: false,
-                    statusCode: 1005
-                });
-            }
+            // if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
+            //     const deletedUser = await Customer.findDeleted();
+            //     const isBlock = deletedUser.find(x => x.deleted === Boolean(true) && x.deletedAt !== null);
+            //     if (isBlock) {
+            //         return res.status(403).json({ message: "This phone is blocked by admin", status: false, statusCode: 1001 });
+            //     }
+            //     const users = await Customer.find();
+            //     const user = users.find(x => x.phone === PHONE);
+            //     if (!user) {
+            //         return res.status(404).json({ message: "Wrong phone. Please try again !", status: false, statusCode: 1002 });
+            //     }
+            //     else if (user) {
+            //         if (user.lockUntil && user.lockUntil < Date.now()) {
+            //             await user.updateOne({ $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } })
+            //         }
+            //     }
+            //     const valiPin = await bcrypt.compare(PIN, user.pin);
+            //     if (!valiPin) {
+            //         if (user.loginAttempts === 5 && user.lockUntil > Date.now()) {
+            //             return res.status(404).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, statusCode: 1004 });
+            //         }
+            //         else if (user.loginAttempts < 5) {
+            //             await user.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { loginAttempts: 1 } });
+            //             return res.status(404).json({ message: `Wrong pin. You are logged in failure ${user.loginAttempts + 1} times !`, status: false, statusCode: 1003, countFail: user.loginAttempts + 1 });
+            //         }
+            //     }
+            //     if (user && valiPin && user.loginAttempts !== 5) {
+            //         await user.updateOne({ $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } })
+            //         const accessToken = UserController.generateAccessToken(user);
+            //         const refreshToken = UserController.generateRefreshToken(user);
+            //         user.refreshToken = refreshToken;
+            //         await user.save()
+            //             .then((data) => {
+            //                 const { pin, __v, ...others } = data._doc;
+            //                 return res.status(200).json({
+            //                     message: "Login successfully",
+            //                     data: { ...others },
+            //                     token: accessToken,
+            //                     status: true
+            //                 });
+            //             })
+            //             .catch((err) => {
+            //                 return res.status(409).json({
+            //                     message: "Login failure",
+            //                     status: false,
+            //                     errorStatus: err.status || 500,
+            //                     errorMessage: err.message
+            //                 });
+            //             })
+            //     }
+            //     else {
+            //         return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false });
+            //     }
+            // }
+            // else {
+            //     return res.status(400).json({
+            //         message: "Please enter your phone and pin code. Do not leave any fields blank !",
+            //         status: false,
+            //         statusCode: 1005
+            //     });
+            // }
+            return res.status(200).json({
+                message: "Login successfully",
+                // data: { ...others },
+                data: {},
+                token: accessToken,
+                status: true
+            });
         }
         catch (err) {
             next(err);
