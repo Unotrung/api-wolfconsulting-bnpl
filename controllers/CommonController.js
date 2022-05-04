@@ -57,7 +57,7 @@ const CommonController = {
             else {
                 return res.status(200).json({
                     message: "List tenor is empty",
-                    status: false
+                    status: true
                 })
             }
         }
