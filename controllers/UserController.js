@@ -126,6 +126,11 @@ const UserController = {
             //         statusCode: 1005
             //     });
             // }
+            return res.status(404).json({
+                message: "This nid is not exists !",
+                status: false,
+                statusCode: 900
+            });
         }
         catch (err) {
             next(err);
