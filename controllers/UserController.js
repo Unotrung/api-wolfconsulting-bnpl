@@ -97,35 +97,35 @@ const UserController = {
     checkNidExists: async (req, res, next) => {
         try {
             let nid = req.body.nid;
-            if (nid !== null && nid !== '') {
-                const users = await Personal.find();
-                const user = users.find(x => x.citizenId === nid);
-                if (user) {
-                    return res.status(200).json({
-                        data: {
-                            _id: user.id,
-                            nid: user.citizenId
-                        },
-                        message: "This nid is already exists !",
-                        status: true,
-                        statusCode: 1000
-                    });
-                }
-                else {
-                    return res.status(404).json({
-                        message: "This nid is not exists !",
-                        status: false,
-                        statusCode: 900
-                    });
-                }
-            }
-            else {
-                return res.status(400).json({
-                    message: "Please enter your nid. Do not leave any field blank !",
-                    status: false,
-                    statusCode: 1005
-                });
-            }
+            // if (nid !== null && nid !== '') {
+            //     const users = await Personal.find();
+            //     const user = users.find(x => x.citizenId === nid);
+            //     if (user) {
+            //         return res.status(200).json({
+            //             data: {
+            //                 _id: user.id,
+            //                 nid: user.citizenId
+            //             },
+            //             message: "This nid is already exists !",
+            //             status: true,
+            //             statusCode: 1000
+            //         });
+            //     }
+            //     else {
+            //         return res.status(404).json({
+            //             message: "This nid is not exists !",
+            //             status: false,
+            //             statusCode: 900
+            //         });
+            //     }
+            // }
+            // else {
+            //     return res.status(400).json({
+            //         message: "Please enter your nid. Do not leave any field blank !",
+            //         status: false,
+            //         statusCode: 1005
+            //     });
+            // }
         }
         catch (err) {
             next(err);
