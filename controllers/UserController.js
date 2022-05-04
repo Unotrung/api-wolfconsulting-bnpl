@@ -73,7 +73,7 @@ const UserController = {
                     });
                 }
                 else {
-                    return res.status(404).json({
+                    return res.status(200).json({
                         message: "This phone number is not exists !",
                         status: false,
                         step: 1,
@@ -112,7 +112,7 @@ const UserController = {
                     });
                 }
                 else {
-                    return res.status(404).json({
+                    return res.status(200).json({
                         message: "This nid is not exists !",
                         status: false,
                         statusCode: 900
@@ -152,7 +152,7 @@ const UserController = {
                     });
                 }
                 else {
-                    return res.status(404).json({
+                    return res.status(200).json({
                         message: "This nid and phone is not exists !",
                         status: false,
                         statusCode: 900
