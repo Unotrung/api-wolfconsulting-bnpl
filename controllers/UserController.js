@@ -36,68 +36,58 @@ const UserController = {
     checkPhoneExists: async (req, res, next) => {
         try {
             let phone = req.body.phone;
-            // if (phone !== null && phone !== '') {
-            //     const users = await Customer.find();
-            //     const user = users.find(x => x.phone === phone);
-            //     if (user) {
-            //         return res.status(200).json({
-            //             data: {
-            //                 _id: user.id,
-            //                 phone: user.phone,
-            //                 step: user.step
-            //             },
-            //             message: "This phone number is already exists !",
-            //             status: true,
-            //             errCode: 1000
-            //         });
-            //     }
-            //     else if (phone.startsWith('033')) {
-            //         return res.status(404).json({
-            //             message: "This phone number is not exists in EAP !",
-            //             status: false,
-            //             errCode: 1001
-            //         });
-            //     }
-            //     else if (phone.startsWith('044')) {
-            //         return res.status(404).json({
-            //             message: "This phone number is not exists in BNPL !",
-            //             status: false,
-            //             errCode: 1002
-            //         });
-            //     }
-            //     else if (phone === "0312312399") {
-            //         return res.status(403).json({
-            //             message: "This phone is block. Please contact for help !",
-            //             status: false,
-            //             errCode: 1004,
-            //         });
-            //     }
-            //     else {
-            //         return res.status(200).json({
-            //             message: "This phone number is not exists !",
-            //             status: false,
-            //             step: 1,
-            //             errCode: 1003
-            //         });
-            //     }
-            // }
-            // else {
-            //     return res.status(400).json({
-            //         message: "Please enter your phone. Do not leave any field blank !",
-            //         status: false,
-            //         errCode: 1005
-            //     });
-            // }
-            return res.status(200).json({
-                data: {
-                    // _id: user.id,
-                    // phone: user.phone,
-                    // step: user.step
-                },
-                message: "This phone number is already exists !",
-                status: true,
-                errCode: 1000
-            });
+            if (phone !== null && phone !== '') {
+                const users = await Customer.find();
+                const user = users.find(x => x.phone === phone);
+                if (user) {
+                    return res.status(200).json({
+                        data: {
+                            _id: user.id,
+                            phone: user.phone,
+                            step: user.step
+                        },
+                        message: "This phone number is already exists !",
+                        status: true,
+                        errCode: 1000
+                    });
+                }
+                else if (phone.startsWith('033')) {
+                    return res.status(404).json({
+                        message: "This phone number is not exists in EAP !",
+                        status: false,
+                        errCode: 1001
+                    });
+                }
+                else if (phone.startsWith('044')) {
+                    return res.status(404).json({
+                        message: "This phone number is not exists in BNPL !",
+                        status: false,
+                        errCode: 1002
+                    });
+                }
+                else if (phone === "0312312399") {
+                    return res.status(403).json({
+                        message: "This phone is block. Please contact for help !",
+                        status: false,
+                        errCode: 1004,
+                    });
+                }
+                else {
+                    return res.status(200).json({
+                        message: "This phone number is not exists !",
+                        status: false,
+                        step: 1,
+                        errCode: 1003
+                    });
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: "Please enter your phone. Do not leave any field blank !",
+                    status: false,
+                    errCode: 1005
+                });
+            }
         }
         catch (err) {
             next(err);
