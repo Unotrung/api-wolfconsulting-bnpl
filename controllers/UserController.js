@@ -266,16 +266,13 @@ const UserController = {
                     }
                     else {
                         if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
-                            console.log("verifyOtp: OTP AND PHONE VALID");
                             await Otp.deleteMany({ phone: lastOtp.phone })
                                 .then(async (data, err) => {
                                     if (!err) {
                                         const users = await Customer.find();
                                         const user = users.find(x => x.phone === PHONE);
-                                        console.log("verifyOtp User: ", user);
                                         if (user) {
                                             user.step = 3;
-                                            console.log("verifyOtp: OTP AND PHONE VALID NEXT");
                                             await user.save()
                                                 .then((data) => {
                                                     return res.status(200).json({
@@ -471,7 +468,6 @@ const UserController = {
                     }
                     else {
                         if (lastOtp.phone === PHONE && lastOtp.nid === NID && lastOtp.otp === OTP) {
-                            console.log("verifyOtpPin: OTP AND PHONE VALID");
                             const accessToken = jwt.sign(
                                 {
                                     id: lastOtp.id,
@@ -481,7 +477,6 @@ const UserController = {
                                 { expiresIn: "1m" }
                             );
                             await Otp.deleteMany({ phone: PHONE, nid: NID });
-                            console.log("verifyOtpPin: OTP AND PHONE VALID NEXT");
                             return res.status(200).json({
                                 message: "Successfully. OTP valid",
                                 token: accessToken,
