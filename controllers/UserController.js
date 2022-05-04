@@ -604,7 +604,7 @@ const UserController = {
                 message: "Login successfully",
                 // data: { ...others },
                 data: {},
-                token: accessToken,
+                // token: accessToken,
                 status: true
             });
         }
