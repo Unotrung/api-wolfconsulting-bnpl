@@ -1,6 +1,7 @@
 const Personal = require('../models/bnpl_personals');
 const Customer = require('../models/bnpl_customers');
 const Provider = require('../models/bnpl_providers');
+const Blacklists = require('../models/bnpl_blacklists');
 const Tenor = require('../models/tenors');
 const Item = require('../models/items');
 const bcrypt = require('bcrypt');
@@ -33,56 +34,165 @@ const PersonalController = {
 
             let pin = req.body.pin;
 
-            const customerValid = await Customer.findOne({ phone: phone });
-            if (pin) {
-                if (!customerValid) {
-                    const salt = await bcrypt.genSalt(10);
-                    const hashed = await bcrypt.hash(pin.toString(), salt);
-                    const customer = await new Customer({ phone: phone, pin: hashed });
-                    await customer.save();
-                    buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+            const customers = await Customer.find();
+            const personals = await Personal.find();
+
+            const blacklists = await Blacklists.find();
+            const isExists = blacklists.find(x => x.phone === phone);
+            if (isExists) {
+                if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
+                    return res.status(403).json({ message: "Your phone is blocked. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
                 }
-            }
-
-            const items = await Item.find({});
-
-            const arrayItem = [];
-            items.map((item) => { arrayItem.push(item._id) });
-
-            const arrayCreditlimit = [10000000, 20000000, 30000000, 40000000];
-
-            const personalValid = await Personal.findOne({ phone: phone, citizenId: citizenId });
-            if (!personalValid) {
-                const personal = await new Personal({
-                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(arrayItem)], arrayItem[PersonalController.randomIndex(arrayItem)]],
-                    credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
-                });
-                await personal.save((err, data) => {
-                    if (!err) {
-                        const { user, ...others } = data._doc;
-                        buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                        return res.status(201).json({
-                            message: "Add Personal BNPL Successfully",
-                            data: { ...others },
-                            status: true
+                else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
+                    await Blacklists.deleteMany({ phone: phone });
+                    if (phone === phone_ref) {
+                        return res.status(400).json({
+                            message: "The phone number and the reference phone number are not allowed to overlap",
+                            status: false,
+                            statusCode: 4000
                         });
                     }
                     else {
-                        buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                        return res.status(200).json({
-                            message: "Add Personal BNPL Failure",
-                            status: false
-                        });
+                        if (pin) {
+                            if (customers) {
+                                // let customerExists = customers.find(x => x.phone === phone);
+                                // if (!customerExists) {
+                                let salt = await bcrypt.genSalt(10);
+                                let hashed = await bcrypt.hash(pin.toString(), salt);
+                                let customer = await new Customer({ phone: phone, pin: hashed });
+                                await customer.save();
+                                buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                                // }
+                            }
+                        }
+
+                        let items = await Item.find({});
+                        let arrayItem = [];
+                        items.map((item) => { arrayItem.push(item) });
+
+                        let arrayCreditlimit = [500000, 1000000, 2000000, 3000000];
+
+                        if (personals) {
+                            // let personalExists = personals.find(x => x.phone === phone || x.citizenId === citizenId);
+                            // if (!personalExists) {
+                            let personal = await new Personal({
+                                name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(items)], arrayItem[PersonalController.randomIndex(items)]],
+                                credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
+                            });
+                            await personal.save().then(async (data, err) => {
+                                if (!err) {
+                                    let { ...others } = data._doc;
+                                    buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                    let customerList = await Customer.find();
+                                    let customerAccount = customerList.find(x => x.phone === phone);
+                                    customerAccount.step = 2;
+                                    await customerAccount.save()
+                                        .then((data, err) => {
+                                            if (!err) {
+                                                return res.status(201).json({
+                                                    message: "Add personal BNPL successfully",
+                                                    data: { ...others },
+                                                    status: true
+                                                });
+                                            }
+                                            else {
+                                                buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                                return res.status(409).json({
+                                                    message: "Add personal BNPL failure",
+                                                    status: false,
+                                                    errorStatus: err.status || 500,
+                                                    errorMessage: err.message
+                                                });
+                                            }
+                                        });
+                                }
+                            });
+                            // }
+                            // else {
+                            //     return res.status(409).json({
+                            //         message: 'This personal is already exists !',
+                            //         status: false,
+                            //         statusCode: 1000
+                            //     })
+                            // }
+                        }
                     }
-                });
+                }
             }
             else {
-                return res.status(200).json({
-                    message: 'Personal Is Exists',
-                    status: false
-                })
-            }
+                if (phone === phone_ref) {
+                    return res.status(400).json({
+                        message: "The phone number and the reference phone number are not allowed to overlap",
+                        status: false,
+                        statusCode: 4000
+                    });
+                }
+                else {
+                    if (pin) {
+                        if (customers) {
+                            // let customerExists = customers.find(x => x.phone === phone);
+                            // if (!customerExists) {
+                            let salt = await bcrypt.genSalt(10);
+                            let hashed = await bcrypt.hash(pin.toString(), salt);
+                            let customer = await new Customer({ phone: phone, pin: hashed });
+                            await customer.save();
+                            buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
+                            // }
+                        }
+                    }
 
+                    let items = await Item.find({});
+                    let arrayItem = [];
+                    items.map((item) => { arrayItem.push(item) });
+
+                    let arrayCreditlimit = [500000, 1000000, 2000000, 3000000];
+
+                    if (personals) {
+                        // let personalExists = personals.find(x => x.phone === phone || x.citizenId === citizenId);
+                        // if (!personalExists) {
+                        let personal = await new Personal({
+                            name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(items)], arrayItem[PersonalController.randomIndex(items)]],
+                            credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], tenor: null
+                        });
+                        await personal.save().then(async (data, err) => {
+                            if (!err) {
+                                let { ...others } = data._doc;
+                                buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                let customerList = await Customer.find();
+                                let customerAccount = customerList.find(x => x.phone === phone);
+                                customerAccount.step = 2;
+                                await customerAccount.save()
+                                    .then((data, err) => {
+                                        if (!err) {
+                                            return res.status(201).json({
+                                                message: "Add personal BNPL successfully",
+                                                data: { ...others },
+                                                status: true
+                                            });
+                                        }
+                                        else {
+                                            buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
+                                            return res.status(409).json({
+                                                message: "Add personal BNPL failure",
+                                                status: false,
+                                                errorStatus: err.status || 500,
+                                                errorMessage: err.message
+                                            });
+                                        }
+                                    });
+                            }
+                        });
+                        // }
+                        // else {
+                        //     return res.status(409).json({
+                        //         message: 'This personal is already exists !',
+                        //         status: false,
+                        //         statusCode: 1000
+                        //     })
+                        // }
+                    }
+                }
+            }
         }
         catch (err) {
             next(err);
@@ -91,17 +201,11 @@ const PersonalController = {
 
     getAllBNPLInformation: async (req, res, next) => {
         try {
-            let personals = await Personal.find();
+            const personals = await Personal.find();
             if (personals.length > 0) {
-                const totalItem = await Personal.countDocuments({});
-                console.log("Total Item: ", totalItem);
-
+                const totalItem = personals.length;
                 const PAGE_SIZE = req.query.pageSize;
-                console.log("Page Size: ", PAGE_SIZE);
-
                 const totalPage = Math.ceil(totalItem / PAGE_SIZE);
-                console.log("Total Page: ", totalPage);
-
                 let page = req.query.page || 1;
                 if (page < 1) {
                     page = 1
@@ -109,25 +213,21 @@ const PersonalController = {
                 if (page > totalPage) {
                     page = totalPage
                 }
-
                 page = parseInt(page);
-                console.log("Current Page: ", page);
-
                 let sortByField = req.query.sortByField;
-                console.log("Sort By Field: ", sortByField);
-
                 let sortValue = req.query.sortValue;
                 sortValue = parseInt(sortValue);
-                console.log("Sort Value: ", sortValue);
-
                 var skipItem = (page - 1) * PAGE_SIZE;
-
                 const sort = sortValue === 1 ? `${sortByField}` : `-${(sortByField)}`;
-
                 const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
-
+                let arrPersonals = [];
+                result.map((user, index) => {
+                    let { pin, __v, ...others } = user._doc;
+                    arrPersonals.push({ ...others });
+                })
                 return res.status(200).json({
-                    data: result,
+                    message: "Get list BNPL user success",
+                    data: arrPersonals,
                     totalItem: totalItem,
                     totalPage: totalPage,
                     currentPage: page,
@@ -137,10 +237,10 @@ const PersonalController = {
                 });
             }
             else {
-                return res.status(401).json({
-                    message: "List Personal Is Empty",
+                return res.status(200).json({
+                    message: "List personal is empty",
                     status: false
-                });
+                })
             }
         }
         catch (err) {
@@ -150,18 +250,22 @@ const PersonalController = {
 
     getInfomation: async (req, res, next) => {
         try {
-            let personal = await Personal.findOne({ phone: req.params.phone }).populate('providers').populate('items').populate('tenor');
+            let phone = req.params.phone;
+            let personals = await Personal.find().populate('providers').populate('items').populate('tenor');
+            let personal = personals.find(x => x.phone === phone);
             if (personal) {
+                const { __v, ...others } = personal._doc;
                 return res.status(200).json({
                     message: "Get information of personal successfully",
-                    data: personal,
+                    data: { ...others },
                     status: true
                 });
             }
             else {
-                return res.status(200).json({
-                    message: "This Personal Infomation is not exists !",
-                    status: false
+                return res.status(404).json({
+                    message: "This personal infomation is not exists !",
+                    status: false,
+                    statusCode: 900
                 });
             }
         }
@@ -176,13 +280,14 @@ const PersonalController = {
             let nid = req.body.nid;
             if (provider !== null && provider !== '' && nid !== null && nid !== '') {
                 let validProvider = await Provider.findOne({ provider: provider });
-                let validNid = await Personal.findOne({ citizenId: nid });
+                let nids = await Personal.find();
+                let validNid = nids.find(x => x.citizenId === nid);
                 if (validNid) {
                     await validNid.updateOne({ $push: { providers: validProvider.id } }).then((data, err) => {
                         if (!err) {
                             buildProdLogger('info', 'register_provider_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                             return res.status(200).json({
-                                message: "Register Provider Successfully",
+                                message: "Register provider successfully",
                                 data: {
                                     nid: nid,
                                     provider: provider
@@ -192,24 +297,28 @@ const PersonalController = {
                         }
                         else {
                             buildProdLogger('error', 'register_provider_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
-                            return res.status(200).json({
-                                message: "Register Provider Failure",
-                                status: false
+                            return res.status(409).json({
+                                message: "Register provider failure",
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
                             })
                         }
                     })
                 }
                 else {
-                    return res.status(200).json({
-                        message: "This Nid is not exists !",
-                        status: false
+                    return res.status(404).json({
+                        message: "This nid is not exists !",
+                        status: false,
+                        statusCode: 900
                     })
                 }
             }
             else {
-                return res.status(200).json({
+                return res.status(400).json({
                     message: "Please enter your nid and choose provider BNPL. Do not leave any fields blank !",
-                    status: false
+                    status: false,
+                    statusCode: 1005
                 });
             }
         }
@@ -224,14 +333,15 @@ const PersonalController = {
             let phone = req.body.phone;
             if (tenorId !== null && tenorId !== '' && phone !== null && phone !== '') {
                 let tenor = await Tenor.findById(tenorId);
-                let validPhone = await Personal.findOne({ phone: phone });
+                let phones = await Personal.find();
+                let validPhone = phones.find(x => x.phone === phone);
                 if (validPhone) {
                     if (tenor) {
                         await validPhone.updateOne({ $set: { tenor: tenor._id } }).then((data, err) => {
                             if (!err) {
                                 buildProdLogger('info', 'update_tenor_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(201).json({
-                                    message: "Update Tenor Successfully",
+                                    message: "Update tenor successfully",
                                     data: {
                                         tenor: tenorId,
                                         phone: phone
@@ -241,31 +351,36 @@ const PersonalController = {
                             }
                             else {
                                 buildProdLogger('error', 'update_tenor_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
-                                return res.status(200).json({
-                                    message: "Update Tenor Failure",
-                                    status: false
+                                return res.status(409).json({
+                                    message: "Update tenor failure",
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
                                 })
                             }
                         })
                     }
                     else {
-                        return res.status(200).json({
+                        return res.status(404).json({
                             message: "This tenor is not exists !",
-                            status: false
+                            status: false,
+                            statusCode: 900
                         });
                     }
                 }
                 else {
-                    return res.status(200).json({
+                    return res.status(404).json({
                         message: "This phone number is not exists !",
-                        status: false
+                        status: false,
+                        statusCode: 900
                     });
                 }
             }
             else {
-                return res.status(200).json({
+                return res.status(400).json({
                     message: "Please enter your phone and choose tenor. Do not leave any fields blank !",
-                    status: false
+                    status: false,
+                    statusCode: 1005
                 });
             }
         }
@@ -274,26 +389,92 @@ const PersonalController = {
         }
     },
 
-    deletePersonalandAccount: async (req, res, next) => {
-        const phone = "0359349582";
-        const nid = "030094009394";
-        await Customer.findOneAndDelete({ phone: phone });
-        await Personal.findOneAndDelete({ citizenId: nid });
-        return res.status(200).json({
-            message: "Delete Successfully",
-            status: true
-        })
+    getDataFromVoolo: async (req, res, next) => {
+        try {
+            let phone = req.body.phone;
+            if (phone !== null && phone !== '') {
+                let personals = await Personal.find();
+                let personal = personals.find(x => x.phone === phone);
+                if (personal) {
+                    const { __v, providers, items, ...others } = personal._doc;
+                    return res.status(200).json({
+                        message: "Get information of personal successfully",
+                        data: { ...others },
+                        status: true
+                    });
+                }
+                else {
+                    return res.status(404).json({
+                        message: "This personal infomation is not exists !",
+                        status: false,
+                        statusCode: 900
+                    });
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: "Please enter your phone. Do not leave any fields blank !",
+                    status: false,
+                    statusCode: 1005
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
     },
 
-    deletePersonalandAccountPhu: async (req, res, next) => {
-        const phone = req.body.phone;
-        const nid = req.body.nid;
-        await Customer.findOneAndDelete({ phone: phone });
-        await Personal.findOneAndDelete({ citizenId: nid });
-        return res.status(200).json({
-            message: "Delete Successfully",
-            status: true
-        })
+    signContract: async (req, res, next) => {
+        try {
+            let phone = req.body.phone;
+            let status = Boolean(req.body.status);
+            if (phone !== null && phone !== '' && status !== null && status !== '') {
+                let personals = await Personal.find();
+                let personal = personals.find(x => x.phone === phone);
+                if (personal) {
+                    await personal.updateOne({ $set: { status: status } })
+                        .then((data) => {
+                            if (status === true) {
+                                return res.status(201).json({
+                                    message: "Your contract has been accepted",
+                                    status: true
+                                })
+                            }
+                            else if (status === false) {
+                                return res.status(201).json({
+                                    message: "Your contract is not accepted",
+                                    status: true
+                                })
+                            }
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: "There was an error in the contract approval process",
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message,
+                            })
+                        })
+                }
+                else {
+                    return res.status(404).json({
+                        message: "This personal infomation is not exists !",
+                        status: false,
+                        statusCode: 900
+                    });
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: "Please enter your phone and status. Do not leave any fields blank !",
+                    status: false,
+                    statusCode: 1005
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
     },
 
 };

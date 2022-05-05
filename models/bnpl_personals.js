@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const item = require('./items');
 const tenor = require('./tenors');
 const bnpl_provider = require('./bnpl_providers');
+const encrypt = require('mongoose-encryption');
+const dotenv = require('dotenv')
+
+dotenv.config();
 
 const bnpl_personalSchema = new mongoose.Schema({
 
@@ -12,6 +16,10 @@ const bnpl_personalSchema = new mongoose.Schema({
     sex: {
         type: String,
         required: [true, 'Sex is required'],
+        enum: {
+            values: ['Nam', 'Nữ'],
+            message: 'Sex is only allowed Nam or Nữ'
+        }
     },
     birthday: {
         type: Date,
@@ -19,12 +27,10 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        unique: [true, 'Phone is already exists'],
         required: [true, 'Phone is required'],
     },
     citizenId: {
         type: String,
-        unique: [true, 'CitizenId is already exists'],
         required: [true, 'CitizenId is required'],
     },
     issueDate: {
@@ -44,17 +50,23 @@ const bnpl_personalSchema = new mongoose.Schema({
         required: [true, 'Ward is required'],
     },
     street: {
-        type: String,
-        required: [true, 'Street is required'],
+        type: String
     },
     personal_title_ref: {
         type: String,
+        required: [true, 'Personal Title Ref is required'],
     },
     name_ref: {
         type: String,
+        required: [true, 'Name Ref is required'],
     },
     phone_ref: {
         type: String,
+        required: [true, 'Phone Ref is required'],
+    },
+    status: {
+        type: Boolean,
+        default: false
     },
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
@@ -64,5 +76,8 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
 
 }, { timestamps: true });
+
+const secret = process.env.SECRET_MONGOOSE;
+bnpl_personalSchema.plugin(encrypt, { secret: secret, encryptedFields: ['name', 'phone', 'citizenId', 'name_ref', 'phone_ref'] });
 
 module.exports = mongoose.model('bnpl_personal', bnpl_personalSchema);

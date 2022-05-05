@@ -1,21 +1,44 @@
 const mongoose = require('mongoose');
+const encrypt = require('mongoose-encryption');
+const dotenv = require('dotenv');
+const mongooseDelete = require('mongoose-delete');
+
+dotenv.config();
 
 const bnpl_customerSchema = new mongoose.Schema({
 
     phone: {
         type: String,
         required: [true, 'Phone is required'],
-        unique: [true, 'Phone is already exists'],
-        minlength: [10, 'Phone only includes 10 numbers'],
-        maxlength: [10, 'Phone only includes 10 numbers']
     },
     pin: {
         type: String,
+        required: [true, 'Pin is required'],
     },
     step: {
+        type: Number,
+    },
+    loginAttempts: {
+        type: Number,
+        required: true,
+        default: 0,
+        max: 5,
+        min: 0
+    },
+    lockUntil: {
+        type: Number
+    },
+    refreshToken: {
         type: String,
+        default: ''
     }
 
 }, { timestamps: true });
+
+const secret = process.env.SECRET_MONGOOSE;
+bnpl_customerSchema.plugin(encrypt, { secret: secret, encryptedFields: ['phone', 'pin'] });
+
+// Add plugin
+bnpl_customerSchema.plugin(mongooseDelete, { deletedAt: true, overrideMethods: 'all' }); // Soft Delete
 
 module.exports = mongoose.model('bnpl_customer', bnpl_customerSchema);

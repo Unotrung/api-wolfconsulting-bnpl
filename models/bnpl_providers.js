@@ -5,6 +5,9 @@ const bnpl_providerSchema = new mongoose.Schema({
     provider: {
         type: String
     },
+    url: {
+        type: String
+    }
 
 }, { timestamps: true });
 

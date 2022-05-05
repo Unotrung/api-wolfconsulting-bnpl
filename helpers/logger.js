@@ -1,5 +1,5 @@
 const { createLogger, format, transports } = require('winston');
-const { combine, errors, timestamp, colorize, printf } = format;
+const { combine, errors, timestamp, printf } = format;
 const winstonMongodb = require('winston-mongodb');
 const path = require('path');
 

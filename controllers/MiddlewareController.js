@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 
-const middlewareController = {
+const MiddlewareController = {
 
     verifyToken: (req, res, next) => {
         try {
@@ -10,7 +11,10 @@ const middlewareController = {
                 const accessToken = token.split(" ")[1];
                 jwt.verify(accessToken, process.env.JWT_ACCESS_KEY, (err, user) => {
                     if (err) {
-                        return res.status(403).json("Token is not valid");
+                        return res.status(403).json({
+                            message: "Token is not valid",
+                            statusCode: 4003
+                        });
                     }
                     // Trả về user
                     req.user = user;
@@ -18,7 +22,10 @@ const middlewareController = {
                 });
             }
             else {
-                return res.status(401).json("You're not authenticated");
+                return res.status(401).json({
+                    message: "You're not authenticated",
+                    statusCode: 4001
+                });
             }
         }
         catch (err) {
@@ -26,17 +33,37 @@ const middlewareController = {
         }
     },
 
-    VerifyTokenByMySelf: (req, res, next) => {
+    verifyTokenByMySelf: (req, res, next) => {
         try {
-            middlewareController.verifyToken(req, res, () => {
-                console.log(req.params.phone);
+            MiddlewareController.verifyToken(req, res, () => {
                 if (req.user.id === req.params.id || req.user.phone === req.params.phone || req.user.phone === req.body.phone) {
                     next();
                 }
                 else {
-                    return res.status(403).json('You are not allowed to do this action');
+                    return res.status(403).json({
+                        message: 'You are not allowed to do this action',
+                        statusCode: 4004
+                    });
                 }
             })
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    validateRequestSchema: (req, res, next) => {
+        try {
+            const errors = validationResult(req);
+            if (errors.errors.length > 0) {
+                return res.status(400).json({
+                    message: errors.errors[0].msg,
+                    status: false
+                });
+            }
+            else {
+                next();
+            }
         }
         catch (err) {
             next(err);
@@ -45,4 +72,4 @@ const middlewareController = {
 
 }
 
-module.exports = middlewareController;
+module.exports = MiddlewareController;

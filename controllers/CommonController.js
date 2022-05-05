@@ -25,15 +25,16 @@ const CommonController = {
             const response = await fetch(url, options);
             const data = await response.json();
             if (data !== null) {
-                return res.json({
+                return res.status(200).json({
                     token: data.result.token,
                     status: true
                 })
             }
             else {
-                return res.json({
-                    message: "Fail To Get API",
+                return res.status(400).json({
+                    message: "Fail to get api",
                     status: false,
+                    statusCode: 5000
                 })
             }
         }
@@ -44,19 +45,19 @@ const CommonController = {
 
     getAllTenor: async (req, res, next) => {
         try {
-            const tenors = await Tenor.find();
+            const tenors = await Tenor.find().select("_id convertFee paymentSchedule createdAt updatedAt");
             if (tenors.length > 0) {
                 return res.status(200).json({
                     count: tenors.length,
                     data: tenors,
-                    message: "Get List Tenor Success",
+                    message: "Get list tenor success",
                     status: true
                 })
             }
             else {
                 return res.status(200).json({
-                    message: "List Tenor Is Empty",
-                    status: false
+                    message: "List tenor is empty",
+                    status: true
                 })
             }
         }
@@ -65,169 +66,121 @@ const CommonController = {
         }
     },
 
-    // eSignContract: async (req, res, next) => {
-    //     try {
-    //         let phone = req.body.phone;
-    //         if (phone !== null && phone !== '') {
-    //             await Personal.updateOne({ phone: phone }, { $set: { step: 2 } }).then((data, err) => {
-    //                 if (!err) {
-    //                     return res.status(201).json({
-    //                         message: `Update Step Successfully For Phone ${phone}`,
-    //                         status: true
-    //                     })
-    //                 }
-    //                 else {
-    //                     return res.status(201).json({
-    //                         message: `Update Step Failure For Phone ${phone}`,
-    //                         status: false
-    //                     })
-    //                 }
-    //             });
-    //         }
-    //         else {
-    //             return res.status(200).json({
-    //                 message: 'Please Enter Your Phone. Do not leave any field blank !',
-    //                 status: false
-    //             })
-    //         }
-    //     }
-    //     catch (err) {
-    //         next(err);
-    //     }
-    // },
-
-    // completeSuccess: async (req, res, next) => {
-    //     try {
-    //         let phone = req.body.phone;
-    //         if (phone !== null && phone !== '') {
-    //             await Personal.updateOne({ phone: phone }, { $set: { step: 3 } }).then((data, err) => {
-    //                 if (!err) {
-    //                     return res.status(201).json({
-    //                         message: 'Successfully. Done 100%',
-    //                         status: true
-    //                     })
-    //                 }
-    //                 else {
-    //                     return res.status(201).json({
-    //                         message: 'Failure. Try Again',
-    //                         status: false
-    //                     })
-    //                 }
-    //             });
-    //         }
-    //         else {
-    //             return res.status(200).json({
-    //                 message: 'Please Enter Your Phone. Do not leave any field blank !',
-    //                 status: false
-    //             })
-    //         }
-    //     }
-    //     catch (err) {
-    //         next(err);
-    //     }
-    // },
-
     updateStep: async (req, res, next) => {
         try {
             let phone = req.body.phone;
-            let step = req.body.step;
-            if (phone !== null && phone !== '') {
-                if (step === 'not_exist') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'not_exist' } }).then((data, err) => {
-                        if (!err) {
+            let step = req.body.process;
+            if (phone !== null && phone !== '' && step !== null && step !== '') {
+                const customers = await Customer.find();
+                const customer = customers.find(x => x.phone === phone);
+                if (step === 0) {
+                    customer.step = 0
+                    await customer.save()
+                        .then((data) => {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone} (Kyc failure)`,
                                 step: data.step,
                                 status: true
                             })
-                        }
-                        else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
-                                status: false
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Kyc failure)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
                             })
-                        }
-                    });
+                        })
                 }
-                else if (step === 'register_success') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'register_success' } }).then((data, err) => {
-                        if (!err) {
+                else if (step === 1) {
+                    customer.step = 1
+                    await customer.save()
+                        .then((data) => {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone} (Not exists)`,
                                 step: data.step,
                                 status: true
                             })
-                        }
-                        else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
-                                status: false
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Not exists)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
                             })
-                        }
-                    });
+                        })
                 }
-                else if (step === 'kyc_process') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_process' } }).then((data, err) => {
-                        if (!err) {
+                else if (step === 2) {
+                    customer.step = 2
+                    await customer.save()
+                        .then((data) => {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone} (Registered success)`,
                                 step: data.step,
                                 status: true
                             })
-                        }
-                        else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
-                                status: false
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Registered fail)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
                             })
-                        }
-                    });
+                        })
                 }
-                else if (step === 'kyc_completed') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_completed' } }).then((data, err) => {
-                        if (!err) {
+                else if (step === 3) {
+                    customer.step = 3
+                    await customer.save()
+                        .then((data) => {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone} (Kyc process)`,
                                 step: data.step,
                                 status: true
                             })
-                        }
-                        else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
-                                status: false
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Kyc process)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
                             })
-                        }
-                    });
+                        })
                 }
-                else if (step === 'kyc_failure') {
-                    await Customer.updateOne({ phone: phone }, { $set: { step: 'kyc_failure' } }).then((data, err) => {
-                        if (!err) {
+                else if (step === 4) {
+                    customer.step = 4
+                    await customer.save()
+                        .then((data) => {
                             return res.status(201).json({
-                                message: `Update Step Successfully For Phone ${phone}`,
+                                message: `Update step successfully for phone ${phone} (Kyc completed)`,
                                 step: data.step,
                                 status: true
                             })
-                        }
-                        else {
-                            return res.status(201).json({
-                                message: `Update Step Failure For Phone ${phone}`,
-                                status: false
+                        })
+                        .catch((err) => {
+                            return res.status(409).json({
+                                message: `Update step failure for phone ${phone} (Kyc completed)`,
+                                status: false,
+                                errorStatus: err.status || 500,
+                                errorMessage: err.message
                             })
-                        }
-                    });
+                        })
                 }
                 else {
-                    return res.status(200).json({
+                    return res.status(400).json({
                         message: 'Step is not valid',
-                        status: false
+                        status: false,
+                        statusCode: 4000
                     })
                 }
             }
             else {
-                return res.status(200).json({
-                    message: 'Please Enter Your Phone. Do not leave any field blank !',
-                    status: false
+                return res.status(400).json({
+                    message: 'Please enter your phone and step. Do not leave any field blank !',
+                    status: false,
+                    statusCode: 1005
                 })
             }
         }
