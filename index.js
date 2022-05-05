@@ -8,7 +8,7 @@ const path = require('path');
 const createError = require('http-errors');
 const compression = require('compression');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+// const rateLimit = require('express-rate-limit');
 const { buildProdLogger } = require('./helpers/logger');
 const { v4: uuid } = require('uuid');
 
@@ -60,7 +60,7 @@ mongoose.connect(process.env.MONGODB_URL, function (err) {
 //     max: 100,
 // })
 
-app.use(limiter);
+// app.use(limiter);
 
 app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
