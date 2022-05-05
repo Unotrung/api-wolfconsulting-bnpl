@@ -136,6 +136,15 @@ const UserController = {
             //         statusCode: 1005
             //     });
             // }
+            return res.status(200).json({
+                data: {
+                    // _id: user.id,
+                    // nid: user.citizenId
+                },
+                message: "This nid is already exists !",
+                status: true,
+                statusCode: 1000
+            });
         }
         catch (err) {
             next(err);
@@ -196,7 +205,7 @@ const UserController = {
                         return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
-                        await Blacklists.deleteMany({ phone: PHONE })
+                        await Blacklists.deleteMany({ phone: PHONE });
                         let dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
                         await dataTemp.save((err) => {
                             if (!err) {
