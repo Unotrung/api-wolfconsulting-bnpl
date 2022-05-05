@@ -55,10 +55,10 @@ mongoose.connect(process.env.MONGODB_URL, function (err) {
 }
 )
 
-const limiter = rateLimit({
-    windowMs: 1000,
-    max: 100,
-})
+// const limiter = rateLimit({
+//     windowMs: 1000,
+//     max: 100,
+// })
 
 app.use(limiter);
 
