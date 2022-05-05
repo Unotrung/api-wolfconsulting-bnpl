@@ -4,6 +4,8 @@ const Otp = require('../models/bnpl_otps');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const otpGenerator = require('otp-generator');
+const { buildProdLogger } = require('../helpers/logger');
+const { v4: uuid } = require('uuid');
 
 let refreshTokens = [];
 
@@ -27,27 +29,87 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_REFRESH_KEY,
-            { expiresIn: "20m" }
+            { expiresIn: "5h" }
         );
     },
 
     checkPhoneExists: async (req, res, next) => {
         try {
-            const user = await Customer.findOne({ phone: req.body.phone });
-            if (user) {
-                return res.status(200).json({
-                    data: {
-                        _id: user.id,
-                        phone: user.phone
-                    },
-                    message: "This phone number is already exists !",
-                    isExists: true
-                });
+            let phone = req.body.phone;
+            if (phone !== null && phone !== '') {
+                const user = await Customer.findOne({ phone: phone });
+                if (user) {
+                    return res.status(200).json({
+                        data: {
+                            _id: user.id,
+                            phone: user.phone,
+                            step: user.step,
+                        },
+                        message: "This phone number is already exists !",
+                        status: true
+                    });
+                }
+                else if (phone.startsWith('033')) {
+                    return res.status(200).json({
+                        message: "This phone number is not exists in EAP !",
+                        status: false,
+                        errCode: 1001,
+                    });
+                }
+                else if (phone.startsWith('044')) {
+                    return res.status(200).json({
+                        message: "This phone number is not exists in BNPL !",
+                        status: false,
+                        errCode: 1002,
+                    });
+                }
+                else {
+                    return res.status(200).json({
+                        message: "This phone number is not exists !",
+                        status: false,
+                        errCode: 1003,
+                        step: 0
+                    });
+                }
             }
             else {
-                return res.status(401).json({
-                    message: "This phone number is not exists !",
-                    isExists: false
+                return res.status(200).json({
+                    message: "Please enter the phone number !",
+                    status: false
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    checkNidExists: async (req, res, next) => {
+        try {
+            let nid = req.body.nid;
+            if (nid !== null && nid !== '') {
+                const user = await Personal.findOne({ citizenId: nid });
+                if (user) {
+                    return res.status(200).json({
+                        data: {
+                            _id: user.id,
+                            nid: user.citizenId
+                        },
+                        message: "This nid is already exists !",
+                        status: true
+                    });
+                }
+                else {
+                    return res.status(200).json({
+                        message: "This nid is not exists !",
+                        status: false,
+                    });
+                }
+            }
+            else {
+                return res.status(200).json({
+                    message: "Please enter the nid !",
+                    status: false
                 });
             }
         }
@@ -58,27 +120,45 @@ const UserController = {
 
     register: async (req, res, next) => {
         try {
-            const auth = await Customer.findOne({ phone: req.body.phone });
-            if (auth) {
-                return res.status(401).json({
-                    message: "This account is already exists ! Please Login",
-                });
+            let PHONE = req.body.phone;
+            let PIN = req.body.pin;
+            if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
+                const auth = await Customer.findOne({ phone: req.body.phone });
+                if (auth) {
+                    return res.status(200).json({
+                        message: "This account is already exists ! Please Login",
+                    });
+                }
+                else {
+                    const salt = await bcrypt.genSalt(10);
+                    const hashed = await bcrypt.hash(PIN, salt);
+                    const user = await new Customer({ phone: PHONE, pin: hashed });
+                    const accessToken = UserController.generateAccessToken(user);
+                    const result = await user.save((err, data) => {
+                        if (!err) {
+                            const { pin, ...others } = data._doc;
+                            buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                            return res.status(201).json({
+                                message: "Register Successfully",
+                                data: { ...others },
+                                token: accessToken,
+                                status: true
+                            });
+                        }
+                        else {
+                            buildProdLogger('error', 'register_customer_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                            return res.status(200).json({
+                                message: "Register Failure",
+                                status: false
+                            });
+                        }
+                    });
+                }
             }
             else {
-                let PHONE = req.body.phone;
-                let PIN = req.body.pin;
-                const salt = await bcrypt.genSalt(10);
-                const hashed = await bcrypt.hash(PIN, salt);
-                const user = await new Customer({ phone: PHONE, pin: hashed });
-                const accessToken = UserController.generateAccessToken(user);
-                const result = await user.save();
-                const { pin, ...others } = result._doc;
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is register successfully`, 'register_success.log');
-                return res.status(201).json({
-                    message: "Register Successfully",
-                    data: { ...others },
-                    token: accessToken,
-                    status: true
+                return res.status(200).json({
+                    message: "Please enter your phone number and pin code. Do not leave any fields blank !",
+                    status: false
                 });
             }
         }
@@ -89,33 +169,41 @@ const UserController = {
 
     login: async (req, res, next) => {
         try {
-            const user = await Customer.findOne({ phone: req.body.phone });
-            if (!user) {
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong phone`, 'error_login.log');
-                return res.status(401).json({ message: "Wrong phone ! Please Try Again" });
+            let PHONE = req.body.phone;
+            let PIN = req.body.pin;
+            if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '') {
+                const user = await Customer.findOne({ phone: PHONE });
+                if (!user) {
+                    return res.status(200).json({ message: "Wrong phone. Please Try Again !", status: false });
+                }
+                const valiPin = await bcrypt.compare(PIN, user.pin);
+                if (!valiPin) {
+                    return res.status(200).json({ message: "Wrong pin. Please Try Again !", status: false });
+                }
+                if (user && valiPin) {
+                    const accessToken = UserController.generateAccessToken(user);
+                    const refreshToken = UserController.generateRefreshToken(user);
+                    refreshTokens.push(refreshToken);
+                    res.cookie("refreshToken", refreshToken, {
+                        httpOnly: true,
+                        secure: false,
+                        path: '/',
+                        sameSite: 'strict',
+                    });
+                    const { pin, ...others } = user._doc;
+                    buildProdLogger('info', 'login_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                    return res.status(200).json({
+                        message: "Login Successfully",
+                        data: { ...others },
+                        token: accessToken,
+                        status: true
+                    });
+                }
             }
-            const valiPin = await bcrypt.compare(req.body.pin, user.pin);
-            if (!valiPin) {
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} login fail because wrong pin`, 'error_login.log');
-                return res.status(401).json({ message: "Wrong pin ! Please Try Again" });
-            }
-            if (user && valiPin) {
-                const accessToken = UserController.generateAccessToken(user);
-                const refreshToken = UserController.generateRefreshToken(user);
-                refreshTokens.push(refreshToken);
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is login successfully`, 'login_success.log');
-                res.cookie("refreshToken", refreshToken, {
-                    httpOnly: true,
-                    secure: false,
-                    path: '/',
-                    sameSite: 'strict',
-                });
-                const { pin, ...others } = user._doc;
+            else {
                 return res.status(200).json({
-                    message: "Login Successfully",
-                    data: { ...others },
-                    token: accessToken,
-                    status: true
+                    message: "Please enter your phone number and pin code. Do not leave any fields blank !",
+                    status: false
                 });
             }
         }
@@ -126,25 +214,32 @@ const UserController = {
 
     sendOtp: async (req, res, next) => {
         try {
-            const user = await Customer.findOne({ phone: req.body.phone });
-            if (user) {
-                const OTP = otpGenerator.generate(6, {
-                    digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
+            let OTP = otpGenerator.generate(6, {
+                digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
+            });
+            let PHONE = req.body.phone;
+            if (PHONE !== null && PHONE !== '') {
+                const dataTemp = new Otp({ phone: PHONE, otp: OTP });
+                const result = await dataTemp.save((err) => {
+                    if (!err) {
+                        return res.status(200).json({
+                            message: "Send OTP Successfully",
+                            otp: OTP,
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "Send OTP Failure",
+                            status: false
+                        });
+                    }
                 });
-                const PHONE = req.body.phone;
-                if (OTP !== null && PHONE != null) {
-                    const dataTemp = new Otp({ phone: PHONE, otp: OTP });
-                    const result = await dataTemp.save();
-                    return res.status(200).json({
-                        message: "Send OTP Successfully",
-                        otp: OTP,
-                        status: true
-                    });
-                }
             }
             else {
-                return res.status(401).json({
-                    message: "Wrong phone ! Please Try Again",
+                return res.status(200).json({
+                    message: "Please enter the phone number !",
+                    status: false
                 });
             }
         }
@@ -155,23 +250,38 @@ const UserController = {
 
     verifyOtp: async (req, res, next) => {
         try {
-            const otpUser = await Otp.find({ phone: req.body.phone });
-            if (otpUser.length === 0) {
-                return res.status(401).json({ message: "Expired OTP ! Please Resend OTP" });
-            }
-            const lastOtp = otpUser[otpUser.length - 1];
-            if (lastOtp.phone === req.body.phone && lastOtp.otp === req.body.otp) {
-                await Otp.deleteMany({ phone: lastOtp.phone });
-                return res.status(200).json({
-                    message: "OTP VALID",
-                    status: true,
-                })
+            let PHONE = req.body.phone;
+            let OTP = req.body.otp;
+            if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
+                const otpUser = await Otp.find({ phone: PHONE });
+                if (otpUser.length === 0) {
+                    return res.status(200).json({
+                        message: "Expired OTP. Please Resend OTP !",
+                        status: false
+                    });
+                }
+                else {
+                    const lastOtp = otpUser[otpUser.length - 1];
+                    if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
+                        await Otp.deleteMany({ phone: lastOtp.phone });
+                        return res.status(200).json({
+                            message: "Successfully. OTP VALID",
+                            status: true,
+                        })
+                    }
+                    else {
+                        return res.status(200).json({
+                            message: "Failure. OTP INVALID",
+                            status: false,
+                        })
+                    }
+                }
             }
             else {
-                return res.status(401).json({
-                    message: "OTP INVALID",
-                    status: false,
-                })
+                return res.status(200).json({
+                    message: "Please enter your phone number and otp code. Do not leave any fields blank !",
+                    status: false
+                });
             }
         }
         catch (err) {
@@ -181,34 +291,51 @@ const UserController = {
 
     sendOtpPin: async (req, res, next) => {
         try {
-            const validPhone = await Customer.findOne({ phone: req.body.phone });
-            if (validPhone) {
-                const validNid = await Personal.findOne({ citizenId: req.body.nid });
-                if (validNid && validPhone.phone === validNid.phone) {
-                    const OTP = otpGenerator.generate(6, {
-                        digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
-                    });
-                    const PHONE = req.body.phone;
-                    const NID = req.body.nid;
-                    if (OTP !== null && PHONE !== null && NID !== null) {
+            let OTP = otpGenerator.generate(6, {
+                digits: true, specialChars: false, upperCaseAlphabets: false, lowerCaseAlphabets: false
+            });
+            let PHONE = req.body.phone;
+            let NID = req.body.nid;
+            if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '') {
+                const validPhone = await Customer.findOne({ phone: PHONE });
+                if (validPhone) {
+                    const validNid = await Personal.findOne({ citizenId: NID });
+                    if (validNid && validPhone.phone === validNid.phone) {
                         const dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID });
-                        const result = await dataTemp.save();
+                        const result = await dataTemp.save((err) => {
+                            if (!err) {
+                                return res.status(200).json({
+                                    message: "Send OTP Successfully",
+                                    otp: OTP,
+                                    status: true
+                                });
+                            }
+                            else {
+                                return res.status(200).json({
+                                    message: "Send OTP Failure",
+                                    status: false
+                                });
+                            }
+                        });
+                    }
+                    else {
                         return res.status(200).json({
-                            message: "Send OTP Successfully",
-                            otp: OTP,
-                            status: true
+                            message: "Wrong Nid. Please Try Again !",
+                            status: false
                         });
                     }
                 }
                 else {
-                    return res.status(401).json({
-                        message: "Wrong Nid ! Please Try Again",
+                    return res.status(200).json({
+                        message: "Wrong phone. Please Try Again !",
+                        status: false
                     });
                 }
             }
             else {
-                return res.status(401).json({
-                    message: "Wrong phone ! Please Try Again",
+                return res.status(200).json({
+                    message: "Please enter your phone number and nid. Do not leave any fields blank !",
+                    status: false
                 });
             }
         }
@@ -219,28 +346,85 @@ const UserController = {
 
     verifyOtpPin: async (req, res, next) => {
         try {
-            const validUser = await Otp.find({ phone: req.body.phone, nid: req.body.nid });
-            if (validUser.length === 0) {
-                return res.status(401).json({ message: "Expired OTP ! Please Resend OTP" });
-            }
-            const lastOtp = validUser[validUser.length - 1];
-            console.log("PHONE:", lastOtp.phone === req.body.phone);
-            console.log("NID:", lastOtp.nid === req.body.nid);
-            console.log("OTP:", lastOtp.otp === req.body.otp);
-            if (lastOtp.phone === req.body.phone && lastOtp.nid === req.body.nid && lastOtp.otp === req.body.otp) {
-                const accessToken = UserController.generateAccessToken(lastOtp);
-                await Otp.deleteMany({ phone: lastOtp.phone, nid: req.body.nid });
-                return res.status(200).json({
-                    message: "OTP VALID",
-                    token: accessToken,
-                    status: true,
-                })
+            let PHONE = req.body.phone;
+            let NID = req.body.nid;
+            let OTP = req.body.otp;
+            if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '' && OTP !== null && OTP !== '') {
+                const validUser = await Otp.find({ phone: PHONE, nid: NID });
+                if (validUser.length === 0) {
+                    return res.status(200).json({
+                        message: "Expired OTP. Please Resend OTP !",
+                        status: false
+                    });
+                }
+                else {
+                    const lastOtp = validUser[validUser.length - 1];
+                    if (lastOtp.phone === PHONE && lastOtp.nid === NID && lastOtp.otp === OTP) {
+                        const accessToken = UserController.generateAccessToken(lastOtp);
+                        await Otp.deleteMany({ phone: PHONE, nid: NID });
+                        return res.status(200).json({
+                            message: "Successfully. OTP VALID",
+                            token: accessToken,
+                            status: true,
+                        })
+                    }
+                    else {
+                        return res.status(401).json({
+                            message: "Failure. OTP INVALID",
+                            status: false,
+                        })
+                    }
+                }
             }
             else {
-                return res.status(401).json({
-                    message: "OTP INVALID",
-                    status: false,
-                })
+                return res.status(200).json({
+                    message: "Please enter your phone number, nid and otp code. Do not leave any fields blank !",
+                    status: false
+                });
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    resetPin: async (req, res, next) => {
+        try {
+            let PHONE = req.body.phone;
+            let NEW_PIN = req.body.new_pin;
+            if (PHONE !== null && PHONE !== '' && NEW_PIN !== null && NEW_PIN !== '') {
+                const user = await Customer.findOne({ phone: PHONE });
+                if (user) {
+                    const salt = await bcrypt.genSalt(10);
+                    const hashed = await bcrypt.hash(NEW_PIN, salt);
+                    await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
+                        if (!err) {
+                            buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                            return res.status(201).json({
+                                message: "Reset Pin Successfully",
+                                status: true
+                            })
+                        }
+                        else {
+                            buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                            return res.status(200).json({
+                                message: "Reset Pin Failure",
+                                status: false
+                            });
+                        }
+                    })
+                }
+                else {
+                    return res.status(200).json({
+                        message: "This account is not exists !"
+                    })
+                }
+            }
+            else {
+                return res.status(200).json({
+                    message: "Please enter your phone number and new pin code. Do not leave any fields blank !",
+                    status: false
+                });
             }
         }
         catch (err) {
@@ -250,61 +434,52 @@ const UserController = {
 
     updatePin: async (req, res, next) => {
         try {
-            const user = await Customer.findOne({ phone: req.body.phone });
-            if (user) {
-                const salt = await bcrypt.genSalt(10);
-                const hashed = await bcrypt.hash(req.body.pin, salt);
-                await Customer.updateOne({ $set: { pin: hashed } });
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated successfully`, 'update_pin_success.log');
-                return res.status(201).json({
-                    message: "Update Password Successfully",
-                    status: true
-                });
-            }
-            else {
-                return res.status(400).json({
-                    message: "This account is not exists !"
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
-
-    updatePassword: async (req, res, next) => {
-        try {
-            const user = await Customer.findOne({ phone: req.body.phone });
-            if (user) {
-                const validPin = await bcrypt.compare(req.body.pin, user.pin);
-                // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin failure`, 'update_password_fail.log');
-                if (validPin) {
-                    if (req.body.new_pin) {
+            let PHONE = req.body.phone;
+            let PIN = req.body.pin;
+            let NEW_PIN = req.body.new_pin;
+            if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '' && NEW_PIN !== null && NEW_PIN !== '') {
+                const user = await Customer.findOne({ phone: PHONE });
+                if (user) {
+                    const validPin = await bcrypt.compare(PIN, user.pin);
+                    if (validPin) {
                         const salt = await bcrypt.genSalt(10);
-                        const hashed = await bcrypt.hash(req.body.new_pin, salt);
-                        await Customer.updateOne({ $set: { pin: hashed } });
-                        // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${req.body.phone} is updated pin successfully`, 'update_password_success.log');
-                        return res.status(201).json({
-                            message: "Update Pin Successfully",
-                            status: true
-                        });
+                        const hashed = await bcrypt.hash(NEW_PIN, salt);
+                        await user.updateOne({ $set: { pin: hashed } }).then((data, err) => {
+                            if (!err) {
+                                buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                                return res.status(201).json({
+                                    message: "Update Pin Successfully",
+                                    status: true
+                                })
+                            }
+                            else {
+                                buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
+                                return res.status(200).json({
+                                    message: "Update Pin Failure",
+                                    status: false
+                                });
+                            }
+                        })
                     }
                     else {
-                        return res.status(400).json({
-                            message: "Please Enter Your New Pin"
+                        return res.status(200).json({
+                            message: "Your old pin is not correct !",
+                            status: false
                         })
                     }
                 }
                 else {
-                    return res.status(400).json({
-                        message: "Your old pin is not correct !"
+                    return res.status(200).json({
+                        message: "This account is not exists !",
+                        status: false
                     })
                 }
             }
             else {
-                return res.status(400).json({
-                    message: "This account is not exists !"
-                })
+                return res.status(200).json({
+                    message: "Please enter your phone number, old pin code and new pin code. Do not leave any fields blank !",
+                    status: false
+                });
             }
         }
         catch (err) {
@@ -314,16 +489,19 @@ const UserController = {
 
     getAllUser: async (req, res, next) => {
         try {
-            const users = await Customer.find();
+            const users = await Customer.find().select('_id phone');
             if (users.length > 0) {
                 return res.status(200).json({
+                    count: users.length,
                     data: users,
-                    message: "Get List User Success"
+                    message: "Get List User Success",
+                    status: true
                 })
             }
             else {
-                return res.status(400).json({
-                    message: "List User Is Empty"
+                return res.status(200).json({
+                    message: "List User Is Empty",
+                    status: false
                 })
             }
         }

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-const bnpl_customersSchema = new mongoose.Schema({
+const bnpl_customerSchema = new mongoose.Schema({
+
     phone: {
         type: String,
         required: [true, 'Phone is required'],
@@ -11,6 +12,10 @@ const bnpl_customersSchema = new mongoose.Schema({
     pin: {
         type: String,
     },
+    step: {
+        type: String,
+    }
+
 }, { timestamps: true });
 
-module.exports = mongoose.model('bnpl_customers', bnpl_customersSchema);
+module.exports = mongoose.model('bnpl_customer', bnpl_customerSchema);

@@ -20,6 +20,8 @@ dotenv.config();
 
 const app = express();
 
+app.use(morgan('combined'));
+
 app.use(helmet());
 
 app.use(compression());
@@ -33,8 +35,6 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
-
-app.use(morgan('combined'));
 
 mongoose.connect(process.env.MONGODB_URL, function (err) {
     if (!err) {
@@ -57,17 +57,12 @@ app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
 
-// Handle Error Not Found
 app.use((req, res, next) => {
-    // All Not Found errors will be handled centrally here
     next(createError.NotFound('This route dose not exists !'));
 })
 
 app.use((err, req, res, next) => {
-    // Any middleware that fails will run down to this middleware for processing
-    // Log errors in logs.log . file
-    // logEvents(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`, 'errors.log');
-    buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
+    buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
     return res.json({
         status: err.status || 500,
         message: err.message
@@ -78,4 +73,3 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
     console.log(`Server is listening at PORT ${PORT}`);
 })
-
