@@ -37,48 +37,73 @@ const UserController = {
         try {
             let phone = req.body.phone;
             if (phone !== null && phone !== '') {
+                const blacklists = await Blacklists.find();
+                const isExists = blacklists.find(x => x.phone === phone);
                 const users = await Customer.find();
                 const user = users.find(x => x.phone === phone);
-                if (user) {
-                    return res.status(200).json({
-                        data: {
-                            _id: user.id,
-                            phone: user.phone,
-                            step: user.step
-                        },
-                        message: "This phone number is already exists !",
-                        status: true,
-                        errCode: 1000
-                    });
-                }
-                else if (phone.startsWith('033')) {
-                    return res.status(404).json({
-                        message: "This phone number is not exists in EAP !",
-                        status: false,
-                        errCode: 1001
-                    });
-                }
-                else if (phone.startsWith('044')) {
-                    return res.status(404).json({
-                        message: "This phone number is not exists in BNPL !",
-                        status: false,
-                        errCode: 1002
-                    });
-                }
-                else if (phone === "0312312399") {
-                    return res.status(403).json({
-                        message: "This phone is block. Please contact for help !",
-                        status: false,
-                        errCode: 1004,
-                    });
+                if (isExists) {
+                    if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
+                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1008 });
+                    }
+                    else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
+                        await Blacklists.deleteMany({ phone: PHONE });
+                        return res.status(200).json({
+                            data: {
+                                _id: user.id,
+                                phone: user.phone,
+                                step: user.step
+                            },
+                            message: "This phone number is already exists !",
+                            status: true,
+                            errCode: 1000
+                        });
+                    }
                 }
                 else {
-                    return res.status(404).json({
-                        message: "This phone number is not exists !",
-                        status: false,
-                        step: 1,
-                        errCode: 1003
-                    });
+                    if (user?.loginAttempts === 5 && user?.lockUntil > Date.now()) {
+                        return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, statusCode: 1004 });
+                    }
+                    else if (user) {
+                        return res.status(200).json({
+                            data: {
+                                _id: user.id,
+                                phone: user.phone,
+                                step: user.step
+                            },
+                            message: "This phone number is already exists !",
+                            status: true,
+                            errCode: 1000
+                        });
+                    }
+                    else if (phone.startsWith('033')) {
+                        return res.status(404).json({
+                            message: "This phone number is not exists in EAP !",
+                            status: false,
+                            errCode: 1001
+                        });
+                    }
+                    else if (phone.startsWith('044')) {
+                        return res.status(404).json({
+                            message: "This phone number is not exists in BNPL !",
+                            status: false,
+                            errCode: 1002
+                        });
+                    }
+                    else if (phone === "0312312399") {
+                        return res.status(403).json({
+                            message: "This phone is block. Please contact for help !",
+                            status: false,
+                            errCode: 1004,
+                        });
+                    }
+                    else {
+                        return res.status(404).json({
+                            message: "This phone number is not exists !",
+                            status: false,
+                            step: 1,
+                            errCode: 1003
+                        });
+                    }
                 }
             }
             else {
@@ -183,7 +208,7 @@ const UserController = {
                 const isExists = blacklists.find(x => x.phone === PHONE);
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
+                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
                         await Blacklists.deleteMany({ phone: PHONE });
@@ -297,7 +322,7 @@ const UserController = {
                             const isExists = blacklists.find(x => x.phone === PHONE);
                             if (isExists) {
                                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                                    return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
+                                    return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
                                 }
                                 else if (isExists.attempts < 5) {
                                     await isExists.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { attempts: 1 } });
@@ -341,7 +366,7 @@ const UserController = {
                 const isExists = blacklists.find(x => x.phone === PHONE);
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
+                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
                         await Blacklists.deleteMany({ phone: PHONE })
@@ -490,7 +515,7 @@ const UserController = {
                             const isExists = blacklists.find(x => x.phone === PHONE);
                             if (isExists) {
                                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                                    return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
+                                    return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
                                 }
                                 else if (isExists.attempts < 5) {
                                     await isExists.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { attempts: 1 } });
@@ -545,7 +570,7 @@ const UserController = {
                 const valiPin = await bcrypt.compare(PIN, user.pin);
                 if (!valiPin) {
                     if (user.loginAttempts === 5 && user.lockUntil > Date.now()) {
-                        return res.status(404).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, statusCode: 1004 });
+                        return res.status(404).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, statusCode: 1004 });
                     }
                     else if (user.loginAttempts < 5) {
                         await user.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { loginAttempts: 1 } });
@@ -577,7 +602,7 @@ const UserController = {
                         })
                 }
                 else {
-                    return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false });
+                    return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", countFail: 5, status: false });
                 }
             }
             else {
