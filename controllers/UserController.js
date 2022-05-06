@@ -60,7 +60,7 @@ const UserController = {
                     }
                 }
                 else {
-                    if (user.loginAttempts === 5 && user.lockUntil > Date.now()) {
+                    if (user?.loginAttempts === 5 && user?.lockUntil > Date.now()) {
                         return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, statusCode: 1004 });
                     }
                     else if (user) {
