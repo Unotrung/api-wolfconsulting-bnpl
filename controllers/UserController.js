@@ -585,12 +585,10 @@ const UserController = {
 
     requestRefreshToken: async (req, res, next) => {
         try {
-            let phone = req.body.phone;
-            let id = req.body.id;
             let refreshToken = req.body.refreshToken;
-            if (refreshToken !== null && refreshToken !== '' && id !== null && id !== '' && phone !== null && phone !== '') {
+            if (refreshToken !== null && refreshToken !== '') {
                 const customers = await Customer.find();
-                const customer = customers.find(x => x.refreshToken === refreshToken && x.id === id && x.phone === phone);
+                const customer = customers.find(x => x.refreshToken === refreshToken);
                 if (customer) {
                     let newAccessToken = UserController.generateAccessToken(customer);
                     let newRefreshToken = UserController.generateRefreshToken(customer);
@@ -623,7 +621,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your id, refreshToken, phone. Do not leave any fields blank !",
+                    message: "Please enter your refreshToken. Do not leave any fields blank !",
                     status: false,
                     statusCode: 1005
                 });
