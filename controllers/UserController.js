@@ -182,6 +182,40 @@ const UserController = {
         }
     },
 
+    generateOTP: (PHONE, OTP) => {
+        return async (req, res) => {
+            console.log("PHONE: ", PHONE);
+            console.log("OTP: ", OTP);
+            if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
+                let dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
+                await dataTemp.save((err) => {
+                    if (!err) {
+                        return res.status(200).json({
+                            message: "Send otp successfully",
+                            otp: OTP,
+                            status: true
+                        });
+                    }
+                    else {
+                        return res.status(409).json({
+                            message: "Send otp failure",
+                            status: false,
+                            errorStatus: err.status || 500,
+                            errorMessage: err.message
+                        });
+                    }
+                });
+            }
+            else {
+                return res.status(400).json({
+                    message: "Please enter your phone. Do not leave any field blank !",
+                    status: false,
+                    statusCode: 1005
+                });
+            }
+        }
+    },
+
     sendOtp: async (req, res, next) => {
         try {
             let OTP = otpGenerator.generate(6, {
@@ -197,45 +231,13 @@ const UserController = {
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
                         await Blacklists.deleteMany({ phone: PHONE });
-                        let dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
-                        await dataTemp.save((err) => {
-                            if (!err) {
-                                return res.status(200).json({
-                                    message: "Send otp successfully",
-                                    otp: OTP,
-                                    status: true
-                                });
-                            }
-                            else {
-                                return res.status(409).json({
-                                    message: "Send otp failure",
-                                    status: false,
-                                    errorStatus: err.status || 500,
-                                    errorMessage: err.message
-                                });
-                            }
-                        });
+                        const data1 = await UserController.generateOTP(PHONE, OTP)(req, res);
+                        console.log("DATA 1: ", data1);
                     }
                 }
                 else {
-                    let dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
-                    await dataTemp.save((err) => {
-                        if (!err) {
-                            return res.status(200).json({
-                                message: "Send otp successfully",
-                                otp: OTP,
-                                status: true
-                            });
-                        }
-                        else {
-                            return res.status(409).json({
-                                message: "Send otp failure",
-                                status: false,
-                                errorStatus: err.status || 500,
-                                errorMessage: err.message
-                            });
-                        }
-                    });
+                    const data2 = await UserController.generateOTP(PHONE, OTP)(req, res);
+                    console.log("DATA 2: ", data2);
                 }
             }
             else {
@@ -858,20 +860,24 @@ const UserController = {
                 })
             }
             const customers = await Customer.find()
-            const user = customers.find(customer => customer._id === id)
+            console.log("ID: ", id);
+            const user = customers.find(customer => customer.id === id);
+            console.log("User: ", user);
             if (!user) return res.status(400).json({
                 message: 'Bad request'
             })
             //todo: update user status esign confirm here
 
             //public an event
-            await pubsub.publish('new_user_event', { newUserEvent: { id, name, credit_limit } })
+            await pubsub.publish('new_user_event', { newUserEvent: { id, name, credit_limit } });
+            return res.status(200).json({
+                message: "Success",
+            })
         }
         catch (e) {
             next(e)
         }
     }
-
 };
 
 module.exports = UserController;
