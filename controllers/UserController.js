@@ -184,8 +184,6 @@ const UserController = {
 
     generateOTP: (PHONE, OTP) => {
         return async (req, res) => {
-            console.log("PHONE: ", PHONE);
-            console.log("OTP: ", OTP);
             if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
                 let dataTemp = new Otp({ phone: PHONE, otp: OTP, expiredAt: Date.now() + 1 * 60 * 1000 });
                 await dataTemp.save((err) => {
@@ -231,13 +229,15 @@ const UserController = {
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
                         await Blacklists.deleteMany({ phone: PHONE });
-                        const data1 = await UserController.generateOTP(PHONE, OTP)(req, res);
-                        console.log("DATA 1: ", data1);
+                        await UserController.generateOTP(PHONE, OTP)(req, res);
+                    }
+                    else if (isExists.attempts > 0) {
+                        await Blacklists.deleteMany({ phone: PHONE });
+                        await UserController.generateOTP(PHONE, OTP)(req, res);
                     }
                 }
                 else {
-                    const data2 = await UserController.generateOTP(PHONE, OTP)(req, res);
-                    console.log("DATA 2: ", data2);
+                    await UserController.generateOTP(PHONE, OTP)(req, res);
                 }
             }
             else {
@@ -260,21 +260,23 @@ const UserController = {
             if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
                 const otpUser = await Otp.find({ phone: PHONE });
                 if (otpUser.length === 0) {
+                    console.log("otpUser.length === 0");
                     return res.status(401).json({
                         message: "Expired otp. Please resend otp !",
                         status: false,
                         statusCode: 3000
-                    });
+                    });;
                 }
                 else {
                     const lastOtp = otpUser[otpUser.length - 1];
                     if (lastOtp.expiredAt < Date.now()) {
+                        console.log("lastOtp.expiredAt < Date.now()");
                         await Otp.deleteMany({ phone: lastOtp.phone });
                         return res.status(401).json({
                             message: "Expired otp. Please resend otp !",
                             status: false,
                             statusCode: 3000
-                        });
+                        });;
                     }
                     else {
                         if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
@@ -860,9 +862,7 @@ const UserController = {
                 })
             }
             const customers = await Customer.find()
-            console.log("ID: ", id);
             const user = customers.find(customer => customer.id === id);
-            console.log("User: ", user);
             if (!user) return res.status(400).json({
                 message: 'Bad request'
             })
