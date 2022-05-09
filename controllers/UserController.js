@@ -41,7 +41,7 @@ const UserController = {
                 const isExists = blacklists.find(x => x.phone === phone);
                 const users = await Customer.find();
                 const user = users.find(x => x.phone === phone);
-                var result = res.status(200).json({
+                var result = {
                     data: {
                         _id: user.id,
                         phone: user.phone,
@@ -50,14 +50,18 @@ const UserController = {
                     message: "This phone number is already exists !",
                     status: true,
                     errCode: 1000
-                });
+                };
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                         return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, errCode: 1008 });
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
-                        await Blacklists.deleteMany({ phone: PHONE });
-                        return result;
+                        await Blacklists.deleteMany({ phone: phone });
+                        return res.status(200).json(result);
+                    }
+                    else if (isExists.attempts > 0 && isExists.attempts < 5) {
+                        await Blacklists.deleteMany({ phone: phone });
+                        return res.status(200).json(result);
                     }
                 }
                 else {
@@ -65,7 +69,7 @@ const UserController = {
                         return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, errCode: 1004 });
                     }
                     else if (user) {
-                        return result;
+                        return res.status(200).json(result);;
                     }
                     else if (phone.startsWith('033')) {
                         return res.status(404).json({
@@ -231,7 +235,7 @@ const UserController = {
                         await Blacklists.deleteMany({ phone: PHONE });
                         await UserController.generateOTP(PHONE, OTP)(req, res);
                     }
-                    else if (isExists.attempts > 0) {
+                    else if (isExists.attempts > 0 && isExists.attempts < 5) {
                         await Blacklists.deleteMany({ phone: PHONE });
                         await UserController.generateOTP(PHONE, OTP)(req, res);
                     }
@@ -257,26 +261,21 @@ const UserController = {
         try {
             let PHONE = req.body.phone;
             let OTP = req.body.otp;
+            let otp_expired = {
+                message: "Expired otp. Please resend otp !",
+                status: false,
+                statusCode: 3000
+            };
             if (PHONE !== null && PHONE !== '' && OTP !== null && OTP !== '') {
                 const otpUser = await Otp.find({ phone: PHONE });
                 if (otpUser.length === 0) {
-                    console.log("otpUser.length === 0");
-                    return res.status(401).json({
-                        message: "Expired otp. Please resend otp !",
-                        status: false,
-                        statusCode: 3000
-                    });;
+                    return res.status(401).json(otp_expired);
                 }
                 else {
                     const lastOtp = otpUser[otpUser.length - 1];
                     if (lastOtp.expiredAt < Date.now()) {
-                        console.log("lastOtp.expiredAt < Date.now()");
                         await Otp.deleteMany({ phone: lastOtp.phone });
-                        return res.status(401).json({
-                            message: "Expired otp. Please resend otp !",
-                            status: false,
-                            statusCode: 3000
-                        });;
+                        return res.status(401).json(otp_expired);
                     }
                     else {
                         if (lastOtp.phone === PHONE && lastOtp.otp === OTP) {
