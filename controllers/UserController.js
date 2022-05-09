@@ -53,7 +53,7 @@ const UserController = {
                 });
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1008 });
+                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, errCode: 1008 });
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
                         await Blacklists.deleteMany({ phone: PHONE });
@@ -62,7 +62,7 @@ const UserController = {
                 }
                 else {
                     if (user?.loginAttempts === 5 && user?.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, statusCode: 1004 });
+                        return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, errCode: 1004 });
                     }
                     else if (user) {
                         return result;
@@ -587,7 +587,7 @@ const UserController = {
                         })
                 }
                 else {
-                    return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", countFail: 5, status: false });
+                    return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", countFail: 5, status: false, statusCode: 1004 });
                 }
             }
             else {

@@ -84,7 +84,7 @@ router.get("/getAllUser", UserController.getAllUser);
 
 router.post("/eSignUser", master, UserController.updateESignUser);
 
-router.put("/requestRefreshToken", MiddlewareController.verifyTokenByMySelf, UserController.requestRefreshToken);
+router.put("/requestRefreshToken", UserController.requestRefreshToken);
 
 // router.put("/logout", MiddlewareController.verifyTokenByMySelf, UserController.logout);
 
