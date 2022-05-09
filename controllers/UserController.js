@@ -871,7 +871,7 @@ const UserController = {
             //public an event
             await pubsub.publish('new_user_event', { newUserEvent: { id, name, credit_limit } });
             return res.status(200).json({
-                message: "Success",
+                message: "Success"
             })
         }
         catch (e) {
