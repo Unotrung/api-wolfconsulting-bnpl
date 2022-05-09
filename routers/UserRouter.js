@@ -86,6 +86,6 @@ router.post("/eSignUser", master, UserController.updateESignUser);
 
 router.put("/requestRefreshToken", MiddlewareController.verifyTokenByMySelf, UserController.requestRefreshToken);
 
-router.put("/logout", MiddlewareController.verifyTokenByMySelf, UserController.logout);
+// router.put("/logout", MiddlewareController.verifyTokenByMySelf, UserController.logout);
 
 module.exports = router;

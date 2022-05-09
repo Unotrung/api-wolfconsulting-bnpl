@@ -18,7 +18,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_ACCESS_KEY,
-            { expiresIn: "40m" }
+            { expiresIn: "15s" }
         );
     },
 
@@ -29,7 +29,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_REFRESH_KEY,
-            { expiresIn: "3h" }
+            { expiresIn: "2m" }
         );
     },
 
@@ -41,22 +41,23 @@ const UserController = {
                 const isExists = blacklists.find(x => x.phone === phone);
                 const users = await Customer.find();
                 const user = users.find(x => x.phone === phone);
+                var result = res.status(200).json({
+                    data: {
+                        _id: user.id,
+                        phone: user.phone,
+                        step: user.step
+                    },
+                    message: "This phone number is already exists !",
+                    status: true,
+                    errCode: 1000
+                });
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                         return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, statusCode: 1008 });
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
                         await Blacklists.deleteMany({ phone: PHONE });
-                        return res.status(200).json({
-                            data: {
-                                _id: user.id,
-                                phone: user.phone,
-                                step: user.step
-                            },
-                            message: "This phone number is already exists !",
-                            status: true,
-                            errCode: 1000
-                        });
+                        return result;
                     }
                 }
                 else {
@@ -64,16 +65,7 @@ const UserController = {
                         return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, statusCode: 1004 });
                     }
                     else if (user) {
-                        return res.status(200).json({
-                            data: {
-                                _id: user.id,
-                                phone: user.phone,
-                                step: user.step
-                            },
-                            message: "This phone number is already exists !",
-                            status: true,
-                            errCode: 1000
-                        });
+                        return result;
                     }
                     else if (phone.startsWith('033')) {
                         return res.status(404).json({
@@ -87,13 +79,6 @@ const UserController = {
                             message: "This phone number is not exists in BNPL !",
                             status: false,
                             errCode: 1002
-                        });
-                    }
-                    else if (phone === "0312312399") {
-                        return res.status(403).json({
-                            message: "This phone is block. Please contact for help !",
-                            status: false,
-                            errCode: 1004,
                         });
                     }
                     else {
@@ -669,51 +654,51 @@ const UserController = {
         }
     },
 
-    logout: async (req, res, next) => {
-        try {
-            let id = req.body.id;
-            let phone = req.body.phone;
-            if (id !== null && id !== '' && phone !== null && phone !== '') {
-                const customers = await Customer.find();
-                const customer = customers.find(x => x.id === id && x.phone === phone);
-                if (customer) {
-                    customer.refreshToken = null;
-                    await customer.save()
-                        .then((data) => {
-                            return res.status(201).json({
-                                message: 'Log out successfully',
-                                status: true
-                            })
-                        })
-                        .catch((err) => {
-                            return res.status(409).json({
-                                message: 'Log out failure',
-                                status: false,
-                                errorStatus: err.status || 500,
-                                errorMessage: err.message
-                            })
-                        })
-                }
-                else {
-                    return res.status(409).json({
-                        message: "Can not find this account to log out !",
-                        status: false,
-                        statusCode: 900
-                    });
-                }
-            }
-            else {
-                return res.status(400).json({
-                    message: "Please enter your id and phone. Do not leave any fields blank !",
-                    status: false,
-                    statusCode: 1005
-                });
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
+    // logout: async (req, res, next) => {
+    //     try {
+    //         let id = req.body.id;
+    //         let phone = req.body.phone;
+    //         if (id !== null && id !== '' && phone !== null && phone !== '') {
+    //             const customers = await Customer.find();
+    //             const customer = customers.find(x => x.id === id && x.phone === phone);
+    //             if (customer) {
+    //                 customer.refreshToken = null;
+    //                 await customer.save()
+    //                     .then((data) => {
+    //                         return res.status(201).json({
+    //                             message: 'Log out successfully',
+    //                             status: true
+    //                         })
+    //                     })
+    //                     .catch((err) => {
+    //                         return res.status(409).json({
+    //                             message: 'Log out failure',
+    //                             status: false,
+    //                             errorStatus: err.status || 500,
+    //                             errorMessage: err.message
+    //                         })
+    //                     })
+    //             }
+    //             else {
+    //                 return res.status(409).json({
+    //                     message: "Can not find this account to log out !",
+    //                     status: false,
+    //                     statusCode: 900
+    //                 });
+    //             }
+    //         }
+    //         else {
+    //             return res.status(400).json({
+    //                 message: "Please enter your id and phone. Do not leave any fields blank !",
+    //                 status: false,
+    //                 statusCode: 1005
+    //             });
+    //         }
+    //     }
+    //     catch (err) {
+    //         next(err);
+    //     }
+    // },
 
     resetPin: async (req, res, next) => {
         try {
