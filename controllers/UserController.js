@@ -43,9 +43,9 @@ const UserController = {
                 const user = users.find(x => x.phone === phone);
                 var result = {
                     data: {
-                        _id: user.id,
-                        phone: user.phone,
-                        step: user.step
+                        _id: user?.id,
+                        phone: user?.phone,
+                        step: user?.step
                     },
                     message: "This phone number is already exists !",
                     status: true,
@@ -342,6 +342,60 @@ const UserController = {
         }
     },
 
+    generateOTPPin: (PHONE, NID, OTP) => {
+        return async (req, res) => {
+            if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '' && OTP !== null && OTP !== '') {
+                let phones = await Customer.find();
+                let validPhone = phones.find(x => x.phone === PHONE);
+                if (validPhone) {
+                    let nids = await Personal.find();
+                    let validNid = nids.find(x => x.citizenId === NID);
+                    if (validNid && validPhone.phone === validNid.phone) {
+                        let dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID, expiredAt: Date.now() + 1 * 60 * 1000 });
+                        await dataTemp.save((err) => {
+                            if (!err) {
+                                return res.status(200).json({
+                                    message: "Send otp successfully",
+                                    otp: OTP,
+                                    status: true
+                                });
+                            }
+                            else {
+                                return res.status(409).json({
+                                    message: "Send otp failure",
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                });
+                            }
+                        });
+                    }
+                    else {
+                        return res.status(404).json({
+                            message: "Wrong nid. Please try again !",
+                            status: false,
+                            statusCode: 1001
+                        });
+                    }
+                }
+                else {
+                    return res.status(404).json({
+                        message: "Wrong phone. Please try again !",
+                        status: false,
+                        statusCode: 1002
+                    });
+                }
+            }
+            else {
+                return res.status(400).json({
+                    message: "Please enter your phone number and nid. Do not leave any fields blank !",
+                    status: false,
+                    statusCode: 1005
+                });
+            }
+        }
+    },
+
     sendOtpPin: async (req, res, next) => {
         try {
             let OTP = otpGenerator.generate(6, {
@@ -358,89 +412,15 @@ const UserController = {
                     }
                     else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
                         await Blacklists.deleteMany({ phone: PHONE })
-                        let phones = await Customer.find();
-                        let validPhone = phones.find(x => x.phone === PHONE);
-                        if (validPhone) {
-                            let nids = await Personal.find();
-                            let validNid = nids.find(x => x.citizenId === NID);
-                            if (validNid && validPhone.phone === validNid.phone) {
-                                let dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID, expiredAt: Date.now() + 1 * 60 * 1000 });
-                                await dataTemp.save((err) => {
-                                    if (!err) {
-                                        return res.status(200).json({
-                                            message: "Send otp successfully",
-                                            otp: OTP,
-                                            status: true
-                                        });
-                                    }
-                                    else {
-                                        return res.status(409).json({
-                                            message: "Send otp failure",
-                                            status: false,
-                                            errorStatus: err.status || 500,
-                                            errorMessage: err.message
-                                        });
-                                    }
-                                });
-                            }
-                            else {
-                                return res.status(404).json({
-                                    message: "Wrong nid. Please try again !",
-                                    status: false,
-                                    statusCode: 1001
-                                });
-                            }
-                        }
-                        else {
-                            return res.status(404).json({
-                                message: "Wrong phone. Please try again !",
-                                status: false,
-                                statusCode: 1002
-                            });
-                        }
+                        await UserController.generateOTPPin(PHONE, NID, OTP)(req, res);
+                    }
+                    else if (isExists.attempts > 0 && isExists.attempts < 5) {
+                        await Blacklists.deleteMany({ phone: PHONE });
+                        await UserController.generateOTPPin(PHONE, NID, OTP)(req, res);
                     }
                 }
                 else {
-                    let phones = await Customer.find();
-                    let validPhone = phones.find(x => x.phone === PHONE);
-                    if (validPhone) {
-                        let nids = await Personal.find();
-                        let validNid = nids.find(x => x.citizenId === NID);
-                        if (validNid && validPhone.phone === validNid.phone) {
-                            let dataTemp = new Otp({ phone: PHONE, otp: OTP, nid: NID, expiredAt: Date.now() + 1 * 60 * 1000 });
-                            await dataTemp.save((err) => {
-                                if (!err) {
-                                    return res.status(200).json({
-                                        message: "Send otp successfully",
-                                        otp: OTP,
-                                        status: true
-                                    });
-                                }
-                                else {
-                                    return res.status(409).json({
-                                        message: "Send otp failure",
-                                        status: false,
-                                        errorStatus: err.status || 500,
-                                        errorMessage: err.message
-                                    });
-                                }
-                            });
-                        }
-                        else {
-                            return res.status(404).json({
-                                message: "Wrong nid. Please try again !",
-                                status: false,
-                                statusCode: 1001
-                            });
-                        }
-                    }
-                    else {
-                        return res.status(404).json({
-                            message: "Wrong phone. Please try again !",
-                            status: false,
-                            statusCode: 1002
-                        });
-                    }
+                    await UserController.generateOTPPin(PHONE, NID, OTP)(req, res);
                 }
             }
             else {
@@ -461,24 +441,21 @@ const UserController = {
             let PHONE = req.body.phone;
             let NID = req.body.nid;
             let OTP = req.body.otp;
+            let expired_otp = {
+                message: "Expired otp. Please resend otp !",
+                status: false,
+                statusCode: 3000
+            }
             if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '' && OTP !== null && OTP !== '') {
                 const validUser = await Otp.find({ phone: PHONE, nid: NID });
                 if (validUser.length === 0) {
-                    return res.status(401).json({
-                        message: "Expired otp. Please resend otp !",
-                        status: false,
-                        statusCode: 3000
-                    });
+                    return res.status(401).json(expired_otp);
                 }
                 else {
                     const lastOtp = validUser[validUser.length - 1];
                     if (lastOtp.expiredAt < Date.now()) {
                         await Otp.deleteMany({ phone: PHONE, nid: NID });
-                        return res.status(401).json({
-                            message: "Expired otp. Please resend otp !",
-                            status: false,
-                            statusCode: 3000
-                        });
+                        return res.status(401).json(expired_otp);
                     }
                     else {
                         if (lastOtp.phone === PHONE && lastOtp.nid === NID && lastOtp.otp === OTP) {
