@@ -66,16 +66,16 @@ router.put("/updateTenor",
 
 router.get("/:phone", MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
 
-router.post("/getDataFromVoolo",
-    [
-        check('phone').matches(formatPhone).withMessage(errMessagePhone),
-    ],
-    MiddlewareController.validateRequestSchema, PersonalController.getDataFromVoolo);
+// router.post("/getDataFromVoolo",
+//     [
+//         check('phone').matches(formatPhone).withMessage(errMessagePhone),
+//     ],
+//     MiddlewareController.validateRequestSchema, PersonalController.getDataFromVoolo);
 
-router.put("/signContract",
-    [
-        check('phone').matches(formatPhone).withMessage(errMessagePhone),
-    ],
-    MiddlewareController.validateRequestSchema, PersonalController.signContract);
+// router.put("/signContract",
+//     [
+//         check('phone').matches(formatPhone).withMessage(errMessagePhone),
+//     ],
+//     MiddlewareController.validateRequestSchema, PersonalController.signContract);
 
 module.exports = router;

@@ -18,7 +18,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_ACCESS_KEY,
-            { expiresIn: "15s" }
+            { expiresIn: "30m" }
         );
     },
 
@@ -29,18 +29,26 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_REFRESH_KEY,
-            { expiresIn: "2m" }
+            { expiresIn: "3h" }
         );
+    },
+
+    findUserInBlacklists: async (phone) => {
+        const blacklists = await Blacklists.find();
+        return blacklists.find(x => x.phone === phone);
+    },
+
+    findUserInCustomers: async (phone) => {
+        const users = await Customer.find();
+        return users.find(x => x.phone === phone);
     },
 
     checkPhoneExists: async (req, res, next) => {
         try {
             let phone = req.body.phone;
             if (phone !== null && phone !== '') {
-                const blacklists = await Blacklists.find();
-                const isExists = blacklists.find(x => x.phone === phone);
-                const users = await Customer.find();
-                const user = users.find(x => x.phone === phone);
+                const isExists = await UserController.findUserInBlacklists(phone);
+                const user = await UserController.findUserInCustomers(phone);
                 var result = {
                     data: {
                         _id: user?.id,
@@ -225,8 +233,7 @@ const UserController = {
             });
             let PHONE = req.body.phone;
             if (PHONE !== null && PHONE !== '') {
-                const blacklists = await Blacklists.find();
-                const isExists = blacklists.find(x => x.phone === PHONE);
+                const isExists = await UserController.findUserInBlacklists(PHONE);
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                         return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
@@ -283,8 +290,7 @@ const UserController = {
                             await Otp.deleteMany({ phone: lastOtp.phone })
                                 .then(async (data, err) => {
                                     if (!err) {
-                                        const users = await Customer.find();
-                                        const user = users.find(x => x.phone === PHONE);
+                                        const user = await UserController.findUserInCustomers(PHONE);
                                         if (user) {
                                             user.step = 3;
                                             await user.save()
@@ -306,8 +312,7 @@ const UserController = {
                                 })
                         }
                         else {
-                            const blacklists = await Blacklists.find();
-                            const isExists = blacklists.find(x => x.phone === PHONE);
+                            const isExists = await UserController.findUserInBlacklists(PHONE);
                             if (isExists) {
                                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                                     return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
@@ -345,8 +350,7 @@ const UserController = {
     generateOTPPin: (PHONE, NID, OTP) => {
         return async (req, res) => {
             if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '' && OTP !== null && OTP !== '') {
-                let phones = await Customer.find();
-                let validPhone = phones.find(x => x.phone === PHONE);
+                let validPhone = await UserController.findUserInCustomers(PHONE);
                 if (validPhone) {
                     let nids = await Personal.find();
                     let validNid = nids.find(x => x.citizenId === NID);
@@ -404,8 +408,7 @@ const UserController = {
             let PHONE = req.body.phone;
             let NID = req.body.nid;
             if (PHONE !== null && PHONE !== '' && NID !== null && NID !== '') {
-                const blacklists = await Blacklists.find();
-                const isExists = blacklists.find(x => x.phone === PHONE);
+                const isExists = await UserController.findUserInBlacklists(PHONE);
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                         return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
@@ -476,8 +479,7 @@ const UserController = {
                             })
                         }
                         else {
-                            const blacklists = await Blacklists.find();
-                            const isExists = blacklists.find(x => x.phone === PHONE);
+                            const isExists = await UserController.findUserInBlacklists(PHONE);
                             if (isExists) {
                                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                                     return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
@@ -522,22 +524,21 @@ const UserController = {
                 if (isBlock) {
                     return res.status(403).json({ message: "This phone is blocked by admin", status: false, statusCode: 1001 });
                 }
-                const users = await Customer.find();
-                const user = users.find(x => x.phone === PHONE);
+                const user = await UserController.findUserInCustomers(PHONE);
                 if (!user) {
                     return res.status(404).json({ message: "Wrong phone. Please try again !", status: false, statusCode: 1002 });
                 }
                 else if (user) {
-                    if (user.lockUntil && user.lockUntil < Date.now()) {
+                    if (user?.lockUntil && user?.lockUntil < Date.now()) {
                         await user.updateOne({ $set: { loginAttempts: 0 }, $unset: { lockUntil: 1 } })
                     }
                 }
                 const valiPin = await bcrypt.compare(PIN, user.pin);
                 if (!valiPin) {
-                    if (user.loginAttempts === 5 && user.lockUntil > Date.now()) {
+                    if (user?.loginAttempts === 5 && user?.lockUntil > Date.now()) {
                         return res.status(404).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, statusCode: 1004 });
                     }
-                    else if (user.loginAttempts < 5) {
+                    else if (user?.loginAttempts < 5) {
                         await user.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { loginAttempts: 1 } });
                         return res.status(404).json({ message: `Wrong pin. You are logged in failure ${user.loginAttempts + 1} times !`, status: false, statusCode: 1003, countFail: user.loginAttempts + 1 });
                     }
@@ -549,7 +550,7 @@ const UserController = {
                     user.refreshToken = refreshToken;
                     await user.save()
                         .then((data) => {
-                            const { pin, __v, ...others } = data._doc;
+                            const { pin, loginAttempts, deleted, __v, ...others } = data._doc;
                             return res.status(200).json({
                                 message: "Login successfully",
                                 data: { ...others },
@@ -678,16 +679,20 @@ const UserController = {
     //     }
     // },
 
+    encryptPassword: async (password) => {
+        const salt = await bcrypt.genSalt(10);
+        const hashed = await bcrypt.hash(password, salt);
+        return hashed;
+    },
+
     resetPin: async (req, res, next) => {
         try {
             let PHONE = req.body.phone;
             let NEW_PIN = req.body.new_pin;
             if (PHONE !== null && PHONE !== '' && NEW_PIN !== null && NEW_PIN !== '') {
-                const users = await Customer.find();
-                const user = users.find(x => x.phone === PHONE);
+                const user = await UserController.findUserInCustomers(PHONE);
                 if (user) {
-                    const salt = await bcrypt.genSalt(10);
-                    const hashed = await bcrypt.hash(NEW_PIN, salt);
+                    const hashed = await UserController.encryptPassword(NEW_PIN);
                     user.pin = hashed;
                     await user.save()
                         .then((data) => {
@@ -734,8 +739,7 @@ const UserController = {
             let PIN = req.body.pin;
             let NEW_PIN = req.body.new_pin;
             if (PHONE !== null && PHONE !== '' && PIN !== null && PIN !== '' && NEW_PIN !== null && NEW_PIN !== '') {
-                const users = await Customer.find();
-                const user = users.find(x => x.phone === PHONE);
+                const user = await UserController.findUserInCustomers(PHONE);
                 if (user) {
                     const validPin = await bcrypt.compare(PIN, user.pin);
                     if (validPin) {
@@ -743,8 +747,7 @@ const UserController = {
                             return res.status(400).json({ message: "Old password and new password are the same. Please try again !", status: false, statusCode: 1006 });
                         }
                         else {
-                            const salt = await bcrypt.genSalt(10);
-                            const hashed = await bcrypt.hash(NEW_PIN, salt);
+                            const hashed = await UserController.encryptPassword(NEW_PIN);
                             user.pin = hashed;
                             await user.save()
                                 .then((data) => {
@@ -799,7 +802,7 @@ const UserController = {
             const users = await Customer.find();
             let result = [];
             users.map((user, index) => {
-                let { pin, __v, ...others } = user._doc;
+                let { pin, __v, loginAttempts, refreshToken, deleted, ...others } = user._doc;
                 result.push({ ...others });
             });
             if (users.length > 0) {
@@ -852,6 +855,7 @@ const UserController = {
             next(e)
         }
     }
+
 };
 
 module.exports = UserController;
