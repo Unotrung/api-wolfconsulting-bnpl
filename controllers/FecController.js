@@ -258,7 +258,91 @@ const FecController = {
         catch (err) {
             next(err);
         }
-    }
+    },
+
+    checkEMIInfo: async (req, res, next) => {
+        try {
+            const url = `${process.env.BASE_URLFEC}/bnpl_checkout/1.0.2/m/Checkout_CheckEMIInfo?TransactionID=${req.query.transactionID}&AccountNumber=${req.query.accountNumber}&TotalOfferAmount=${req.query.totalOfferAmount}`;
+            const options = {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "TransID": process.env.TRANSID,
+                    "RequestorID": process.env.REQUESTORID,
+                    "DateTime": "2022-05-11T01:36:12.118+00:00",
+                    "ms2-authorization": req.headers.ms2authorization
+                }
+            };
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (data !== null) {
+                console.log("DATA CHECK EMMI INFO: ", data);
+                return res.status(200).json({
+                    data: data
+                })
+            }
+            else {
+                return res.status(400).json({
+                    message: "Fail to get api",
+                    status: false,
+                    statusCode: 5000
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    checkoutTransaction: async (req, res, next) => {
+        try {
+            const url = `${process.env.BASE_URLFEC}/bnpl_checkout/1.0.2/m/Checkout_Transaction`;
+            const options = {
+                method: "POST",
+                body: JSON.stringify({
+                    TransactionID: process.env.TRANSID,
+                    AccountNumber: req.body.accountNumber,
+                    CustomerInfo: {
+                        CustomerName: req.body.customerName,
+                        NationalID: req.body.nid,
+                        PhoneNumber: req.body.phone
+                    },
+                    ItemList: [
+                        {
+                            Name: 'Sản phẩm 1',
+                            Quantity: 2,
+                            Price: 2000000
+                        }
+                    ]
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                    "TransID": process.env.TRANSID,
+                    "RequestorID": process.env.REQUESTORID,
+                    "DateTime": "2022-05-11T01:36:12.118+00:00",
+                    "ms2-authorization": req.headers.ms2authorization
+                }
+            };
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (data !== null) {
+                console.log("DATA CHECK OUT TRANSACTION INFO: ", data);
+                return res.status(200).json({
+                    data: data
+                })
+            }
+            else {
+                return res.status(400).json({
+                    message: "Fail to get api",
+                    status: false,
+                    statusCode: 5000
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
 
 };
 
