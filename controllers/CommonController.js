@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const dotenv = require('dotenv');
 const Tenor = require('../models/tenors');
 const Personal = require('../models/bnpl_personals');
@@ -7,41 +6,6 @@ const Customer = require('../models/bnpl_customers');
 dotenv.config();
 
 const CommonController = {
-
-    getHVToken: async (req, res, next) => {
-        try {
-            const url = "https://auth.hyperverge.co/login";
-            const options = {
-                method: "POST",
-                body: JSON.stringify({
-                    appId: process.env.appId,
-                    appKey: process.env.appKey,
-                    expiry: 900
-                }),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            };
-            const response = await fetch(url, options);
-            const data = await response.json();
-            if (data !== null) {
-                return res.status(200).json({
-                    token: data.result.token,
-                    status: true
-                })
-            }
-            else {
-                return res.status(400).json({
-                    message: "Fail to get api",
-                    status: false,
-                    statusCode: 5000
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
 
     getAllTenor: async (req, res, next) => {
         try {

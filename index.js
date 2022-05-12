@@ -8,13 +8,14 @@ const path = require('path');
 const createError = require('http-errors');
 const compression = require('compression');
 const helmet = require('helmet');
-// const rateLimit = require('express-rate-limit');
+const rateLimit = require('express-rate-limit');
 const { buildProdLogger } = require('./helpers/logger');
 const { v4: uuid } = require('uuid');
 
 const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
 const commonRoute = require('./routers/CommonRouter');
+const fecRoute = require('./routers/FecRouter');
 const otpConfigRoute = require('./routers/otpConfigRouter');
 
 const http = require("http");
@@ -31,7 +32,7 @@ const app = express();
 
 app.use(morgan('combined'));
 
-// app.use(helmet());
+app.use(helmet());
 
 app.use(compression());
 
@@ -55,16 +56,17 @@ mongoose.connect(process.env.MONGODB_URL, function (err) {
 }
 )
 
-// const limiter = rateLimit({
-//     windowMs: 1000,
-//     max: 100,
-// })
+const limiter = rateLimit({
+    windowMs: 1000,
+    max: 100,
+})
 
-// app.use(limiter);
+app.use(limiter);
 
 app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
+app.use('/v1/bnpl/fec', fecRoute);
 app.use('/v1/bnpl/otp_config', otpConfigRoute);
 
 app.use((err, req, res, next) => {
@@ -109,10 +111,12 @@ app.use('/graphql',
         }
 
     })))
+
 // app.listen(4000)
 // app.use((req, res, next) => {
 //     next(createError.NotFound('This route dose not exists !'));
 // })
+
 app.use((req, res, next) => {
     next(createError.NotFound('This route dose not exists !'));
 })
