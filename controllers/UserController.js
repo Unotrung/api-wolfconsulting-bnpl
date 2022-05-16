@@ -317,7 +317,7 @@ const UserController = {
                                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                                     return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
                                 }
-                                else if (isExists.attempts < 5) {
+                                else if (isExists.attempts > 0 && isExists.attempts < 5) {
                                     await isExists.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { attempts: 1 } });
                                     return res.status(404).json({ message: `Failure. OTP invalid. You are verified otp failure ${isExists.attempts + 1} times !`, status: false, statusCode: 4000, countFail: isExists.attempts + 1 });
                                 }

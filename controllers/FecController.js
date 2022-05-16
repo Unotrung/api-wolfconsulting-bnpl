@@ -190,7 +190,7 @@ const FecController = {
                             FileKey: 'Selfie',
                             FileContent: 'image/jpeg',
                             FileName: req.body.filename,
-                            FileBody: '<Base64File=Encoding>'
+                            FileBody: req.body.filebody ? req.body.filebody : '<Base64File=Encoding>'
                         }
                     ]
                 }),
