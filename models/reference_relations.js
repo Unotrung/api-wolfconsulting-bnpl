@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
-const bnpl_providerSchema = new mongoose.Schema({
+const reference_relationSchema = new mongoose.Schema({
 
-    provider: {
+    Value: {
         type: String
     },
-    url: {
+    Text: {
         type: String
     }
 
@@ -13,4 +13,4 @@ const bnpl_providerSchema = new mongoose.Schema({
 
 mongoose.SchemaTypes.String.set('trim', true);
 
-module.exports = mongoose.model('bnpl_provider', bnpl_providerSchema);
+module.exports = mongoose.model('reference_relation', reference_relationSchema);

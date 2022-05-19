@@ -35,6 +35,8 @@ const bnpl_customerSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+mongoose.SchemaTypes.String.set('trim', true);
+
 const secret = process.env.SECRET_MONGOOSE;
 bnpl_customerSchema.plugin(encrypt, { secret: secret, encryptedFields: ['phone', 'pin'] });
 

@@ -18,4 +18,6 @@ const bnpl_blacklistSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+mongoose.SchemaTypes.String.set('trim', true);
+
 module.exports = mongoose.model('bnpl_blacklist', bnpl_blacklistSchema);

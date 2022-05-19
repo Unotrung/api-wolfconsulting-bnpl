@@ -22,4 +22,6 @@ const itemSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+mongoose.SchemaTypes.String.set('trim', true);
+
 module.exports = mongoose.model('item', itemSchema);

@@ -19,4 +19,6 @@ const bnpl_otpSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+mongoose.SchemaTypes.String.set('trim', true);
+
 module.exports = mongoose.model('bnpl_otp', bnpl_otpSchema);

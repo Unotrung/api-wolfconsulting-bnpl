@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
-const bnpl_providerSchema = new mongoose.Schema({
+const citySchema = new mongoose.Schema({
 
-    provider: {
+    Value: {
         type: String
     },
-    url: {
+    UI_Show: {
         type: String
     }
 
@@ -13,4 +13,4 @@ const bnpl_providerSchema = new mongoose.Schema({
 
 mongoose.SchemaTypes.String.set('trim', true);
 
-module.exports = mongoose.model('bnpl_provider', bnpl_providerSchema);
+module.exports = mongoose.model('city', citySchema);

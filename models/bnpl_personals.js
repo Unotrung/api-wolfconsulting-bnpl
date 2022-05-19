@@ -77,6 +77,8 @@ const bnpl_personalSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+mongoose.SchemaTypes.String.set('trim', true);
+
 const secret = process.env.SECRET_MONGOOSE;
 bnpl_personalSchema.plugin(encrypt, { secret: secret, encryptedFields: ['name', 'phone', 'citizenId', 'name_ref', 'phone_ref'] });
 
