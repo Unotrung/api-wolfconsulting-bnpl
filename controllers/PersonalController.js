@@ -54,7 +54,8 @@ const PersonalController = {
                                         return res.status(201).json({
                                             message: "Add personal BNPL successfully",
                                             data: { ...others },
-                                            status: true
+                                            status: true,
+                                            linkRegisterEap: `https://www.eap.voolo.vn/register-from-bnpl/${name}/${phone}`
                                         });
                                     }
                                     else {
