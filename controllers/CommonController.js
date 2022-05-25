@@ -4,23 +4,116 @@ const City = require('../models/cities');
 const District = require('../models/districts');
 const Ward = require('../models/wards');
 const ReferenceRelation = require('../models/reference_relations');
+const { MSG_GET_LIST_SUCCESS, MSG_LIST_IS_EMPTY } = require('../config/response/response');
 
 const CommonController = {
 
     getAllTenor: async (req, res, next) => {
         try {
-            const tenors = await Tenor.find().select("_id convertFee paymentSchedule createdAt updatedAt");
+            const tenors = await Tenor.find().select('_id convertFee paymentSchedule createdAt updatedAt');
             if (tenors.length > 0) {
                 return res.status(200).json({
                     count: tenors.length,
                     data: tenors,
-                    message: "Get list tenor success",
+                    message: MSG_GET_LIST_SUCCESS,
                     status: true
                 })
             }
             else {
                 return res.status(200).json({
-                    message: "List tenor is empty",
+                    message: MSG_LIST_IS_EMPTY,
+                    status: true
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    getAllCity: async (req, res, next) => {
+        try {
+            const cities = await City.find();
+            if (cities.length > 0) {
+                return res.status(200).json({
+                    count: cities.length,
+                    data: cities,
+                    message: MSG_GET_LIST_SUCCESS,
+                    status: true
+                })
+            }
+            else {
+                return res.status(200).json({
+                    message: MSG_LIST_IS_EMPTY,
+                    status: true
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    getAllDistrict: async (req, res, next) => {
+        try {
+            const districts = await District.find();
+            if (districts.length > 0) {
+                return res.status(200).json({
+                    count: districts.length,
+                    data: districts,
+                    message: MSG_GET_LIST_SUCCESS,
+                    status: true
+                })
+            }
+            else {
+                return res.status(200).json({
+                    message: MSG_LIST_IS_EMPTY,
+                    status: true
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    getAllWard: async (req, res, next) => {
+        try {
+            const wards = await Ward.find();
+            if (wards.length > 0) {
+                return res.status(200).json({
+                    count: wards.length,
+                    data: wards,
+                    message: MSG_GET_LIST_SUCCESS,
+                    status: true
+                })
+            }
+            else {
+                return res.status(200).json({
+                    message: MSG_LIST_IS_EMPTY,
+                    status: true
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    getAllReferenceRelation: async (req, res, next) => {
+        try {
+            const referenceRelations = await ReferenceRelation.find();
+            if (referenceRelations.length > 0) {
+                return res.status(200).json({
+                    count: referenceRelations.length,
+                    data: referenceRelations,
+                    message: MSG_GET_LIST_SUCCESS,
+                    status: true
+                })
+            }
+            else {
+                return res.status(200).json({
+                    message: MSG_LIST_IS_EMPTY,
                     status: true
                 })
             }
@@ -142,101 +235,9 @@ const CommonController = {
             }
             else {
                 return res.status(400).json({
-                    message: 'Please enter your phone and step. Do not leave any field blank !',
+                    message: 'Please enter all fields ! Do not leave any field blank !',
                     status: false,
                     statusCode: 1005
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
-
-    getAllCity: async (req, res, next) => {
-        try {
-            const cities = await City.find();
-            if (cities.length > 0) {
-                return res.status(200).json({
-                    count: cities.length,
-                    data: cities,
-                    message: "Get list city success",
-                    status: true
-                })
-            }
-            else {
-                return res.status(200).json({
-                    message: "List city is empty",
-                    status: true
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
-
-    getAllDistrict: async (req, res, next) => {
-        try {
-            const districts = await District.find();
-            if (districts.length > 0) {
-                return res.status(200).json({
-                    count: districts.length,
-                    data: districts,
-                    message: "Get list district success",
-                    status: true
-                })
-            }
-            else {
-                return res.status(200).json({
-                    message: "List district is empty",
-                    status: true
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
-
-    getAllWard: async (req, res, next) => {
-        try {
-            const wards = await Ward.find();
-            if (wards.length > 0) {
-                return res.status(200).json({
-                    count: wards.length,
-                    data: wards,
-                    message: "Get list ward success",
-                    status: true
-                })
-            }
-            else {
-                return res.status(200).json({
-                    message: "List ward is empty",
-                    status: true
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
-
-    getAllReferenceRelation: async (req, res, next) => {
-        try {
-            const referenceRelations = await ReferenceRelation.find();
-            if (referenceRelations.length > 0) {
-                return res.status(200).json({
-                    count: referenceRelations.length,
-                    data: referenceRelations,
-                    message: "Get list reference relation success",
-                    status: true
-                })
-            }
-            else {
-                return res.status(200).json({
-                    message: "List reference relation is empty",
-                    status: true
                 })
             }
         }

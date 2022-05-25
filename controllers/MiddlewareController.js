@@ -8,11 +8,11 @@ const MiddlewareController = {
             const token = req.header('authorization');
             if (token) {
                 // 'Beaer [token]'
-                const accessToken = token.split(" ")[1];
+                const accessToken = token.split(' ')[1];
                 jwt.verify(accessToken, process.env.JWT_ACCESS_KEY, (err, user) => {
                     if (err) {
                         return res.status(403).json({
-                            message: "Token is not valid",
+                            message: 'Token is not valid',
                             statusCode: 4003
                         });
                     }
@@ -58,11 +58,32 @@ const MiddlewareController = {
             if (errors.errors.length > 0) {
                 return res.status(400).json({
                     message: errors.errors[0].msg,
-                    status: false
+                    status: false,
+                    errorCode: 8000
                 });
             }
             else {
                 next();
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    verifySecurity: (req, res, next) => {
+        try {
+            const appKey = req.query.appKey;
+            const appId = req.query.appId;
+            if (appKey && appId && appKey === process.env.APP_KEY && appId === process.env.APP_ID) {
+                req.isAuthenticated = true;
+                next();
+            }
+            else {
+                return res.status(401).json({
+                    message: 'You do not have permission to access this app',
+                    statusCode: 9000
+                });
             }
         }
         catch (err) {

@@ -1,78 +1,79 @@
 const UserController = require('../controllers/UserController');
 const MiddlewareController = require('../controllers/MiddlewareController');
 const { check } = require('express-validator');
-const { master } = require('../helpers/auth');
-
 const router = require("express").Router();
+const { VALIDATE_PHONE, VALIDATE_NID, VALIDATE_PIN } = require('../config/validate_data/validate_data');
+const { ERR_MESSAGE_PHONE, ERR_MESSAGE_PHONE_REF, ERR_MESSAGE_PIN, ERR_MESSAGE_NID, ERR_MESSAGE_NEW_PIN } = require('../config/message/message');
 
-const formatPhone = /^(09|03|07|08|05)+([0-9]{8}$)/;
-const formatNid = /^\d{12}$|^\d{9}$/;
-const formatPin = /^\d{4}$/;
-const errMessagePhone = 'Invalid phone number format';
-const errMessageNid = 'Nid only accepts numbers. Length of nid is 9 or 12';
-const errMessagePin = 'Pin codes only accepts numbers. Length of pin is 4';
-const errMessageNewPin = 'New pin codes only accepts numbers. Length of of new pin is 4';
+const formatPhone = VALIDATE_PHONE;
+const formatNid = VALIDATE_NID;
+const formatPin = VALIDATE_PIN;
 
-router.post("/checkPhoneExists",
+const errMessagePhone = ERR_MESSAGE_PHONE;
+const errMessageNid = ERR_MESSAGE_NID;
+const errMessagePin = ERR_MESSAGE_PIN;
+const errMessageNewPin = ERR_MESSAGE_NEW_PIN;
+
+router.post("/checkPhoneExists", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone)
     ],
     MiddlewareController.validateRequestSchema, UserController.checkPhoneExists);
 
-router.post("/checkNidExists",
+router.post("/checkNidExists", MiddlewareController.verifySecurity,
     [
         check('nid').matches(formatNid).withMessage(errMessageNid)
     ],
     MiddlewareController.validateRequestSchema, UserController.checkNidExists);
 
-router.post("/checkNidPhoneExists",
+router.post("/checkNidPhoneExists", MiddlewareController.verifySecurity,
     [
         check('nid').matches(formatNid).withMessage(errMessageNid),
         check('phone').matches(formatPhone).withMessage(errMessagePhone)
     ],
     MiddlewareController.validateRequestSchema, UserController.checkNidPhoneExists);
 
-router.post("/sendOtp",
+router.post("/sendOtp", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone)
     ],
     MiddlewareController.validateRequestSchema, UserController.sendOtp);
 
-router.post("/verifyOtp",
+router.post("/verifyOtp", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone)
     ],
     MiddlewareController.validateRequestSchema, UserController.verifyOtp);
 
-router.post("/login",
+router.post("/login", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('pin').matches(formatPin).withMessage(errMessagePin),
     ],
     MiddlewareController.validateRequestSchema, UserController.login);
 
-router.post("/sendOtpPin",
+router.post("/sendOtpPin", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('nid').matches(formatNid).withMessage(errMessageNid),
     ],
     MiddlewareController.validateRequestSchema, UserController.sendOtpPin);
 
-router.post("/verifyOtpPin",
+router.post("/verifyOtpPin", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('nid').matches(formatNid).withMessage(errMessageNid),
     ],
     MiddlewareController.validateRequestSchema, UserController.verifyOtpPin);
 
-router.put("/resetPin",
+router.put("/resetPin", MiddlewareController.verifySecurity, MiddlewareController.verifyTokenByMySelf,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('new_pin').matches(formatPin).withMessage(errMessageNewPin),
     ],
-    MiddlewareController.verifyTokenByMySelf, MiddlewareController.validateRequestSchema, UserController.resetPin);
+    MiddlewareController.validateRequestSchema, UserController.resetPin);
 
-router.put("/updatePin",
+router.put("/updatePin", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('pin').matches(formatPin).withMessage(errMessagePin),
@@ -80,12 +81,8 @@ router.put("/updatePin",
     ],
     MiddlewareController.validateRequestSchema, UserController.updatePin);
 
-router.get("/getAllUser", UserController.getAllUser);
+router.get("/getAllUser", MiddlewareController.verifySecurity, UserController.getAllUser);
 
-router.post("/eSignUser", master, UserController.updateESignUser);
-
-router.put("/requestRefreshToken", UserController.requestRefreshToken);
-
-// router.put("/logout", MiddlewareController.verifyTokenByMySelf, UserController.logout);
+router.put("/requestRefreshToken", MiddlewareController.verifySecurity, UserController.requestRefreshToken);
 
 module.exports = router;

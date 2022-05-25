@@ -1,17 +1,19 @@
 const CommonController = require('../controllers/CommonController');
 const MiddlewareController = require('../controllers/MiddlewareController');
 const { check } = require('express-validator');
-const router = require("express").Router();
+const router = require('express').Router();
+const { VALIDATE_PHONE } = require('../config/validate_data/validate_data');
+const { ERR_MESSAGE_PHONE } = require('../config/message/message');
 
-router.get("/getAllTenor", CommonController.getAllTenor);
-router.put("/updateStep",
+router.get('/getAllTenor', MiddlewareController.verifySecurity, CommonController.getAllTenor);
+router.put('/updateStep', MiddlewareController.verifySecurity,
     [
-        check('phone').matches(/^(09|03|07|08|05)+([0-9]{8}$)/).withMessage('Invalid phone number format'),
+        check('phone').matches(VALIDATE_PHONE).withMessage(ERR_MESSAGE_PHONE),
     ],
     MiddlewareController.validateRequestSchema, CommonController.updateStep);
-router.get("/getAllCity", CommonController.getAllCity);
-router.get("/getAllDistrict", CommonController.getAllDistrict);
-router.get("/getAllWard", CommonController.getAllWard);
-router.get("/getAllReferenceRelation", CommonController.getAllReferenceRelation);
+router.get('/getAllCity', MiddlewareController.verifySecurity, CommonController.getAllCity);
+router.get('/getAllDistrict', MiddlewareController.verifySecurity, CommonController.getAllDistrict);
+router.get('/getAllWard', MiddlewareController.verifySecurity, CommonController.getAllWard);
+router.get('/getAllReferenceRelation', MiddlewareController.verifySecurity, CommonController.getAllReferenceRelation);
 
 module.exports = router;

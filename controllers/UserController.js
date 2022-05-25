@@ -8,6 +8,13 @@ const otpGenerator = require('otp-generator');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
 const pubsub = require('../utils/pubsub');
+const { MSG_GET_LIST_SUCCESS, MSG_LIST_IS_EMPTY, MSG_PERSONAL_IS_NOT_EXISTS, MSG_ENTER_ALL_FIELDS,
+    MSG_UPDATE_SUCCESSFULLY, MSG_UPDATE_FAILURE, MSG_PHONE_IS_NOT_EXISTS_IN_EAP, MSG_PHONE_IS_NOT_EXISTS_IN_BNPL,
+    MSG_PHONE_IS_EXISTS, MSG_PHONE_IS_NOT_EXISTS, MSG_VERIFY_OTP_FAILURE_5_TIMES, MSG_LOGIN_FAILURE_5_TIMES, MSG_NID_IS_EXISTS, MSG_NID_IS_NOT_EXISTS,
+    MSG_NID_AND_PHONE_IS_EXISTS, MSG_NID_AND_PHONE_IS_NOT_EXISTS, MSG_OLD_NEW_PASSWORD_IS_SAME, MSG_OLD_PIN_IS_NOT_CORRECT,
+    MSG_PHONE_IS_BLOCKED_BY_ADMIN, MSG_LOGIN_SUCCESSFULLY, MSG_LOGIN_FAILURE, MSG_WRONG_PHONE, MSG_WRONG_PIN, MSG_SEND_OTP_SUCCESSFULLY,
+    MSG_SEND_OTP_FAILURE, MSG_OTP_EXPIRED, MSG_OTP_VALID, MSG_OTP_INVALID, MSG_WRONG_NID
+} = require('../config/response/response');
 
 const UserController = {
 
@@ -18,7 +25,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_ACCESS_KEY,
-            { expiresIn: "30m" }
+            { expiresIn: '30m' }
         );
     },
 
@@ -29,7 +36,7 @@ const UserController = {
                 phone: user.phone
             },
             process.env.JWT_REFRESH_KEY,
-            { expiresIn: "3h" }
+            { expiresIn: '3h' }
         );
     },
 
@@ -55,47 +62,43 @@ const UserController = {
                         phone: user?.phone,
                         step: user?.step
                     },
-                    message: "This phone number is already exists !",
+                    message: MSG_PHONE_IS_EXISTS,
                     status: true,
                     errCode: 1000
                 };
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, errCode: 1008 });
+                        return res.status(403).json({ message: MSG_VERIFY_OTP_FAILURE_5_TIMES, status: false, errCode: 1008, countFail: 5 });
                     }
-                    else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
-                        await Blacklists.deleteMany({ phone: phone });
-                        return res.status(200).json(result);
-                    }
-                    else if (isExists.attempts > 0 && isExists.attempts < 5) {
+                    else if ((isExists.lockUntil && isExists.lockUntil < Date.now()) || (isExists.attempts > 0 && isExists.attempts < 5)) {
                         await Blacklists.deleteMany({ phone: phone });
                         return res.status(200).json(result);
                     }
                 }
                 else {
                     if (user?.loginAttempts === 5 && user?.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, errCode: 1004 });
+                        return res.status(403).json({ message: MSG_LOGIN_FAILURE_5_TIMES, status: false, countFail: 5, errCode: 1004 });
                     }
                     else if (user) {
                         return res.status(200).json(result);;
                     }
                     else if (phone.startsWith('033')) {
                         return res.status(404).json({
-                            message: "This phone number is not exists in EAP !",
+                            message: MSG_PHONE_IS_NOT_EXISTS_IN_EAP,
                             status: false,
                             errCode: 1001
                         });
                     }
                     else if (phone.startsWith('044')) {
                         return res.status(404).json({
-                            message: "This phone number is not exists in BNPL !",
+                            message: MSG_PHONE_IS_NOT_EXISTS_IN_BNPL,
                             status: false,
                             errCode: 1002
                         });
                     }
                     else {
                         return res.status(404).json({
-                            message: "This phone number is not exists !",
+                            message: MSG_PHONE_IS_NOT_EXISTS,
                             status: false,
                             step: 1,
                             errCode: 1003
@@ -105,7 +108,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone. Do not leave any field blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     errCode: 1005
                 });
@@ -128,14 +131,14 @@ const UserController = {
                             _id: user.id,
                             nid: user.citizenId
                         },
-                        message: "This nid is already exists !",
+                        message: MSG_NID_IS_EXISTS,
                         status: true,
                         statusCode: 1000
                     });
                 }
                 else {
                     return res.status(404).json({
-                        message: "This nid is not exists !",
+                        message: MSG_NID_IS_NOT_EXISTS,
                         status: false,
                         statusCode: 900
                     });
@@ -143,7 +146,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your nid. Do not leave any field blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -168,14 +171,14 @@ const UserController = {
                             nid: user.citizenId,
                             phone: user.phone
                         },
-                        message: "This nid and phone is already exists !",
+                        message: MSG_NID_AND_PHONE_IS_EXISTS,
                         status: true,
                         statusCode: 1000
                     });
                 }
                 else {
                     return res.status(404).json({
-                        message: "This nid and phone is not exists !",
+                        message: MSG_NID_AND_PHONE_IS_NOT_EXISTS,
                         status: false,
                         statusCode: 900
                     });
@@ -183,7 +186,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your nid and phone. Do not leave any field blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -201,14 +204,14 @@ const UserController = {
                 await dataTemp.save((err) => {
                     if (!err) {
                         return res.status(200).json({
-                            message: "Send otp successfully",
+                            message: MSG_SEND_OTP_SUCCESSFULLY,
                             otp: OTP,
                             status: true
                         });
                     }
                     else {
                         return res.status(409).json({
-                            message: "Send otp failure",
+                            message: MSG_SEND_OTP_FAILURE,
                             status: false,
                             errorStatus: err.status || 500,
                             errorMessage: err.message
@@ -218,7 +221,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone. Do not leave any field blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -236,13 +239,9 @@ const UserController = {
                 const isExists = await UserController.findUserInBlacklists(PHONE);
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
+                        return res.status(403).json({ message: MSG_VERIFY_OTP_FAILURE_5_TIMES, status: false, countFail: 5, statusCode: 1004 });
                     }
-                    else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
-                        await Blacklists.deleteMany({ phone: PHONE });
-                        await UserController.generateOTP(PHONE, OTP)(req, res);
-                    }
-                    else if (isExists.attempts > 0 && isExists.attempts < 5) {
+                    else if ((isExists.lockUntil && isExists.lockUntil < Date.now()) || (isExists.attempts > 0 && isExists.attempts < 5)) {
                         await Blacklists.deleteMany({ phone: PHONE });
                         await UserController.generateOTP(PHONE, OTP)(req, res);
                     }
@@ -253,7 +252,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone. Do not leave any field blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -269,7 +268,7 @@ const UserController = {
             let PHONE = req.body.phone;
             let OTP = req.body.otp;
             let otp_expired = {
-                message: "Expired otp. Please resend otp !",
+                message: MSG_OTP_EXPIRED,
                 status: false,
                 statusCode: 3000
             };
@@ -296,7 +295,7 @@ const UserController = {
                                             await user.save()
                                                 .then((data) => {
                                                     return res.status(200).json({
-                                                        message: "Successfully. OTP valid",
+                                                        message: MSG_OTP_VALID,
                                                         status: true,
                                                     })
                                                 })
@@ -315,18 +314,18 @@ const UserController = {
                             const isExists = await UserController.findUserInBlacklists(PHONE);
                             if (isExists) {
                                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                                    return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
+                                    return res.status(403).json({ message: MSG_VERIFY_OTP_FAILURE_5_TIMES, status: false, countFail: 5, statusCode: 1004 });
                                 }
                                 else if (isExists.attempts > 0 && isExists.attempts < 5) {
                                     await isExists.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { attempts: 1 } });
-                                    return res.status(404).json({ message: `Failure. OTP invalid. You are verified otp failure ${isExists.attempts + 1} times !`, status: false, statusCode: 4000, countFail: isExists.attempts + 1 });
+                                    return res.status(404).json({ message: MSG_OTP_INVALID, status: false, statusCode: 4000, countFail: isExists.attempts + 1 });
                                 }
                             }
                             else {
                                 const blackPhone = await new Blacklists({ phone: PHONE, attempts: 1, lockUntil: Date.now() + 24 * 60 * 60 * 1000 });
                                 await blackPhone.save((err) => {
                                     if (!err) {
-                                        return res.status(404).json({ message: `Failure. OTP invalid. You are verified otp failure 1 times !`, status: false, statusCode: 4000, countFail: 1 });
+                                        return res.status(404).json({ message: MSG_OTP_INVALID, status: false, statusCode: 4000, countFail: 1 });
                                     }
                                 });
                             }
@@ -336,7 +335,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone and otp code. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -359,14 +358,14 @@ const UserController = {
                         await dataTemp.save((err) => {
                             if (!err) {
                                 return res.status(200).json({
-                                    message: "Send otp successfully",
+                                    message: MSG_SEND_OTP_SUCCESSFULLY,
                                     otp: OTP,
                                     status: true
                                 });
                             }
                             else {
                                 return res.status(409).json({
-                                    message: "Send otp failure",
+                                    message: MSG_SEND_OTP_FAILURE,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
@@ -376,7 +375,7 @@ const UserController = {
                     }
                     else {
                         return res.status(404).json({
-                            message: "Wrong nid. Please try again !",
+                            message: MSG_WRONG_NID,
                             status: false,
                             statusCode: 1001
                         });
@@ -384,7 +383,7 @@ const UserController = {
                 }
                 else {
                     return res.status(404).json({
-                        message: "Wrong phone. Please try again !",
+                        message: MSG_WRONG_PHONE,
                         status: false,
                         statusCode: 1002
                     });
@@ -392,7 +391,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone number and nid. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -411,14 +410,10 @@ const UserController = {
                 const isExists = await UserController.findUserInBlacklists(PHONE);
                 if (isExists) {
                     if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                        return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
+                        return res.status(403).json({ message: MSG_VERIFY_OTP_FAILURE_5_TIMES, status: false, countFail: 5, statusCode: 1004 });
                     }
-                    else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
+                    else if ((isExists.lockUntil && isExists.lockUntil < Date.now()) || (isExists.attempts > 0 && isExists.attempts < 5)) {
                         await Blacklists.deleteMany({ phone: PHONE })
-                        await UserController.generateOTPPin(PHONE, NID, OTP)(req, res);
-                    }
-                    else if (isExists.attempts > 0 && isExists.attempts < 5) {
-                        await Blacklists.deleteMany({ phone: PHONE });
                         await UserController.generateOTPPin(PHONE, NID, OTP)(req, res);
                     }
                 }
@@ -428,7 +423,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone number and nid. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -445,7 +440,7 @@ const UserController = {
             let NID = req.body.nid;
             let OTP = req.body.otp;
             let expired_otp = {
-                message: "Expired otp. Please resend otp !",
+                message: MSG_OTP_EXPIRED,
                 status: false,
                 statusCode: 3000
             }
@@ -473,7 +468,7 @@ const UserController = {
                             await Blacklists.deleteMany({ phone: PHONE });
                             await Otp.deleteMany({ phone: PHONE, nid: NID });
                             return res.status(200).json({
-                                message: "Successfully. OTP valid",
+                                message: MSG_OTP_VALID,
                                 token: accessToken,
                                 status: true,
                             })
@@ -482,18 +477,18 @@ const UserController = {
                             const isExists = await UserController.findUserInBlacklists(PHONE);
                             if (isExists) {
                                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                                    return res.status(403).json({ message: "You have verified otp failure 5 times. Please wait 24 hours to try again !", status: false, countFail: 5, statusCode: 1004 });
+                                    return res.status(403).json({ message: MSG_VERIFY_OTP_FAILURE_5_TIMES, status: false, countFail: 5, statusCode: 1004 });
                                 }
                                 else if (isExists.attempts < 5) {
                                     await isExists.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { attempts: 1 } });
-                                    return res.status(404).json({ message: `Failure. OTP invalid. You are verified otp failure ${isExists.attempts + 1} times !`, status: false, statusCode: 4000, countFail: isExists.attempts + 1 });
+                                    return res.status(404).json({ message: MSG_OTP_INVALID, status: false, statusCode: 4000, countFail: isExists.attempts + 1 });
                                 }
                             }
                             else {
                                 const blackPhone = await new Blacklists({ phone: PHONE, attempts: 1, lockUntil: Date.now() + 24 * 60 * 60 * 1000 });
                                 await blackPhone.save((err) => {
                                     if (!err) {
-                                        return res.status(404).json({ message: `Failure. OTP invalid. You are verified otp failure 1 times !`, status: false, statusCode: 4000, countFail: 1 });
+                                        return res.status(404).json({ message: MSG_OTP_INVALID, status: false, statusCode: 4000, countFail: 1 });
                                     }
                                 });
                             }
@@ -503,7 +498,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone, nid and otp code. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -522,11 +517,11 @@ const UserController = {
                 const deletedUser = await Customer.findDeleted();
                 const isBlock = deletedUser.find(x => x.deleted === Boolean(true) && x.deletedAt !== null);
                 if (isBlock) {
-                    return res.status(403).json({ message: "This phone is blocked by admin", status: false, statusCode: 1001 });
+                    return res.status(403).json({ message: MSG_PHONE_IS_BLOCKED_BY_ADMIN, status: false, statusCode: 1001 });
                 }
                 const user = await UserController.findUserInCustomers(PHONE);
                 if (!user) {
-                    return res.status(404).json({ message: "Wrong phone. Please try again !", status: false, statusCode: 1002 });
+                    return res.status(404).json({ message: MSG_WRONG_PHONE, status: false, statusCode: 1002 });
                 }
                 else if (user) {
                     if (user?.lockUntil && user?.lockUntil < Date.now()) {
@@ -536,11 +531,11 @@ const UserController = {
                 const valiPin = await bcrypt.compare(PIN, user.pin);
                 if (!valiPin) {
                     if (user?.loginAttempts === 5 && user?.lockUntil > Date.now()) {
-                        return res.status(404).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", status: false, countFail: 5, statusCode: 1004 });
+                        return res.status(404).json({ message: MSG_LOGIN_FAILURE_5_TIMES, status: false, countFail: 5, statusCode: 1004 });
                     }
                     else if (user?.loginAttempts < 5) {
                         await user.updateOne({ $set: { lockUntil: Date.now() + 24 * 60 * 60 * 1000 }, $inc: { loginAttempts: 1 } });
-                        return res.status(404).json({ message: `Wrong pin. You are logged in failure ${user.loginAttempts + 1} times !`, status: false, statusCode: 1003, countFail: user.loginAttempts + 1 });
+                        return res.status(404).json({ message: MSG_WRONG_PIN, status: false, statusCode: 1003, countFail: user.loginAttempts + 1 });
                     }
                 }
                 if (user && valiPin && user.loginAttempts !== 5) {
@@ -552,7 +547,7 @@ const UserController = {
                         .then((data) => {
                             const { pin, loginAttempts, deleted, __v, ...others } = data._doc;
                             return res.status(200).json({
-                                message: "Login successfully",
+                                message: MSG_LOGIN_SUCCESSFULLY,
                                 data: { ...others },
                                 token: accessToken,
                                 status: true
@@ -560,7 +555,7 @@ const UserController = {
                         })
                         .catch((err) => {
                             return res.status(409).json({
-                                message: "Login failure",
+                                message: MSG_LOGIN_FAILURE,
                                 status: false,
                                 errorStatus: err.status || 500,
                                 errorMessage: err.message
@@ -568,12 +563,12 @@ const UserController = {
                         })
                 }
                 else {
-                    return res.status(403).json({ message: "You are logged in failure 5 times. Please wait 24 hours to login again !", countFail: 5, status: false, statusCode: 1004 });
+                    return res.status(403).json({ message: MSG_LOGIN_FAILURE_5_TIMES, countFail: 5, status: false, statusCode: 1004 });
                 }
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone and pin code. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -597,7 +592,7 @@ const UserController = {
                     await customer.save()
                         .then((data) => {
                             return res.status(201).json({
-                                message: 'Update refreshToken successfully',
+                                message: MSG_UPDATE_SUCCESSFULLY,
                                 accessToken: newAccessToken,
                                 refreshToken: newRefreshToken,
                                 status: true
@@ -605,7 +600,7 @@ const UserController = {
                         })
                         .catch((err) => {
                             return res.status(409).json({
-                                message: 'Update refreshToken failure',
+                                message: MSG_UPDATE_FAILURE,
                                 status: false,
                                 errorStatus: err.status || 500,
                                 errorMessage: err.message
@@ -614,7 +609,7 @@ const UserController = {
                 }
                 else {
                     return res.status(409).json({
-                        message: "Can not find this account to update !",
+                        message: MSG_PERSONAL_IS_NOT_EXISTS,
                         status: false,
                         statusCode: 900
                     });
@@ -622,7 +617,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your refreshToken. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -698,14 +693,14 @@ const UserController = {
                         .then((data) => {
                             buildProdLogger('info', 'reset_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(200).json({
-                                message: "Reset pin successfully",
+                                message: MSG_UPDATE_SUCCESSFULLY,
                                 status: true
                             })
                         })
                         .catch((err) => {
                             buildProdLogger('error', 'reset_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                             return res.status(409).json({
-                                message: "Reset pin failure",
+                                message: MSG_UPDATE_FAILURE,
                                 status: false,
                                 errorStatus: err.status || 500,
                                 errorMessage: err.message,
@@ -714,7 +709,7 @@ const UserController = {
                 }
                 else {
                     return res.status(404).json({
-                        message: "This account is not exists !",
+                        message: MSG_PERSONAL_IS_NOT_EXISTS,
                         status: false,
                         statusCode: 900
                     })
@@ -722,7 +717,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone and new pin code. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -744,7 +739,7 @@ const UserController = {
                     const validPin = await bcrypt.compare(PIN, user.pin);
                     if (validPin) {
                         if (PIN === NEW_PIN) {
-                            return res.status(400).json({ message: "Old password and new password are the same. Please try again !", status: false, statusCode: 1006 });
+                            return res.status(400).json({ message: MSG_OLD_NEW_PASSWORD_IS_SAME, status: false, statusCode: 1006 });
                         }
                         else {
                             const hashed = await UserController.encryptPassword(NEW_PIN);
@@ -753,14 +748,14 @@ const UserController = {
                                 .then((data) => {
                                     buildProdLogger('info', 'update_pin_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                     return res.status(201).json({
-                                        message: "Update pin successfully",
+                                        message: MSG_UPDATE_SUCCESSFULLY,
                                         status: true
                                     })
                                 })
                                 .catch((err) => {
                                     buildProdLogger('error', 'update_pin_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${PHONE}`);
                                     return res.status(409).json({
-                                        message: "Update pin failure",
+                                        message: MSG_UPDATE_FAILURE,
                                         status: false,
                                         errorStatus: err.status || 500,
                                         errorMessage: err.message
@@ -770,7 +765,7 @@ const UserController = {
                     }
                     else {
                         return res.status(404).json({
-                            message: "Your old pin is not correct !",
+                            message: MSG_OLD_PIN_IS_NOT_CORRECT,
                             status: false,
                             statusCode: 1001
                         })
@@ -778,7 +773,7 @@ const UserController = {
                 }
                 else {
                     return res.status(404).json({
-                        message: "This account is not exists !",
+                        message: MSG_PERSONAL_IS_NOT_EXISTS,
                         status: false,
                         statusCode: 1002
                     })
@@ -786,7 +781,7 @@ const UserController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone, old pin code and new pin code. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -809,13 +804,13 @@ const UserController = {
                 return res.status(200).json({
                     count: users.length,
                     data: result,
-                    message: "Get list user success",
+                    message: MSG_GET_LIST_SUCCESS,
                     status: true
                 })
             }
             else {
                 return res.status(200).json({
-                    message: "List user is empty ",
+                    message: MSG_LIST_IS_EMPTY,
                     status: true
                 })
             }
@@ -824,37 +819,6 @@ const UserController = {
             next(err);
         }
     },
-
-    updateESignUser: async (req, res, next) => {
-        try {
-            if (req.error) {
-                return res.status(401).json({
-                    message: 'You are not authorize'
-                })
-            }
-            const { id, tenors, credit_limit, name } = req.body
-            if (!id || !credit_limit || !name || tenors.length === 0) {
-                return res.status(400).json({
-                    message: 'Bad request'
-                })
-            }
-            const customers = await Customer.find()
-            const user = customers.find(customer => customer.id === id);
-            if (!user) return res.status(400).json({
-                message: 'Bad request'
-            })
-            //todo: update user status esign confirm here
-
-            //public an event
-            await pubsub.publish('new_user_event', { newUserEvent: { id, name, credit_limit } });
-            return res.status(200).json({
-                message: "Success"
-            })
-        }
-        catch (e) {
-            next(e)
-        }
-    }
 
 };
 

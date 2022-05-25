@@ -7,6 +7,9 @@ const Item = require('../models/items');
 const bcrypt = require('bcrypt');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
+const { MSG_GET_LIST_SUCCESS, MSG_LIST_IS_EMPTY, MSG_ADD_SUCCESSFULLY, MSG_ADD_FAILURE, MSG_PERSONAL_IS_EXISTS,
+    MSG_GET_DETAIL_SUCCESS, MSG_PERSONAL_IS_NOT_EXISTS, MSG_ENTER_ALL_FIELDS, MSG_UPDATE_SUCCESSFULLY, MSG_UPDATE_FAILURE, MSG_TENOR_IS_NOT_EXISTS } =
+    require('../config/message/message');
 
 const PersonalController = {
 
@@ -15,7 +18,7 @@ const PersonalController = {
     },
 
     addInfo: (name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin) => {
-        return async (req, res) => {
+        return async (req, res, next) => {
             const customers = await Customer.find();
             const personals = await Personal.find();
 
@@ -52,7 +55,7 @@ const PersonalController = {
                                 .then((data, err) => {
                                     if (!err) {
                                         return res.status(201).json({
-                                            message: "Add personal BNPL successfully",
+                                            message: MSG_ADD_SUCCESSFULLY,
                                             data: { ...others },
                                             status: true,
                                             linkRegisterEap: `https://www.eap.voolo.vn/register-from-bnpl/${name}/${phone}`
@@ -61,7 +64,7 @@ const PersonalController = {
                                     else {
                                         buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                                         return res.status(409).json({
-                                            message: "Add personal BNPL failure",
+                                            message: MSG_ADD_FAILURE,
                                             status: false,
                                             errorStatus: err.status || 500,
                                             errorMessage: err.message
@@ -73,7 +76,7 @@ const PersonalController = {
             }
             else {
                 return res.status(409).json({
-                    message: 'This personal is already exists !',
+                    message: MSG_PERSONAL_IS_EXISTS,
                     status: false,
                     statusCode: 1000
                 })
@@ -106,9 +109,9 @@ const PersonalController = {
 
             if (isExists) {
                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
-                    return res.status(403).json({ message: "Your phone is blocked. Please wait 24 hours to try again !", status: false, statusCode: 1004 });
+                    return res.status(403).json({ message: MSG_PHONE_IS_BLOCKED, status: false, statusCode: 1004 });
                 }
-                else if (isExists.lockUntil && isExists.lockUntil < Date.now()) {
+                else if ((isExists.lockUntil && isExists.lockUntil < Date.now()) || (isExists.attempts > 0 && isExists.attempts < 5)) {
                     await Blacklists.deleteMany({ phone: phone });
                     await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin)(req, res);
                 }
@@ -116,7 +119,7 @@ const PersonalController = {
             else {
                 if (phone === phone_ref) {
                     return res.status(400).json({
-                        message: "The phone number and the reference phone number are not allowed to overlap",
+                        message: MSG_PERSONAL_IS_EXISTS,
                         status: false,
                         statusCode: 4000
                     });
@@ -158,7 +161,7 @@ const PersonalController = {
                     arrPersonals.push({ ...others });
                 })
                 return res.status(200).json({
-                    message: "Get list BNPL user success",
+                    message: MSG_GET_LIST_SUCCESS,
                     data: arrPersonals,
                     totalItem: totalItem,
                     totalPage: totalPage,
@@ -170,7 +173,7 @@ const PersonalController = {
             }
             else {
                 return res.status(200).json({
-                    message: "List personal is empty",
+                    message: MSG_LIST_IS_EMPTY,
                     status: true
                 })
             }
@@ -188,14 +191,14 @@ const PersonalController = {
             if (personal) {
                 const { __v, ...others } = personal._doc;
                 return res.status(200).json({
-                    message: "Get information of personal successfully",
+                    message: MSG_GET_DETAIL_SUCCESS,
                     data: { ...others },
                     status: true
                 });
             }
             else {
                 return res.status(404).json({
-                    message: "This personal infomation is not exists !",
+                    message: MSG_PERSONAL_IS_NOT_EXISTS,
                     status: false,
                     statusCode: 900
                 });
@@ -220,7 +223,7 @@ const PersonalController = {
                             if (!err) {
                                 buildProdLogger('info', 'register_provider_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                                 return res.status(200).json({
-                                    message: "Register provider successfully",
+                                    message: MSG_ADD_SUCCESSFULLY,
                                     data: {
                                         nid: nid,
                                         provider: provider
@@ -231,7 +234,7 @@ const PersonalController = {
                             else {
                                 buildProdLogger('error', 'register_provider_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Nid: ${nid} --- Provider: ${provider}`);
                                 return res.status(409).json({
-                                    message: "Register provider failure",
+                                    message: MSG_ADD_FAILURE,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
@@ -241,7 +244,7 @@ const PersonalController = {
                 }
                 else {
                     return res.status(404).json({
-                        message: "This nid is not exists !",
+                        message: MSG_PERSONAL_IS_NOT_EXISTS,
                         status: false,
                         statusCode: 900
                     })
@@ -249,7 +252,7 @@ const PersonalController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your nid and choose provider BNPL. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });
@@ -274,7 +277,7 @@ const PersonalController = {
                             if (!err) {
                                 buildProdLogger('info', 'update_tenor_successfully.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(201).json({
-                                    message: "Update tenor successfully",
+                                    message: MSG_UPDATE_SUCCESSFULLY,
                                     data: {
                                         tenor: tenorId,
                                         phone: phone
@@ -285,7 +288,7 @@ const PersonalController = {
                             else {
                                 buildProdLogger('error', 'update_tenor_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Tenor Id: ${tenorId}`);
                                 return res.status(409).json({
-                                    message: "Update tenor failure",
+                                    message: MSG_UPDATE_FAILURE,
                                     status: false,
                                     errorStatus: err.status || 500,
                                     errorMessage: err.message
@@ -295,7 +298,7 @@ const PersonalController = {
                     }
                     else {
                         return res.status(404).json({
-                            message: "This tenor is not exists !",
+                            message: MSG_TENOR_IS_NOT_EXISTS,
                             status: false,
                             statusCode: 900
                         });
@@ -303,7 +306,7 @@ const PersonalController = {
                 }
                 else {
                     return res.status(404).json({
-                        message: "This phone number is not exists !",
+                        message: MSG_PERSONAL_IS_NOT_EXISTS,
                         status: false,
                         statusCode: 900
                     });
@@ -311,7 +314,7 @@ const PersonalController = {
             }
             else {
                 return res.status(400).json({
-                    message: "Please enter your phone and choose tenor. Do not leave any fields blank !",
+                    message: MSG_ENTER_ALL_FIELDS,
                     status: false,
                     statusCode: 1005
                 });

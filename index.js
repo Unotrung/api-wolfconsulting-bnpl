@@ -16,7 +16,6 @@ const userRoute = require('./routers/UserRouter');
 const personalRoute = require('./routers/PersonalRouter');
 const commonRoute = require('./routers/CommonRouter');
 const fecRoute = require('./routers/FecRouter');
-const otpConfigRoute = require('./routers/otpConfigRouter');
 
 const http = require("http");
 const authGraphql = require("./middlewares/auth-graphql");
@@ -67,7 +66,6 @@ app.use('/v1/bnpl/user', userRoute);
 app.use('/v1/bnpl/personal', personalRoute);
 app.use('/v1/bnpl/common', commonRoute);
 app.use('/v1/bnpl/fec', fecRoute);
-app.use('/v1/bnpl/otp_config', otpConfigRoute);
 
 app.use((err, req, res, next) => {
     buildProdLogger('error', 'error.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Message: ${err.message}`);
