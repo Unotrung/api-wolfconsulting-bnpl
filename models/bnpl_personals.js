@@ -74,6 +74,18 @@ const bnpl_personalSchema = new mongoose.Schema({
     credit_limit: {
         type: Number,
     },
+    consumed_limit: {
+        type: Number,
+    },
+    approve_limit: {
+        type: Number,
+    },
+    memo_debit: {
+        type: Number,
+    },
+    memo_credit: {
+        type: Number,
+    },
 
 }, { timestamps: true });
 
