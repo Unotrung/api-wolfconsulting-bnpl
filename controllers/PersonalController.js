@@ -7,7 +7,7 @@ const Item = require('../models/items');
 const bcrypt = require('bcrypt');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
-const { MSG_GET_LIST_SUCCESS, MSG_LIST_IS_EMPTY, MSG_ADD_SUCCESSFULLY, MSG_ADD_FAILURE, MSG_PERSONAL_IS_EXISTS,
+const { MSG_GET_LIST_SUCCESS, MSG_LIST_IS_EMPTY, MSG_ADD_SUCCESSFULLY, MSG_ADD_FAILURE, MSG_PERSONAL_IS_EXISTS, MSG_PHONE_PHONE_REF_IS_SAME,
     MSG_GET_DETAIL_SUCCESS, MSG_PERSONAL_IS_NOT_EXISTS, MSG_ENTER_ALL_FIELDS, MSG_UPDATE_SUCCESSFULLY, MSG_UPDATE_FAILURE, MSG_TENOR_IS_NOT_EXISTS } =
     require('../config/message/message');
 
@@ -120,7 +120,7 @@ const PersonalController = {
             else {
                 if (phone === phone_ref) {
                     return res.status(400).json({
-                        message: MSG_PERSONAL_IS_EXISTS,
+                        message: MSG_PHONE_PHONE_REF_IS_SAME,
                         status: false,
                         statusCode: 4000
                     });

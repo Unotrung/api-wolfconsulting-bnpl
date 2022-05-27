@@ -13,10 +13,12 @@ const ERR_MESSAGE_MIN_DISTRICT = 'Minimum length of district is 1';
 const ERR_MESSAGE_MAX_DISTRICT = 'Maximum length of district is 255';
 const ERR_MESSAGE_MIN_WARD = 'Minimum length of ward is 1';
 const ERR_MESSAGE_MAX_WARD = 'Maximum length of ward is 255';
+const MSG_PERSONAL_IS_EXISTS = 'This personal is already exists !';
+const MSG_PHONE_PHONE_REF_IS_SAME = 'The phone number and the reference phone number are not allowed to overlap';
 
 module.exports = {
     ERR_MESSAGE_PHONE, ERR_MESSAGE_PHONE_REF, ERR_MESSAGE_NID, ERR_MESSAGE_PIN,
     ERR_MESSAGE_NEW_PIN, ERR_MESSAGE_MIN_NAME, ERR_MESSAGE_MAX_NAME, ERR_MESSAGE_MIN_CITY, ERR_MESSAGE_MAX_CITY,
     ERR_MESSAGE_MIN_DISTRICT, ERR_MESSAGE_MAX_DISTRICT, ERR_MESSAGE_MIN_WARD, ERR_MESSAGE_MAX_WARD, ERR_MESSAGE_MIN_NAME_REF,
-    ERR_MESSAGE_MAX_NAME_REF
+    ERR_MESSAGE_MAX_NAME_REF, MSG_PERSONAL_IS_EXISTS, MSG_PHONE_PHONE_REF_IS_SAME
 };
