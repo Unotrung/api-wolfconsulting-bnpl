@@ -5,15 +5,15 @@ const router = require('express').Router();
 const { VALIDATE_PHONE } = require('../config/validate_data/validate_data');
 const { ERR_MESSAGE_PHONE } = require('../config/message/message');
 
-router.get('/getAllTenor', MiddlewareController.verifySecurity, CommonController.getAllTenor);
-router.put('/updateStep', MiddlewareController.verifySecurity,
+router.get('/getAllTenor', CommonController.getAllTenor);
+router.put('/updateStep',
     [
         check('phone').matches(VALIDATE_PHONE).withMessage(ERR_MESSAGE_PHONE),
     ],
     MiddlewareController.validateRequestSchema, CommonController.updateStep);
-router.get('/getAllCity', MiddlewareController.verifySecurity, CommonController.getAllCity);
-router.get('/getAllDistrict', MiddlewareController.verifySecurity, CommonController.getAllDistrict);
-router.get('/getAllWard', MiddlewareController.verifySecurity, CommonController.getAllWard);
-router.get('/getAllReferenceRelation', MiddlewareController.verifySecurity, CommonController.getAllReferenceRelation);
+router.get('/getAllCity', CommonController.getAllCity);
+router.get('/getAllDistrict', CommonController.getAllDistrict);
+router.get('/getAllWard', CommonController.getAllWard);
+router.get('/getAllReferenceRelation', CommonController.getAllReferenceRelation);
 
 module.exports = router;
