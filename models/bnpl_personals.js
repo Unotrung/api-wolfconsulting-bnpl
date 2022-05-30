@@ -85,7 +85,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     memo_credit: {
         type: Number,
-    },
+    }
 
 }, { timestamps: true });
 

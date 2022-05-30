@@ -18,7 +18,7 @@ const errMessageRefPhone = ERR_MESSAGE_PHONE_REF;
 const errMessageNid = ERR_MESSAGE_NID;
 const errMessagePin = ERR_MESSAGE_PIN;
 
-router.post("/addInfoPersonal",
+router.post("/addInfoPersonal", MiddlewareController.verifySecurity,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('citizenId').matches(formatNid).withMessage(errMessageNid),
@@ -47,21 +47,21 @@ router.post("/addInfoPersonal",
     ],
     MiddlewareController.validateRequestSchema, PersonalController.addInfoPersonal);
 
-router.get("/getAllBNPLInformation", PersonalController.getAllBNPLInformation);
+router.get("/getAllBNPLInformation", MiddlewareController.verifySecurity, PersonalController.getAllBNPLInformation);
 
-router.put("/registerProvider",
+router.put("/registerProvider", MiddlewareController.verifySecurity,
     [
         check('nid').matches(formatNid).withMessage(errMessageNid)
     ],
     MiddlewareController.validateRequestSchema, PersonalController.registerProvider);
 
-router.put("/updateTenor", MiddlewareController.verifyTokenByMySelf,
+router.put("/updateTenor", MiddlewareController.verifySecurity, MiddlewareController.verifyTokenByMySelf,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
     ],
     MiddlewareController.validateRequestSchema, PersonalController.updateTenor);
 
-router.get("/:phone", MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
+router.get("/:phone", MiddlewareController.verifySecurity, MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
 
 // router.post("/getDataFromVoolo",
 //     [
