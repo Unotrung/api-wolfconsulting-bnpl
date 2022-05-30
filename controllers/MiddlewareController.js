@@ -73,8 +73,8 @@ const MiddlewareController = {
 
     verifySecurity: (req, res, next) => {
         try {
-            const appKey = req.query.appKey;
-            const appId = req.query.appId;
+            const appKey = req.headers.appkey;
+            const appId = req.headers.appid;
             if (appKey && appId && appKey === process.env.APP_KEY && appId === process.env.APP_ID) {
                 req.isAuthenticated = true;
                 next();
