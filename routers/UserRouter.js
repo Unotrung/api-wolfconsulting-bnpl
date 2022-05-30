@@ -66,7 +66,7 @@ router.post("/verifyOtpPin", MiddlewareController.verifySecurity,
     ],
     MiddlewareController.validateRequestSchema, UserController.verifyOtpPin);
 
-router.put("/resetPin", MiddlewareController.verifyTokenByMySelf,
+router.put("/resetPin", MiddlewareController.verifySecurity, MiddlewareController.verifyTokenByMySelf,
     [
         check('phone').matches(formatPhone).withMessage(errMessagePhone),
         check('new_pin').matches(formatPin).withMessage(errMessageNewPin),
