@@ -1,6 +1,7 @@
 const PersonalController = require('../controllers/PersonalController');
 const MiddlewareController = require('../controllers/MiddlewareController');
 const { check } = require('express-validator');
+const { upload } = require('../multer/index');
 const router = require('express').Router();
 const { VALIDATE_PHONE, VALIDATE_PHONE_REF, VALIDATE_NID, VALIDATE_PIN } = require('../config/validate_data/validate_data');
 const { ERR_MESSAGE_PHONE, ERR_MESSAGE_PHONE_REF, ERR_MESSAGE_PIN, ERR_MESSAGE_NID, ERR_MESSAGE_NEW_PIN,
@@ -45,7 +46,8 @@ router.post("/addInfoPersonal", MiddlewareController.verifySecurity,
         check('phone_ref').matches(formatPhoneRef).withMessage(errMessageRefPhone),
         check('pin').matches(formatPin).withMessage(errMessagePin),
     ],
-    MiddlewareController.validateRequestSchema, PersonalController.addInfoPersonal);
+    upload.array('images', 3),
+    PersonalController.addInfoPersonal);
 
 router.get("/getAllBNPLInformation", MiddlewareController.verifySecurity, PersonalController.getAllBNPLInformation);
 

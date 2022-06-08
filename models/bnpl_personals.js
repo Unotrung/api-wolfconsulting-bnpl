@@ -3,9 +3,22 @@ const item = require('./items');
 const tenor = require('./tenors');
 const bnpl_provider = require('./bnpl_providers');
 const encrypt = require('mongoose-encryption');
-const dotenv = require('dotenv')
 
-dotenv.config();
+const imageShema = new mongoose.Schema({
+    filename: {
+        type: String,
+        unique: true,
+        required: true
+    },
+    contentType: {
+        type: String,
+        required: true
+    },
+    imageBase64: {
+        type: String,
+        required: true
+    }
+})
 
 const bnpl_personalSchema = new mongoose.Schema({
 
@@ -71,6 +84,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
     tenor: { type: mongoose.Schema.Types.ObjectId, ref: 'tenor' },
+    images: [imageShema],
     credit_limit: {
         type: Number,
     },

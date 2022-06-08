@@ -5,6 +5,7 @@ const Blacklists = require('../models/bnpl_blacklists');
 const Tenor = require('../models/tenors');
 const Item = require('../models/items');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 const { buildProdLogger } = require('../helpers/logger');
 const { v4: uuid } = require('uuid');
 const { MSG_GET_LIST_SUCCESS, MSG_LIST_IS_EMPTY, MSG_ADD_SUCCESSFULLY, MSG_ADD_FAILURE, MSG_PERSONAL_IS_EXISTS,
@@ -21,7 +22,7 @@ const PersonalController = {
         return Math.floor(Math.random() * arr.length);
     },
 
-    addInfo: (name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin) => {
+    addInfo: (name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin, images) => {
         return async (req, res, next) => {
             const customers = await Customer.find();
             const personals = await Personal.find();
@@ -46,7 +47,7 @@ const PersonalController = {
                 let personal = await new Personal({
                     name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street, personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(items)], arrayItem[PersonalController.randomIndex(items)]],
                     credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], consumed_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], approve_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], memo_debit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)],
-                    tenor: null, memo_credit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)],
+                    tenor: null, memo_credit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], images: images
                 });
                 await personal.save()
                     .then(async (data, err) => {
@@ -109,16 +110,49 @@ const PersonalController = {
 
             let pin = req.body.pin;
 
+            let files = req.files;
+
+            let imageArr = [];
+
+            if (req.fileValidationError) {
+                return res.json({ message: req.fileValidationError, status: false });
+            }
+            else if (!files) {
+                return res.json({ message: 'Please select an image to upload', status: false });
+            }
+            else {
+                let imgArray = files.map((file) => {
+                    let img = fs.readFileSync(file.path);
+                    return encode_image = img.toString('base64');
+                })
+                imgArray.map((src, index) => {
+                    // Create object to store data in the collection
+                    let finalImg = {
+                        filename: files[index].originalname,
+                        contentType: files[index].mimetype,
+                        imageBase64: src,
+                    }
+                    imageArr.push(finalImg);
+                });
+            }
+
+            // console.log('Req Files 1: ', req.files);
+            // console.log('Data 1: ', name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin);
+
             const blacklists = await Blacklists.find();
             const isExists = blacklists.find(x => x.phone === phone);
-
             if (isExists) {
+                console.log('IS EXISTS');
                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
+                    // console.log('Req Files 2: ', req.files);
+                    // console.log('Data 2: ', name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin);
                     return res.status(403).json({ message: MSG_PHONE_IS_BLOCKED, status: false, statusCode: 1004 });
                 }
                 else if ((isExists.lockUntil && isExists.lockUntil < Date.now()) || (isExists.attempts > 0 && isExists.attempts < 5)) {
+                    // console.log('Req Files 3: ', req.files);
+                    // console.log('Data 3: ', name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin);
                     await Blacklists.deleteMany({ phone: phone });
-                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin)(req, res);
+                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin, imageArr)(req, res);
                 }
             }
             else {
@@ -130,7 +164,11 @@ const PersonalController = {
                     });
                 }
                 else {
-                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin)(req, res);
+                    // console.log('IS EXISTS ELSE');
+
+                    // console.log('Req Files 4: ', req.files);
+                    // console.log('Data 4: ', name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin);
+                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, personal_title_ref, name_ref, phone_ref, pin, imageArr)(req, res);
                 }
             }
         }
