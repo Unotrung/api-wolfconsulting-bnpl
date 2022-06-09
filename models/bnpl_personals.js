@@ -65,6 +65,21 @@ const bnpl_personalSchema = new mongoose.Schema({
     street: {
         type: String
     },
+    temporaryCity: {
+        type: String,
+        required: [true, 'Temporary city is required'],
+    },
+    temporaryDistrict: {
+        type: String,
+        required: [true, 'Temporary district is required'],
+    },
+    temporaryWard: {
+        type: String,
+        required: [true, 'Temporary ward is required'],
+    },
+    temporaryStreet: {
+        type: String
+    },
     personal_title_ref: {
         type: String,
         required: [true, 'Personal Title Ref is required'],
