@@ -22,7 +22,7 @@ const PersonalController = {
         return Math.floor(Math.random() * arr.length);
     },
 
-    addInfo: (name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, images) => {
+    addInfo: (name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, images) => {
         return async (req, res, next) => {
             const customers = await Customer.find();
             const personals = await Personal.find();
@@ -45,7 +45,7 @@ const PersonalController = {
             let personalExists = personals.find(x => x.phone === phone || x.citizenId === citizenId);
             if (!personalExists) {
                 let personal = await new Personal({
-                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, city: city, district: district, ward: ward, street: street,
+                    name: name, sex: sex, phone: phone, birthday: birthday, citizenId: citizenId, issueDate: issueDate, expirationDate: expirationDate, city: city, district: district, ward: ward, street: street,
                     temporaryCity: temporaryCity, temporaryDistrict: temporaryDistrict, temporaryWard: temporaryWard, temporaryStreet: temporaryStreet,
                     personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(items)], arrayItem[PersonalController.randomIndex(items)]],
                     credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], consumed_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], approve_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], memo_debit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)],
@@ -100,6 +100,7 @@ const PersonalController = {
             let phone = req.body.phone;
             let citizenId = req.body.citizenId;
             let issueDate = req.body.issueDate;
+            let expirationDate = req.body.expirationDate;
 
             let city = req.body.city;
             let district = req.body.district;
@@ -152,7 +153,7 @@ const PersonalController = {
                 }
                 else if ((isExists.lockUntil && isExists.lockUntil < Date.now()) || (isExists.attempts > 0 && isExists.attempts < 5)) {
                     await Blacklists.deleteMany({ phone: phone });
-                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, imageArr)(req, res);
+                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, imageArr)(req, res);
                 }
             }
             else {
@@ -164,7 +165,7 @@ const PersonalController = {
                     });
                 }
                 else {
-                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, imageArr)(req, res);
+                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, imageArr)(req, res);
                 }
             }
         }

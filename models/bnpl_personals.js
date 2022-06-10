@@ -50,6 +50,10 @@ const bnpl_personalSchema = new mongoose.Schema({
         type: Date,
         required: [true, 'Issue Date is required'],
     },
+    expirationDate: {
+        type: Date,
+        required: [true, 'Expiration Date is required'],
+    },
     city: {
         type: String,
         required: [true, 'City is required'],
