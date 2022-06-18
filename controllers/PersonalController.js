@@ -22,7 +22,7 @@ const PersonalController = {
         return Math.floor(Math.random() * arr.length);
     },
 
-    addInfo: (name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, back_front_image, selfie_image) => {
+    addInfo: (name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, nid_back_image, selfie_image) => {
         return async (req, res, next) => {
             const customers = await Customer.find();
             const personals = await Personal.find();
@@ -49,7 +49,7 @@ const PersonalController = {
                     temporaryCity: temporaryCity, temporaryDistrict: temporaryDistrict, temporaryWard: temporaryWard, temporaryStreet: temporaryStreet,
                     personal_title_ref: personal_title_ref, name_ref: name_ref, phone_ref: phone_ref, providers: [], items: [arrayItem[PersonalController.randomIndex(items)], arrayItem[PersonalController.randomIndex(items)]],
                     credit_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], consumed_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], approve_limit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], memo_debit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)],
-                    tenor: null, memo_credit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], nid_front_image: nid_front_image, back_front_image: back_front_image, selfie_image: selfie_image
+                    tenor: null, memo_credit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], nid_front_image: nid_front_image, nid_back_image: nid_back_image, selfie_image: selfie_image
                 });
                 await personal.save()
                     .then(async (data, err) => {
@@ -119,7 +119,7 @@ const PersonalController = {
             let pin = req.body.pin;
 
             let nid_front_image = req.body.nid_front_image;
-            let back_front_image = req.body.back_front_image;
+            let nid_back_image = req.body.nid_back_image;
             let selfie_image = req.body.selfie_image;
 
             // let files = req.files;
@@ -157,7 +157,7 @@ const PersonalController = {
                 }
                 else if ((isExists.lockUntil && isExists.lockUntil < Date.now()) || (isExists.attempts > 0 && isExists.attempts < 5)) {
                     await Blacklists.deleteMany({ phone: phone });
-                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, back_front_image, selfie_image)(req, res);
+                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, nid_back_image, selfie_image)(req, res);
                 }
             }
             else {
@@ -169,7 +169,7 @@ const PersonalController = {
                     });
                 }
                 else {
-                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, back_front_image, selfie_image)(req, res);
+                    await PersonalController.addInfo(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, nid_back_image, selfie_image)(req, res);
                 }
             }
         }

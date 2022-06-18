@@ -108,7 +108,7 @@ const bnpl_personalSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Nid front image is required'],
     },
-    back_front_image: {
+    nid_back_image: {
         type: String,
         required: [true, 'Nid back image is required'],
     },
