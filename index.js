@@ -33,7 +33,22 @@ app.use(morgan('combined'));
 
 app.use(helmet());
 
-app.use(compression());
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb' }));
+
+// Nếu mà dữ liệu lớn hơn 100KB thì chúng ta mới compress ngược lại thì chúng ta không compress. level càng cao thì compress càng nhiều.  filter: Những router nào chúng ta không cần nén thì truyền vào
+app.use(compression({
+    level: 6,
+    threshold: 100 * 1000,
+    filter: (req, res) => {
+        if (req.headers['x-no-compress']) {
+            // Không cần nén 
+            return false;
+        }
+        // Cần nén
+        return compression.filter(req, res);
+    }
+}));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
