@@ -24,6 +24,7 @@ const PersonalController = {
 
     addInfo: (name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, nid_back_image, selfie_image) => {
         return async (req, res, next) => {
+            console.log(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, nid_back_image, selfie_image);
             const customers = await Customer.find();
             const personals = await Personal.find();
 
