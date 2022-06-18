@@ -4,21 +4,21 @@ const tenor = require('./tenors');
 const bnpl_provider = require('./bnpl_providers');
 const encrypt = require('mongoose-encryption');
 
-const imageShema = new mongoose.Schema({
-    filename: {
-        type: String,
-        unique: true,
-        required: true
-    },
-    contentType: {
-        type: String,
-        required: true
-    },
-    imageBase64: {
-        type: String,
-        required: true
-    }
-})
+// const imageShema = new mongoose.Schema({
+//     filename: {
+//         type: String,
+//         unique: true,
+//         required: true
+//     },
+//     contentType: {
+//         type: String,
+//         required: true
+//     },
+//     imageBase64: {
+//         type: String,
+//         required: true
+//     }
+// })
 
 const bnpl_personalSchema = new mongoose.Schema({
 
@@ -103,7 +103,19 @@ const bnpl_personalSchema = new mongoose.Schema({
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
     tenor: { type: mongoose.Schema.Types.ObjectId, ref: 'tenor' },
-    images: [imageShema],
+    // images: [imageShema],
+    nid_front_image: {
+        type: String,
+        required: [true, 'Nid front image is required'],
+    },
+    back_front_image: {
+        type: String,
+        required: [true, 'Nid back image is required'],
+    },
+    selfie_image: {
+        type: String,
+        required: [true, 'Selfie image is required'],
+    },
     credit_limit: {
         type: Number,
     },
