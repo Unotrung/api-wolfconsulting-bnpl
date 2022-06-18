@@ -46,7 +46,6 @@ router.post("/addInfoPersonal", MiddlewareController.verifySecurity,
         check('phone_ref').matches(formatPhoneRef).withMessage(errMessageRefPhone),
         check('pin').matches(formatPin).withMessage(errMessagePin),
     ],
-    upload.array('images', 3),
     PersonalController.addInfoPersonal);
 
 router.get("/getAllBNPLInformation", MiddlewareController.verifySecurity, PersonalController.getAllBNPLInformation);
