@@ -125,7 +125,7 @@ const CommonController = {
 
     getDistrict: async (req, res, next) => {
         try {
-            const districts = await District.find({ "Parent Value": req.body.idParent });
+            const districts = await District.find({ Parent_Value: req.body.idParent });
             if (districts.length > 0) {
                 return res.status(200).json({
                     count: districts.length,
@@ -148,7 +148,7 @@ const CommonController = {
 
     getWard: async (req, res, next) => {
         try {
-            const wards = await Ward.find({ "Parent Value": req.body.idParent });
+            const wards = await Ward.find({ Parent_Value: req.body.idParent });
             if (wards.length > 0) {
                 return res.status(200).json({
                     count: wards.length,

@@ -15,7 +15,6 @@ router.get('/getAllCity', MiddlewareController.verifySecurity, CommonController.
 router.get('/getAllDistrict', MiddlewareController.verifySecurity, CommonController.getAllDistrict);
 router.get('/getAllWard', MiddlewareController.verifySecurity, CommonController.getAllWard);
 router.get('/getAllReferenceRelation', MiddlewareController.verifySecurity, CommonController.getAllReferenceRelation);
-
 router.get('/getDistrict', MiddlewareController.verifySecurity, CommonController.getDistrict);
 router.get('/getWard', MiddlewareController.verifySecurity, CommonController.getWard);
 
