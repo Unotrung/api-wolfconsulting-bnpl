@@ -123,6 +123,52 @@ const CommonController = {
         }
     },
 
+    getDistrict: async (req, res, next) => {
+        try {
+            const districts = await District.find({ "Parent Value": req.body.idParent });
+            if (districts.length > 0) {
+                return res.status(200).json({
+                    count: districts.length,
+                    data: districts,
+                    message: MSG_GET_LIST_SUCCESS,
+                    status: true
+                })
+            }
+            else {
+                return res.status(200).json({
+                    message: MSG_LIST_IS_EMPTY,
+                    status: true
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
+    getWard: async (req, res, next) => {
+        try {
+            const wards = await Ward.find({ "Parent Value": req.body.idParent });
+            if (wards.length > 0) {
+                return res.status(200).json({
+                    count: wards.length,
+                    data: wards,
+                    message: MSG_GET_LIST_SUCCESS,
+                    status: true
+                })
+            }
+            else {
+                return res.status(200).json({
+                    message: MSG_LIST_IS_EMPTY,
+                    status: true
+                })
+            }
+        }
+        catch (err) {
+            next(err);
+        }
+    },
+
     updateStep: async (req, res, next) => {
         try {
             let phone = req.body.phone;
