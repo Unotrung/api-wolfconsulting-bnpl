@@ -53,25 +53,22 @@ const PersonalController = {
                     .then(async (data, err) => {
                         if (!err) {
                             let { pin, ...others } = data._doc;
-                            await customerAccount.save()
-                                .then((data, err) => {
-                                    if (!err) {
-                                        return res.status(201).json({
-                                            message: MSG_ADD_SUCCESSFULLY,
-                                            data: { ...others },
-                                            status: true,
-                                            linkRegisterEap: `https://www.eap.voolo.vn/register-from-bnpl/${name}/${phone}`
-                                        });
-                                    }
-                                    else {
-                                        return res.status(409).json({
-                                            message: MSG_ADD_FAILURE,
-                                            status: false,
-                                            errorStatus: err.status || 500,
-                                            errorMessage: err.message
-                                        });
-                                    }
+                            if (!err) {
+                                return res.status(201).json({
+                                    message: MSG_ADD_SUCCESSFULLY,
+                                    data: { ...others },
+                                    status: true,
+                                    linkRegisterEap: `https://www.eap.voolo.vn/register-from-bnpl/${name}/${phone}`
                                 });
+                            }
+                            else {
+                                return res.status(409).json({
+                                    message: MSG_ADD_FAILURE,
+                                    status: false,
+                                    errorStatus: err.status || 500,
+                                    errorMessage: err.message
+                                });
+                            }
                         }
                     });
             }
