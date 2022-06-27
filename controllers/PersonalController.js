@@ -24,24 +24,8 @@ const PersonalController = {
 
     addInfo: (name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, nid_back_image, selfie_image) => {
         return async (req, res, next) => {
-            console.log(name, sex, birthday, phone, citizenId, issueDate, expirationDate, city, district, ward, street, temporaryCity, temporaryDistrict, temporaryWard, temporaryStreet, personal_title_ref, name_ref, phone_ref, pin, nid_front_image, nid_back_image, selfie_image);
             const customers = await Customer.find();
             const personals = await Personal.find();
-
-            let customerExists = customers.find(x => x.phone === phone);
-            if (!customerExists) {
-                let salt = await bcrypt.genSalt(10);
-                let hashed = await bcrypt.hash(pin, salt);
-                let customer = await new Customer({ phone: phone, pin: hashed });
-                await customer.save();
-                buildProdLogger('info', 'register_customer_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone}`);
-            }
-
-            let items = await Item.find({});
-            let arrayItem = [];
-            items.map((item) => { arrayItem.push(item) });
-
-            let arrayCreditlimit = [500000, 1000000, 2000000, 3000000];
 
             let personalExists = personals.find(x => x.phone === phone || x.citizenId === citizenId);
             if (!personalExists) {
@@ -53,13 +37,23 @@ const PersonalController = {
                     tenor: null, memo_credit: arrayCreditlimit[PersonalController.randomIndex(arrayCreditlimit)], nid_front_image: nid_front_image, nid_back_image: nid_back_image, selfie_image: selfie_image
                 });
                 await personal.save()
+            }
+
+            let items = await Item.find({});
+            let arrayItem = [];
+            items.map((item) => { arrayItem.push(item) });
+
+            let arrayCreditlimit = [500000, 1000000, 2000000, 3000000];
+
+            let customerExists = customers.find(x => x.phone === phone);
+            if (!customerExists) {
+                let salt = await bcrypt.genSalt(10);
+                let hashed = await bcrypt.hash(pin, salt);
+                let customer = await new Customer({ phone: phone, pin: hashed, step: 2 });
+                await customer.save()
                     .then(async (data, err) => {
                         if (!err) {
-                            let { ...others } = data._doc;
-                            buildProdLogger('info', 'add_personal_success.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
-                            let customerList = await Customer.find();
-                            let customerAccount = customerList.find(x => x.phone === phone);
-                            customerAccount.step = 2;
+                            let { pin, ...others } = data._doc;
                             await customerAccount.save()
                                 .then((data, err) => {
                                     if (!err) {
@@ -71,7 +65,6 @@ const PersonalController = {
                                         });
                                     }
                                     else {
-                                        buildProdLogger('error', 'add_personal_failure.log').error(`Id_Log: ${uuid()} --- Hostname: ${req.hostname} --- Ip: ${req.ip} --- Router: ${req.url} --- Method: ${req.method} --- Phone: ${phone} --- Citizen Id: ${citizenId}`);
                                         return res.status(409).json({
                                             message: MSG_ADD_FAILURE,
                                             status: false,
@@ -152,7 +145,6 @@ const PersonalController = {
             const blacklists = await Blacklists.find();
             const isExists = blacklists.find(x => x.phone === phone);
             if (isExists) {
-                console.log('IS EXISTS');
                 if (isExists.attempts === 5 && isExists.lockUntil > Date.now()) {
                     return res.status(403).json({ message: MSG_PHONE_IS_BLOCKED, status: false, statusCode: 1004 });
                 }
