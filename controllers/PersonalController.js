@@ -27,6 +27,10 @@ const PersonalController = {
             const customers = await Customer.find();
             const personals = await Personal.find();
 
+            let items = await Item.find({});
+            let arrayItem = [];
+            items.map((item) => { arrayItem.push(item) });
+
             let personalExists = personals.find(x => x.phone === phone || x.citizenId === citizenId);
             if (!personalExists) {
                 let personal = await new Personal({
@@ -38,10 +42,6 @@ const PersonalController = {
                 });
                 await personal.save()
             }
-
-            let items = await Item.find({});
-            let arrayItem = [];
-            items.map((item) => { arrayItem.push(item) });
 
             let arrayCreditlimit = [500000, 1000000, 2000000, 3000000];
 
