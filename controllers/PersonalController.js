@@ -4,6 +4,9 @@ const Provider = require('../models/bnpl_providers');
 const Blacklists = require('../models/bnpl_blacklists');
 const Tenor = require('../models/tenors');
 const Item = require('../models/items');
+const City = require('../models/cities');
+const District = require('../models/districts');
+const Ward = require('../models/wards');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const { buildProdLogger } = require('../helpers/logger');
@@ -222,10 +225,16 @@ const PersonalController = {
             let personals = await Personal.find().populate('providers').populate('items').populate('tenor');
             let personal = personals.find(x => x.phone === phone);
             if (personal) {
-                const { __v, ...others } = personal._doc;
+                let cityData = await City.findOne({ Value: personal.city }).select('UI_Show Value -_id');
+                let districtData = await District.findOne({ Value: personal.district }).select('UI_Show Value -_id');
+                let wardData = await Ward.findOne({ Value: personal.ward }).select('UI_Show Value -_id');
+                let cityTempData = await City.findOne({ Value: personal.temporaryCity }).select('UI_Show Value -_id');
+                let districtTempData = await District.findOne({ Value: personal.temporaryDistrict }).select('UI_Show Value -_id');
+                let wardTempData = await Ward.findOne({ Value: personal.temporaryWard }).select('UI_Show Value -_id');
+                const { createdAt, updatedAt, __v, city, district, ward, temporaryCity, temporaryDistrict, temporaryWard, ...others } = personal._doc;
                 return res.status(200).json({
                     message: MSG_GET_DETAIL_SUCCESS,
-                    data: { ...others },
+                    data: { cityData, districtData, wardData, cityTempData, districtTempData, wardTempData, ...others },
                     status: true
                 });
             }
