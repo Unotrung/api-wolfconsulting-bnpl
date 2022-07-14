@@ -33,7 +33,7 @@ const CommonController = {
 
     getAllCity: async (req, res, next) => {
         try {
-            const cities = await City.find();
+            const cities = await City.find().sort({ UI_Show: 1 });
             if (cities.length > 0) {
                 return res.status(200).json({
                     count: cities.length,
@@ -56,7 +56,7 @@ const CommonController = {
 
     getAllDistrict: async (req, res, next) => {
         try {
-            const districts = await District.find();
+            const districts = await District.find().sort({ UI_Show: 1 });
             if (districts.length > 0) {
                 return res.status(200).json({
                     count: districts.length,
@@ -79,7 +79,7 @@ const CommonController = {
 
     getAllWard: async (req, res, next) => {
         try {
-            const wards = await Ward.find();
+            const wards = await Ward.find().sort({ UI_Show: 1 });;
             if (wards.length > 0) {
                 return res.status(200).json({
                     count: wards.length,
@@ -102,7 +102,7 @@ const CommonController = {
 
     getAllReferenceRelation: async (req, res, next) => {
         try {
-            const referenceRelations = await ReferenceRelation.find();
+            const referenceRelations = await ReferenceRelation.find().sort({ Text: 1 });;
             if (referenceRelations.length > 0) {
                 return res.status(200).json({
                     count: referenceRelations.length,
