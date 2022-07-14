@@ -7,6 +7,7 @@ const Item = require('../models/items');
 const City = require('../models/cities');
 const District = require('../models/districts');
 const Ward = require('../models/wards');
+const ReferenceRelation = require('../models/reference_relations');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const { buildProdLogger } = require('../helpers/logger');
@@ -231,10 +232,11 @@ const PersonalController = {
                 let cityTempData = await City.findOne({ Value: personal.temporaryCity }).select('UI_Show Value -_id');
                 let districtTempData = await District.findOne({ Value: personal.temporaryDistrict }).select('UI_Show Value -_id');
                 let wardTempData = await Ward.findOne({ Value: personal.temporaryWard }).select('UI_Show Value -_id');
+                let referenceRelation = await ReferenceRelation.findOne({ Value: personal.personal_title_ref }).select('Text Value -_id');
                 const { createdAt, updatedAt, __v, city, district, ward, temporaryCity, temporaryDistrict, temporaryWard, ...others } = personal._doc;
                 return res.status(200).json({
                     message: MSG_GET_DETAIL_SUCCESS,
-                    data: { cityData, districtData, wardData, cityTempData, districtTempData, wardTempData, ...others },
+                    data: { cityData, districtData, wardData, cityTempData, districtTempData, wardTempData, referenceRelation, ...others },
                     status: true
                 });
             }
