@@ -236,7 +236,7 @@ const PersonalController = {
                 const { createdAt, updatedAt, __v, city, district, ward, temporaryCity, temporaryDistrict, temporaryWard, ...others } = personal._doc;
                 return res.status(200).json({
                     message: MSG_GET_DETAIL_SUCCESS,
-                    data: { cityData, districtData, wardData, cityTempData, districtTempData, wardTempData, personal_title_ref, ...others },
+                    data: { cityData, districtData, wardData, cityTempData, districtTempData, wardTempData, personal_title_ref: personal_title_ref, ...others },
                     status: true
                 });
             }
