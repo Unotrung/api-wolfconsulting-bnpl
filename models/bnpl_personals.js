@@ -67,6 +67,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     street: {
         type: String,
+        required: [true, 'Street is required'],
         default: '',
     },
     temporaryCity: {
@@ -83,6 +84,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     temporaryStreet: {
         type: String,
+        required: [true, 'Temporary street is required'],
         default: '',
     },
     personal_title_ref: {
