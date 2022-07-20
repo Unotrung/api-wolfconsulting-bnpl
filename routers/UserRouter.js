@@ -81,8 +81,8 @@ router.put("/updatePin", MiddlewareController.verifySecurity,
     ],
     MiddlewareController.validateRequestSchema, UserController.updatePin);
 
-router.get("/getAllUser", MiddlewareController.verifySecurity, UserController.getAllUser);
-
 router.put("/requestRefreshToken", MiddlewareController.verifySecurity, UserController.requestRefreshToken);
+
+// router.get("/getAllUser", MiddlewareController.verifySecurity, UserController.getAllUser);
 
 module.exports = router;

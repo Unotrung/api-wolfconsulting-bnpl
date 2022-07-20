@@ -158,7 +158,6 @@ const FecController = {
             const response = await fetch(url, options);
             const data = await response.json();
             if (data !== null) {
-                console.log("DATA REGISTRATION: ", data);
                 return res.status(200).json({
                     data: data
                 })
@@ -205,7 +204,6 @@ const FecController = {
             const response = await fetch(url, options);
             const data = await response.json();
             if (data !== null) {
-                console.log("DATA CHECK BNPL INFO: ", data);
                 return res.status(200).json({
                     data: data
                 })

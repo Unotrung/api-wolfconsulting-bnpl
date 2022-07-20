@@ -171,54 +171,54 @@ const PersonalController = {
         }
     },
 
-    getAllBNPLInformation: async (req, res, next) => {
-        try {
-            const personals = await Personal.find();
-            if (personals.length > 0) {
-                const totalItem = personals.length;
-                const PAGE_SIZE = req.query.pageSize;
-                const totalPage = Math.ceil(totalItem / PAGE_SIZE);
-                let page = req.query.page || 1;
-                if (page < 1) {
-                    page = 1
-                };
-                if (page > totalPage) {
-                    page = totalPage
-                }
-                page = parseInt(page);
-                let sortByField = req.query.sortByField;
-                let sortValue = req.query.sortValue;
-                sortValue = parseInt(sortValue);
-                var skipItem = (page - 1) * PAGE_SIZE;
-                const sort = sortValue === 1 ? `${sortByField}` : `-${(sortByField)}`;
-                const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
-                let arrPersonals = [];
-                result.map((user, index) => {
-                    let { pin, __v, ...others } = user._doc;
-                    arrPersonals.push({ ...others });
-                })
-                return res.status(200).json({
-                    message: MSG_GET_LIST_SUCCESS,
-                    data: arrPersonals,
-                    totalItem: totalItem,
-                    totalPage: totalPage,
-                    currentPage: page,
-                    sortByField: sortByField,
-                    sortValue: sortValue,
-                    status: true
-                });
-            }
-            else {
-                return res.status(200).json({
-                    message: MSG_LIST_IS_EMPTY,
-                    status: true
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
+    // getAllBNPLInformation: async (req, res, next) => {
+    //     try {
+    //         const personals = await Personal.find();
+    //         if (personals.length > 0) {
+    //             const totalItem = personals.length;
+    //             const PAGE_SIZE = req.query.pageSize;
+    //             const totalPage = Math.ceil(totalItem / PAGE_SIZE);
+    //             let page = req.query.page || 1;
+    //             if (page < 1) {
+    //                 page = 1
+    //             };
+    //             if (page > totalPage) {
+    //                 page = totalPage
+    //             }
+    //             page = parseInt(page);
+    //             let sortByField = req.query.sortByField;
+    //             let sortValue = req.query.sortValue;
+    //             sortValue = parseInt(sortValue);
+    //             var skipItem = (page - 1) * PAGE_SIZE;
+    //             const sort = sortValue === 1 ? `${sortByField}` : `-${(sortByField)}`;
+    //             const result = await Personal.find({}).skip(skipItem).limit(PAGE_SIZE).sort(sort);
+    //             let arrPersonals = [];
+    //             result.map((user, index) => {
+    //                 let { pin, __v, ...others } = user._doc;
+    //                 arrPersonals.push({ ...others });
+    //             })
+    //             return res.status(200).json({
+    //                 message: MSG_GET_LIST_SUCCESS,
+    //                 data: arrPersonals,
+    //                 totalItem: totalItem,
+    //                 totalPage: totalPage,
+    //                 currentPage: page,
+    //                 sortByField: sortByField,
+    //                 sortValue: sortValue,
+    //                 status: true
+    //             });
+    //         }
+    //         else {
+    //             return res.status(200).json({
+    //                 message: MSG_LIST_IS_EMPTY,
+    //                 status: true
+    //             })
+    //         }
+    //     }
+    //     catch (err) {
+    //         next(err);
+    //     }
+    // },
 
     getInfomation: async (req, res, next) => {
         try {

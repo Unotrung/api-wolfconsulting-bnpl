@@ -48,8 +48,6 @@ router.post("/addInfoPersonal", MiddlewareController.verifySecurity,
     ],
     PersonalController.addInfoPersonal);
 
-router.get("/getAllBNPLInformation", MiddlewareController.verifySecurity, PersonalController.getAllBNPLInformation);
-
 router.put("/registerProvider", MiddlewareController.verifySecurity,
     [
         check('nid').matches(formatNid).withMessage(errMessageNid)
@@ -63,6 +61,8 @@ router.put("/updateTenor", MiddlewareController.verifySecurity, MiddlewareContro
     MiddlewareController.validateRequestSchema, PersonalController.updateTenor);
 
 router.get("/:phone", MiddlewareController.verifySecurity, MiddlewareController.verifyTokenByMySelf, PersonalController.getInfomation);
+
+// router.get("/getAllBNPLInformation", MiddlewareController.verifySecurity, PersonalController.getAllBNPLInformation);
 
 // router.post("/getDataFromVoolo",
 //     [

@@ -82,20 +82,6 @@ const UserController = {
                     else if (user) {
                         return res.status(200).json(result);;
                     }
-                    else if (phone.startsWith('033')) {
-                        return res.status(404).json({
-                            message: MSG_PHONE_IS_NOT_EXISTS_IN_EAP,
-                            status: false,
-                            errCode: 1001
-                        });
-                    }
-                    else if (phone.startsWith('044')) {
-                        return res.status(404).json({
-                            message: MSG_PHONE_IS_NOT_EXISTS_IN_BNPL,
-                            status: false,
-                            errCode: 1002
-                        });
-                    }
                     else {
                         return res.status(404).json({
                             message: MSG_PHONE_IS_NOT_EXISTS,
@@ -792,33 +778,33 @@ const UserController = {
         }
     },
 
-    getAllUser: async (req, res, next) => {
-        try {
-            const users = await Customer.find();
-            let result = [];
-            users.map((user, index) => {
-                let { pin, __v, loginAttempts, refreshToken, deleted, ...others } = user._doc;
-                result.push({ ...others });
-            });
-            if (users.length > 0) {
-                return res.status(200).json({
-                    count: users.length,
-                    data: result,
-                    message: MSG_GET_LIST_SUCCESS,
-                    status: true
-                })
-            }
-            else {
-                return res.status(200).json({
-                    message: MSG_LIST_IS_EMPTY,
-                    status: true
-                })
-            }
-        }
-        catch (err) {
-            next(err);
-        }
-    },
+    // getAllUser: async (req, res, next) => {
+    //     try {
+    //         const users = await Customer.find();
+    //         let result = [];
+    //         users.map((user, index) => {
+    //             let { pin, __v, loginAttempts, refreshToken, deleted, ...others } = user._doc;
+    //             result.push({ ...others });
+    //         });
+    //         if (users.length > 0) {
+    //             return res.status(200).json({
+    //                 count: users.length,
+    //                 data: result,
+    //                 message: MSG_GET_LIST_SUCCESS,
+    //                 status: true
+    //             })
+    //         }
+    //         else {
+    //             return res.status(200).json({
+    //                 message: MSG_LIST_IS_EMPTY,
+    //                 status: true
+    //             })
+    //         }
+    //     }
+    //     catch (err) {
+    //         next(err);
+    //     }
+    // },
 
 };
 
