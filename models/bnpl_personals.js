@@ -66,7 +66,8 @@ const bnpl_personalSchema = new mongoose.Schema({
         required: [true, 'Ward is required'],
     },
     street: {
-        type: String
+        type: String,
+        default: '',
     },
     temporaryCity: {
         type: String,
@@ -81,7 +82,8 @@ const bnpl_personalSchema = new mongoose.Schema({
         required: [true, 'Temporary ward is required'],
     },
     temporaryStreet: {
-        type: String
+        type: String,
+        default: '',
     },
     personal_title_ref: {
         type: String,
@@ -97,7 +99,7 @@ const bnpl_personalSchema = new mongoose.Schema({
     },
     status: {
         type: Boolean,
-        default: false
+        default: false,
     },
     providers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bnpl_provider' }],
     items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'item' }],
